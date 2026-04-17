@@ -1,14 +1,16 @@
 import express from 'express'
 import { ApiResponse } from './utils/apiResponse'
 import { errorHandler } from './middlewares/error.middleware'
+import { db } from './config/mysql.config'
+import mongoose from 'mongoose'
 
 const app = express()
 
-//express middlewares
+// EXPRESS GLOBAL MIDDLEWARES
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-//health status checkup
+// HEALTH STATUS CHECKUP
 app.get('/api/health', async (req, res, next) => {
     try {
         /*
@@ -16,8 +18,16 @@ app.get('/api/health', async (req, res, next) => {
         throw new Error("Simulated Crash")
         */
 
+       //testing the mongodb connection
+       const mongodbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
+
+        //testing the mysql connection
+        await db.execute('SELECT 1')
+
         const healthData = {
             server: "UP",
+            mysql: "Connected",
+            mongodb: mongodbStatus,
             timestamp: new Date().toISOString()
         }
 
@@ -30,7 +40,7 @@ app.get('/api/health', async (req, res, next) => {
     }
 })
 
-//using the global error middleware
+// GLOBAL ERROR MIDDLEWARE
 app.use(errorHandler)
 
 export { app }
