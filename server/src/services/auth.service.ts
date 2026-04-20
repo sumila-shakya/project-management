@@ -1,9 +1,11 @@
 import { db } from "../config/mysql.config";
-import { users, User, NewUser } from "../models/mysql.model";
+import { users, User, NewUser, refreshTokens, NewToken } from "../models/mysql.model";
 import { registrationType } from "../utils/validator";
 import { eq } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
+import { Payload } from "../@types/interface";
+import { jwtUtils } from "../utils/jwt";
 
 export const authServices = {
     async register(data: registrationType) {
@@ -28,6 +30,30 @@ export const authServices = {
         .insert(users)
         .values(newUser)
 
-        
+        const payload: Payload = {
+            userId: result.insertId
+        }
+
+        const accessToken: string = jwtUtils.generateAccessToken(payload)
+        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
+        const expiryDate: Date = jwtUtils.getExpiryDate()
+
+        const newToken: NewToken = {
+            userId: result.insertId,
+            token: refreshToken,
+            expiresAt: expiryDate
+        }
+
+        await db
+        .insert(refreshTokens)
+        .values(newToken)
+
+        return {
+            userId: result.insertId,
+            email: data.email,
+            name: data.name,
+            accessToken,
+            refreshToken
+        }
     }
 }

@@ -2,6 +2,7 @@ import express from 'express'
 import { ApiResponse } from './utils/apiResponse'
 import { errorHandler } from './middlewares/error.middleware'
 import { db } from './config/mysql.config'
+import authRouter from './routes/auth.route'
 import mongoose from 'mongoose'
 
 const app = express()
@@ -9,6 +10,8 @@ const app = express()
 // EXPRESS GLOBAL MIDDLEWARES
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+
+app.use('/api/auth', authRouter)
 
 // HEALTH STATUS CHECKUP
 app.get('/api/health', async (req, res, next) => {

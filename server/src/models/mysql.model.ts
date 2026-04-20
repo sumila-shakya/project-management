@@ -85,6 +85,14 @@ export const comments = mysqlTable('comments', {
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
 })
 
+export const refreshTokens = mysqlTable('refresh_tokens', {
+    tokenId: serial('token_id').primaryKey(),
+    token: varchar('token', { length: 512 }).notNull(),
+    userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+})
+
 // USERS SCHEMA TYPE
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -112,3 +120,6 @@ export type NewTaskAssets = typeof taskAssets.$inferInsert
 // COMMENTS TYPE
 export type Comment = typeof comments.$inferSelect
 export type NewComment = typeof comments.$inferInsert
+
+export type Token = typeof refreshTokens.$inferSelect
+export type NewToken = typeof refreshTokens.$inferInsert
