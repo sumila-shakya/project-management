@@ -1,7 +1,7 @@
 import { db } from "../config/mysql.config";
 import { users, User, NewUser, refreshTokens, NewToken } from "../models/mysql.model";
-import { registrationType } from "../utils/validator";
-import { eq } from "drizzle-orm";
+import { registrationType, loginType } from "../utils/validator";
+import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
 import { Payload } from "../@types/interface";
@@ -9,15 +9,18 @@ import { jwtUtils } from "../utils/jwt";
 
 export const authServices = {
     async register(data: registrationType) {
+        // check for the existing user
         const existingUser: User[] = await db
         .select()
         .from(users)
         .where(eq(users.email, data.email))
 
+        // throw error if the user already exists
         if(existingUser.length > 0) {
             throw new ApiError(409, "User already exists")
         }
 
+        // hash the password for safety
         const hashedPassword: string = await bcrypt.hash(data.password, 10)
 
         const newUser: NewUser = {
@@ -26,6 +29,7 @@ export const authServices = {
             password: hashedPassword
         }
 
+        // insert the new user into the database
         const [result] = await db
         .insert(users)
         .values(newUser)
@@ -34,6 +38,7 @@ export const authServices = {
             userId: result.insertId
         }
 
+        // generate access and refresh tokens
         const accessToken: string = jwtUtils.generateAccessToken(payload)
         const refreshToken: string = jwtUtils.generateRefreshToken(payload)
         const expiryDate: Date = jwtUtils.getExpiryDate()
@@ -44,6 +49,7 @@ export const authServices = {
             expiresAt: expiryDate
         }
 
+        // insert token into the database
         await db
         .insert(refreshTokens)
         .values(newToken)
@@ -52,6 +58,58 @@ export const authServices = {
             userId: result.insertId,
             email: data.email,
             name: data.name,
+            accessToken,
+            refreshToken
+        }
+    },
+
+    async login(data: loginType) {
+        // check for the existing user
+        const [existingUser]: User[] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, data.email))
+
+        // if the user doesn't exists throw error
+        if(!existingUser) {
+            throw new ApiError(401, "Invalid credentials")
+        }
+
+        // compare the password
+        const isValidPassword = await bcrypt.compare(data.password, existingUser.password)
+        if(!isValidPassword) {
+            throw new ApiError(401, "Invalid credentials")
+        }
+
+        const payload: Payload = {
+            userId: existingUser.userId
+        }
+
+        // generate the new access and refresh tokens
+        const accessToken: string = jwtUtils.generateAccessToken(payload)
+        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
+        const expiryDate: Date = jwtUtils.getExpiryDate()
+
+        // delete the old token
+        await db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.userId, existingUser.userId))
+
+        const newToken: NewToken = {
+            userId: existingUser.userId,
+            token: refreshToken,
+            expiresAt: expiryDate
+        }
+
+        // insert the new token
+        await db
+        .insert(refreshTokens)
+        .values(newToken)
+        
+        return {
+            userId: existingUser.userId,
+            email: existingUser.email,
+            name: existingUser.name,
             accessToken,
             refreshToken
         }

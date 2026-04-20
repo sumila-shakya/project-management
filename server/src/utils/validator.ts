@@ -11,5 +11,12 @@ export const registrationSchema = z.object({
     .regex(/[^a-zA-Z0-9\s]/, { message:"Password must contain at least one special character" })
 })
 
-// REGISTRATION TYPE
+// LOGIN SCHEMA
+export const loginSchema = z.object({
+    email: z.string().email({ message: "Invalid email format" }),
+    password: z.string().min(1, { message: "Password is required" })
+})
+
+/* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
+export type loginType = z.infer<typeof loginSchema>
