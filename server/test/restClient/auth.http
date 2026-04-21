@@ -21,3 +21,13 @@ Content-Type: application/json
 POST http://localhost:3000/api/auth/logout
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc1NjEzOSwiZXhwIjoxNzc2NzU2NzM5fQ.WCOw-26KTJLcayQ1hna4aKLo-8CHHPwHuqJQv3Fle9s
+
+### get account check
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3MDY0MSwiZXhwIjoxNzc2NzcxMjQxfQ.Da_aFTVLHMjYm_pn-Dbxx3frvpfK90QfRoV43yGoyUI
+
+### refresh token
+POST  http://localhost:3000/api/auth/refresh
+Content-Type: application/json
+
+{}

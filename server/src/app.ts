@@ -4,12 +4,14 @@ import { errorHandler } from './middlewares/error.middleware'
 import { db } from './config/mysql.config'
 import authRouter from './routes/auth.route'
 import mongoose from 'mongoose'
+import cookieParser from 'cookie-parser'
 
 const app = express()
 
 // EXPRESS GLOBAL MIDDLEWARES
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+app.use(cookieParser())
 
 app.use('/api/auth', authRouter)
 

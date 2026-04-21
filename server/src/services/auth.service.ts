@@ -140,5 +140,57 @@ export const authServices = {
 
         //return the data without the password
         return userInfo
+    },
+
+    async refreshToken(token: string, userId: number) {
+        const [tokenRecord] = await db
+        .select()
+        .from(refreshTokens)
+        .where(and(
+            eq(refreshTokens.userId, userId),
+            eq(refreshTokens.token, token)
+        ))
+
+        if(!tokenRecord) {
+            throw new ApiError(401, "Access Denied")
+        }
+
+        if(tokenRecord.expiresAt < new Date()) {
+            await db
+            .delete(refreshTokens)
+            .where(eq(refreshTokens.tokenId, tokenRecord.tokenId))
+
+            throw new ApiError(401, "Token expired! Please login again")
+        }
+
+        const payload: Payload = {
+            userId: userId
+        }
+
+        // generate the new access and refresh tokens
+        const accessToken: string = jwtUtils.generateAccessToken(payload)
+        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
+        const expiryDate: Date = jwtUtils.getExpiryDate()
+
+        // delete the old token
+        await db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.tokenId, tokenRecord.tokenId))
+
+        const newToken: NewToken = {
+            userId: userId,
+            token: refreshToken,
+            expiresAt: expiryDate
+        }
+
+        // insert the new token
+        await db
+        .insert(refreshTokens)
+        .values(newToken)
+        
+        return {
+            accessToken,
+            refreshToken
+        }
     }
 }
