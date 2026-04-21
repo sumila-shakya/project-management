@@ -8,7 +8,8 @@ export const registrationSchema = z.object({
     .regex(/[A-Z]/, { message:"Password must contain at least one uppercase letter" })
     .regex(/[a-z]/, { message:"Password must contain at least one lowercase letter" })
     .regex(/[0-9]/, { message:"Password must contain at least one digit" })
-    .regex(/[^a-zA-Z0-9\s]/, { message:"Password must contain at least one special character" })
+    .regex(/[^a-zA-Z0-9\s]/, { message:"Password must contain at least one special character" }),
+    bio: z.string().optional()
 })
 
 // LOGIN SCHEMA

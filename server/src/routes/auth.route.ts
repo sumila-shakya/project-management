@@ -13,4 +13,7 @@ router.post('/login', authController.login)
 // LOGOUT ROUTE
 router.post('/logout', authMiddleware, authController.logout)
 
+// GET USER INFO ROUTE
+router.get('/me', authMiddleware, authController.getAccount)
+
 export default router

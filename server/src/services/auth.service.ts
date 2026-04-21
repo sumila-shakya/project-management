@@ -26,7 +26,8 @@ export const authServices = {
         const newUser: NewUser = {
             email: data.email,
             name: data.name,
-            password: hashedPassword
+            password: hashedPassword,
+            ...(data.bio && {bio: data.bio})
         }
 
         // insert the new user into the database
@@ -120,5 +121,24 @@ export const authServices = {
         await db
         .delete(refreshTokens)
         .where(eq(refreshTokens.userId, userId))
+    },
+
+    async getAccount(userId: number) {
+        // get the user data
+        const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.userId, userId))
+
+        // if the data doesn't exists throw error
+        if(!user) {
+            throw new ApiError(404, "Not Found")
+        }
+
+        //extract data without the password
+        const { password , ...userInfo} = user
+
+        //return the data without the password
+        return userInfo
     }
 }
