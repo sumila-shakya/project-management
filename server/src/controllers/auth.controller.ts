@@ -59,5 +59,34 @@ export const authController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // delete the refresh token from the database
+            await authServices.logout(userId)
+
+            // cookies option
+            const options = {
+                httpOnly: true,
+                sameSite: "strict" as const
+            }
+
+            // send 200 successfully login message
+            res.status(200)
+            .clearCookie('refreshToken', options)
+            .json(new ApiResponse(200, {}, "User logged out successfully"))
+
+        } catch(error) {
+            next(error)
+        }
     }
 }

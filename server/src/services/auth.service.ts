@@ -113,5 +113,12 @@ export const authServices = {
             accessToken,
             refreshToken
         }
+    },
+
+    async logout(userId: number) {
+        // delete the refresh token from the database
+        await db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.userId, userId))
     }
 }

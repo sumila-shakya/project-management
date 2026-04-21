@@ -8,7 +8,7 @@ Content-Type: application/json
     "password":"P@ssw0rd"
 }
 
-### Login route
+### Login check
 POST  http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -16,3 +16,8 @@ Content-Type: application/json
     "email":"sumi123@gmail.com",
     "password":"P@ssw0rd"
 }
+
+### logout check
+POST http://localhost:3000/api/auth/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc1NjEzOSwiZXhwIjoxNzc2NzU2NzM5fQ.WCOw-26KTJLcayQ1hna4aKLo-8CHHPwHuqJQv3Fle9s

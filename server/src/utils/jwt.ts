@@ -22,5 +22,29 @@ export const jwtUtils = {
 
     getExpiryDate(): Date {
         return new Date(Date.now() + 7*24*60*60*1000)
+    },
+
+    verifyAccessToken(accessToken: string): Payload {
+        try {
+            const decoded = jwt.verify(accessToken, ACCESS_TOKEN_SECRET) as Payload
+            return decoded
+        } catch(error) {
+            if(error instanceof jwt.TokenExpiredError) {
+                throw new ApiError(401, "Token expired!!")
+            }
+            throw new ApiError(401, "Invalid token!!")
+        }
+    },
+
+    verifyRefreshToken(refreshToken: string): Payload {
+        try {
+            const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as Payload
+            return decoded
+        } catch(error) {
+            if(error instanceof jwt.TokenExpiredError) {
+                throw new ApiError(401, "Token expired!!")
+            }
+            throw new ApiError(401, "Invalid token!!")
+        }
     }
 }
