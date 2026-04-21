@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { users, User, NewUser, refreshTokens, NewToken } from "../models/mysql.model";
-import { registrationType, loginType } from "../utils/validator";
+import { registrationType, loginType, changePasswordType } from "../utils/validator";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
@@ -143,6 +143,7 @@ export const authServices = {
     },
 
     async refreshToken(token: string, userId: number) {
+        //check for the existing token record
         const [tokenRecord] = await db
         .select()
         .from(refreshTokens)
@@ -151,11 +152,14 @@ export const authServices = {
             eq(refreshTokens.token, token)
         ))
 
+        // throw error if token record doesn't exists
         if(!tokenRecord) {
             throw new ApiError(401, "Access Denied")
         }
 
+        // throw error if token expired
         if(tokenRecord.expiresAt < new Date()) {
+            // delete the expired token
             await db
             .delete(refreshTokens)
             .where(eq(refreshTokens.tokenId, tokenRecord.tokenId))
@@ -172,10 +176,57 @@ export const authServices = {
         const refreshToken: string = jwtUtils.generateRefreshToken(payload)
         const expiryDate: Date = jwtUtils.getExpiryDate()
 
-        // delete the old token
+        // delete the old token (token rotation)
         await db
         .delete(refreshTokens)
         .where(eq(refreshTokens.tokenId, tokenRecord.tokenId))
+
+        const newToken: NewToken = {
+            userId: userId,
+            token: refreshToken,
+            expiresAt: expiryDate
+        }
+
+        // insert the new token
+        await db
+        .insert(refreshTokens)
+        .values(newToken)
+        
+        // return new refresh token and access token
+        return {
+            accessToken,
+            refreshToken
+        }
+    },
+
+    async resetPassword(userId: number, data: changePasswordType) {
+        // hash the password for safety
+        const hashedPassword: string = await bcrypt.hash(data.password, 10)
+
+        // update the database with new password
+        const [result] = await db.update(users)
+        .set({
+            password: hashedPassword
+        })
+        .where(eq(users.userId, userId))
+
+        if(result.affectedRows === 0) {
+            throw new ApiError(404, "User Not Found")
+        }
+
+        const payload: Payload = {
+            userId: userId
+        }
+
+        // generate the new access and refresh tokens
+        const accessToken: string = jwtUtils.generateAccessToken(payload)
+        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
+        const expiryDate: Date = jwtUtils.getExpiryDate()
+
+        // delete the old token
+        await db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.userId, userId))
 
         const newToken: NewToken = {
             userId: userId,

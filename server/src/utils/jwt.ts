@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { ApiError } from './apiError'
 import { Payload } from '../@types/interface'
+import { payloadSchema } from './validator'
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!
@@ -26,8 +27,9 @@ export const jwtUtils = {
 
     verifyAccessToken(accessToken: string): Payload {
         try {
-            const decoded = jwt.verify(accessToken, ACCESS_TOKEN_SECRET) as Payload
-            return decoded
+            const decoded = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+            const user: Payload = payloadSchema.parse(decoded)
+            return user
         } catch(error) {
             if(error instanceof jwt.TokenExpiredError) {
                 throw new ApiError(401, "Token expired!!")
@@ -38,8 +40,9 @@ export const jwtUtils = {
 
     verifyRefreshToken(refreshToken: string): Payload {
         try {
-            const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as Payload
-            return decoded
+            const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET)
+            const user: Payload = payloadSchema.parse(decoded)
+            return user
         } catch(error) {
             if(error instanceof jwt.TokenExpiredError) {
                 throw new ApiError(401, "Token expired!!")

@@ -1,4 +1,4 @@
-import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index } from "drizzle-orm/mysql-core";
 import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY } from "../utils/constants";
 
 // USERS SCHEMA
@@ -91,6 +91,8 @@ export const refreshTokens = mysqlTable('refresh_tokens', {
     userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
     expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+}, (table) => {
+    return { userIdIdx: index('user_id_idx').on(table.userId) }
 })
 
 // USERS SCHEMA TYPE

@@ -1,10 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { registrationSchema, loginSchema, registrationType, loginType } from "../utils/validator";
 import { authServices } from "../services/auth.service";
+import { COOKIES_OPTIONS } from "../utils/constants";
 import { jwtUtils } from "../utils/jwt";
 import { Payload } from "../@types/interface";
+import { 
+    registrationSchema, loginSchema, changePasswordSchema, 
+    registrationType, loginType, changePasswordType } 
+from "../utils/validator";
 
 export const authController = {
     async register(req: Request, res: Response, next: NextFunction) {
@@ -18,16 +22,9 @@ export const authController = {
             // seperate the refresh token from the rest of the data
             const {refreshToken, ...data} = newUser
 
-            // cookies options
-            const options = {
-                httpOnly: true,
-                maxAge: 7*24*60*60*1000,
-                sameSite: "strict" as const
-            }
-
             // send 201 successfully created message
             res.status(201)
-            .cookie('refreshToken', refreshToken, options)
+            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
             .json(new ApiResponse(201, data, "User registered successfully"))
 
         } catch(error) {
@@ -46,16 +43,9 @@ export const authController = {
             // seperate the refresh token from the rest of the data 
             const {refreshToken, ...data} = user
 
-            // cookies option
-            const options = {
-                httpOnly: true,
-                maxAge: 7*24*60*60*1000,
-                sameSite: "strict" as const
-            }
-
             // send 200 successfully login message
             res.status(200)
-            .cookie('refreshToken', refreshToken, options)
+            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
             .json(new ApiResponse(200, data, "User logged in successfully"))
 
         } catch(error) {
@@ -120,24 +110,46 @@ export const authController = {
             //get refresh token from the cookie
             const token = req.cookies?.refreshToken
 
+            //throw error if token not present
             if(!token) {
                 throw new ApiError(401,"Refresh token is required")
             }
 
+            // extract the userId from the refresh token
             const { userId }: Payload = jwtUtils.verifyRefreshToken(token)
 
+            //get the new access and refresh token
             const { accessToken, refreshToken} = await authServices.refreshToken(token, userId)
-
-            const options = {
-                httpOnly: true,
-                maxAge: 7*24*60*60*1000,
-                sameSite: "strict" as const
-            }
 
             // send 200 message
             res.status(200)
-            .cookie('refreshToken', refreshToken, options)
+            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
             .json(new ApiResponse(200, {accessToken}))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async changePassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // validate the user data
+            const validatedData: changePasswordType = changePasswordSchema.parse(req.body)
+
+            const { accessToken, refreshToken} = await authServices.resetPassword(userId, validatedData)
+
+            // send 200 message
+            res.status(200)
+            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
+            .json(new ApiResponse(200, {accessToken}, "Successfully password reset"))
+
         } catch(error) {
             next(error)
         }

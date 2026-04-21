@@ -16,6 +16,10 @@ router.post('/logout', authMiddleware, authController.logout)
 // GET USER INFO ROUTE
 router.get('/me', authMiddleware, authController.getAccount)
 
+// GET NEW ACCESS TOKEN ROUTE
 router.post('/refresh', authController.refreshToken)
+
+// CHANGE THE PASSWORD ROUTE
+router.patch('/change-password', authMiddleware, authController.changePassword)
 
 export default router

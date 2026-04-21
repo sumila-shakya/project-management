@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
     "email":"sumi123@gmail.com",
-    "password":"P@ssw0rd"
+    "password":"P@ssw0rd123"
 }
 
 ### logout check
@@ -24,10 +24,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3MDY0MSwiZXhwIjoxNzc2NzcxMjQxfQ.Da_aFTVLHMjYm_pn-Dbxx3frvpfK90QfRoV43yGoyUI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3NjM4NCwiZXhwIjoxNzc2Nzc2OTg0fQ.aZKhANr-ebWHkVud8sPIC6eaVPxQY8bQ4KvFF6EmL4U
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh
 Content-Type: application/json
 
 {}
+
+### change password
+PATCH http://localhost:3000/api/auth/change-password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3NjE3NCwiZXhwIjoxNzc2Nzc2Nzc0fQ.-vaZrehTK8YLo52nEogbheJ_1dLq58Zk8Wbr3Brj2rQ
+Content-Type: application/json
+
+{
+    "password": "P@ssw0rd123"
+}
