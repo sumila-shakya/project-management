@@ -24,7 +24,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3NjM4NCwiZXhwIjoxNzc2Nzc2OTg0fQ.aZKhANr-ebWHkVud8sPIC6eaVPxQY8bQ4KvFF6EmL4U
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njg0NzkxMywiZXhwIjoxNzc2ODQ4NTEzfQ.Q76dlHFTebbERCrmuT9zFKxJbnhfTImQyXdxtIsTh4M
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh
@@ -39,4 +39,13 @@ Content-Type: application/json
 
 {
     "password": "P@ssw0rd123"
+}
+
+### update account
+PATCH http://localhost:3000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njg0NzkxMywiZXhwIjoxNzc2ODQ4NTEzfQ.Q76dlHFTebbERCrmuT9zFKxJbnhfTImQyXdxtIsTh4M
+Content-Type: application/json
+
+{
+    "bio": "hello i am good"
 }

@@ -22,4 +22,7 @@ router.post('/refresh', authController.refreshToken)
 // CHANGE THE PASSWORD ROUTE
 router.patch('/change-password', authMiddleware, authController.changePassword)
 
+// UPDATE THE USER ACCOUNT
+router.patch('/me', authMiddleware, authController.updateAccount)
+
 export default router

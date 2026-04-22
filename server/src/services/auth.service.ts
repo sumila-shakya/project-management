@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { users, User, NewUser, refreshTokens, NewToken } from "../models/mysql.model";
-import { registrationType, loginType, changePasswordType } from "../utils/validator";
+import { registrationType, loginType, changePasswordType, updateAccountType } from "../utils/validator";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
@@ -243,5 +243,25 @@ export const authServices = {
             accessToken,
             refreshToken
         }
+    },
+
+    async updateAccount(userId: number, updates: updateAccountType) {
+        //update the account
+        await db
+        .update(users)
+        .set(updates)
+        .where(eq(users.userId, userId))
+
+        //fetch the updated account
+        const [updatedAccount]: User[] = await db
+        .select()
+        .from(users)
+        .where(eq(users.userId, userId))
+
+        //extract data without the password
+        const { password , ...userInfo} = updatedAccount
+
+        //return the data without the password
+        return userInfo
     }
 }

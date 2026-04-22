@@ -6,8 +6,8 @@ import { COOKIES_OPTIONS } from "../utils/constants";
 import { jwtUtils } from "../utils/jwt";
 import { Payload } from "../@types/interface";
 import { 
-    registrationSchema, loginSchema, changePasswordSchema, 
-    registrationType, loginType, changePasswordType } 
+    registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema,
+    registrationType, loginType, changePasswordType, updateAccountType } 
 from "../utils/validator";
 
 export const authController = {
@@ -149,6 +149,33 @@ export const authController = {
             res.status(200)
             .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
             .json(new ApiResponse(200, {accessToken}, "Successfully password reset"))
+
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async updateAccount(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            const updates: updateAccountType = updateAccountSchema.parse(req.body)
+
+            if( Object.keys(updates).length === 0 ) {
+                throw new ApiError(400, "No data provided for updates")
+            }
+
+            const updatedAccount = await authServices.updateAccount(userId, updates)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, updatedAccount, "Successfully updated account"))
 
         } catch(error) {
             next(error)

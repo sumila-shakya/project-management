@@ -32,7 +32,14 @@ export const payloadSchema = z.object({
     userId: z.coerce.number().positive()
 })
 
+// UPDATE ACCOUNT SCHEMA
+export const updateAccountSchema = z.object({
+    name: z.string().min(2, { message: "Name must be atleast two charaters long" }).trim().optional(),
+    bio: z.string().max(500, { message: "Bio must be under 500 characters" }).optional()
+})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type loginType = z.infer<typeof loginSchema>
 export type changePasswordType = z.infer<typeof changePasswordSchema>
+export type updateAccountType = z.infer<typeof updateAccountSchema>
