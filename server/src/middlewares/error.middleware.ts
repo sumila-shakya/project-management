@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ZodError } from "zod";
 
+// GLOBAL ERROR MIDDLEWARE
 export const errorHandler = (
     err:any, 
     req: Request, 

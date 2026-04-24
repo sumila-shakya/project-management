@@ -1,15 +1,16 @@
 import { db } from "../config/mysql.config";
-import { users, User, NewUser, refreshTokens, NewToken, resetPasswordTokens, NewResetPassToken } from "../models/mysql.model";
-import { registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType } from "../utils/validator";
+import { users, User, NewUser, refreshTokens, NewToken, resetPasswordTokens, NewResetPassToken, emailVerificationTokens, NewEmailToken } from "../models/mysql.model";
+import { registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType, emailVerificationType, requestVerificationType } from "../utils/validator";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
 import { Payload } from "../@types/interface";
 import { jwtUtils } from "../utils/jwt";
-import { hashToken, generateResetToken } from "../utils/resetToken";
-import { sendResetPasswordMail } from "../utils/mailer";
+import { hashToken, generateToken } from "../utils/token";
+import { sendResetPasswordMail, sendEmailVerificationMail } from "../utils/mailer";
 
 export const authServices = {
+    // USER REGISTRATION SERVICE FUNCTION
     async register(data: registrationType) {
         // check for the existing user
         const existingUser: User[] = await db
@@ -29,7 +30,7 @@ export const authServices = {
             email: data.email,
             name: data.name,
             password: hashedPassword,
-            ...(data.bio && {bio: data.bio})
+            ...(data.bio && {bio: data.bio}) //insert bio into the database if it exists
         }
 
         // insert the new user into the database
@@ -37,35 +38,75 @@ export const authServices = {
         .insert(users)
         .values(newUser)
 
-        const payload: Payload = {
-            userId: result.insertId
-        }
+        // generate the verificationToken
+        const verificationToken: string = generateToken()
 
-        // generate access and refresh tokens
-        const accessToken: string = jwtUtils.generateAccessToken(payload)
-        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
-        const expiryDate: Date = jwtUtils.getExpiryDate()
-
-        const newToken: NewToken = {
+        const newEmailToken: NewEmailToken = {
             userId: result.insertId,
-            token: refreshToken,
-            expiresAt: expiryDate
+            token: hashToken(verificationToken),
+            expiresAt: new Date(Date.now() + 24*60*60*1000)
         }
 
-        // insert token into the database
+        // delete the existing verification tokens
         await db
-        .insert(refreshTokens)
-        .values(newToken)
+        .delete(emailVerificationTokens)
+        .where(eq(emailVerificationTokens.userId, result.insertId))
+
+        // insert the new email verification token
+        await db
+        .insert(emailVerificationTokens)
+        .values(newEmailToken)
+
+        // send email with verification token
+        await sendEmailVerificationMail(data.email, verificationToken)
 
         return {
             userId: result.insertId,
             email: data.email,
-            name: data.name,
-            accessToken,
-            refreshToken
+            name: data.name
         }
     },
 
+    // EMAIL VERIFICATION SERVICE FUNCTION
+    async verifyEmail(data: emailVerificationType) {
+        //check for the token in the database
+        const [tokenRecord] = await db
+        .select()
+        .from(emailVerificationTokens)
+        .where(eq(emailVerificationTokens.token, hashToken(data.token)))
+
+        //if token doesn't exists throw error
+        if(!tokenRecord) {
+            throw new ApiError(400, "Invalid token")
+        }
+
+        //if the token is expired throw error
+        if(tokenRecord.expiresAt < new Date()) {
+            // delete the expired token
+            await db
+            .delete(emailVerificationTokens)
+            .where(eq(emailVerificationTokens.tokenId, tokenRecord.tokenId))
+
+            throw new ApiError(400, "Token Expired. Please, re-request the verification email")
+        }
+
+        // update the user to verified
+        await db
+        .update(users)
+        .set({
+            isverified: true
+        })
+        .where(eq(users.userId, tokenRecord.userId)),
+
+        // delete the email verification token
+        await db
+        .delete(emailVerificationTokens)
+        .where(eq(emailVerificationTokens.userId, tokenRecord.userId))
+
+
+    },
+
+    // USER LOGIN SERVICE FUNCTION
     async login(data: loginType) {
         // check for the existing user
         const [existingUser]: User[] = await db
@@ -80,8 +121,15 @@ export const authServices = {
 
         // compare the password
         const isValidPassword = await bcrypt.compare(data.password, existingUser.password)
+
+        // if the password doesn't match throw error
         if(!isValidPassword) {
             throw new ApiError(401, "Invalid credentials")
+        }
+
+        // verify the user
+        if(!existingUser.isverified) {
+            throw new ApiError(403, "please verify your email before logging in")
         }
 
         const payload: Payload = {
@@ -118,6 +166,7 @@ export const authServices = {
         }
     },
 
+    // USER LOGOUT SERVICE FUNCTION
     async logout(userId: number) {
         // delete the refresh token from the database
         await db
@@ -125,6 +174,7 @@ export const authServices = {
         .where(eq(refreshTokens.userId, userId))
     },
 
+    // USER ACCOUNT VIEW SERVICE FUNCTION
     async getAccount(userId: number) {
         // get the user data
         const [user] = await db
@@ -144,6 +194,7 @@ export const authServices = {
         return userInfo
     },
 
+    // REFRESH ACCESS SERVICE FUNCTION
     async refreshToken(token: string, userId: number) {
         //check for the existing token record
         const [tokenRecord] = await db
@@ -201,6 +252,7 @@ export const authServices = {
         }
     },
 
+    // CHANGE PASSWORD SERVICE FUNCTION
     async changePassword(userId: number, data: changePasswordType) {
         // hash the password for safety
         const hashedPassword: string = await bcrypt.hash(data.password, 10)
@@ -212,6 +264,7 @@ export const authServices = {
         })
         .where(eq(users.userId, userId))
 
+        // if no data was updated throw error
         if(result.affectedRows === 0) {
             throw new ApiError(404, "User Not Found")
         }
@@ -247,6 +300,7 @@ export const authServices = {
         }
     },
 
+    // UPDATE USER ACCOUNT SERVICE FUNCTION
     async updateAccount(userId: number, updates: updateAccountType) {
         //update the account
         await db
@@ -267,6 +321,7 @@ export const authServices = {
         return userInfo
     },
 
+    // FORGET PASSWORD SERVICE FUNCTION
     async forgetPassword(data: forgetPasswordType) {
         //find the user according to the email
         const [user] = await db
@@ -274,6 +329,7 @@ export const authServices = {
         .from(users)
         .where(eq(users.email, data.email))
 
+        // if the user doesn't exists return without throwing error
         if(!user) {
             return
         }
@@ -290,7 +346,7 @@ export const authServices = {
         */
 
         //generate the reset token
-        const resetToken: string = generateResetToken()
+        const resetToken: string = generateToken()
 
         const newResetToken: NewResetPassToken = {
             userId: user.userId,
@@ -298,17 +354,21 @@ export const authServices = {
             expiresAt: new Date(Date.now() + 15*60*1000)
         }
 
+        // delete the existing reset tokens
         await db
         .delete(resetPasswordTokens)
         .where(eq(resetPasswordTokens.userId, user.userId))
 
+        // insert the new reset token
         await db
         .insert(resetPasswordTokens)
         .values(newResetToken)
 
+        // send the email to the user's inbox
         await sendResetPasswordMail(user.email, resetToken)
     },
 
+    // RESET PASSWORD SERVICE FUNCTION
     async resetPassword(data: resetPasswordType) {
         //check for the token in the database
         const [tokenRecord] = await db
@@ -369,5 +429,45 @@ export const authServices = {
             accessToken,
             refreshToken
         }
+    },
+
+    // RESEND VERIFICATION SERVICE FUNCTION
+    async resendVerification(data: requestVerificationType) {
+        //find the user according to the email
+        const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, data.email))
+
+        // if the user doesn't exists return without throwing error
+        if(!user) {
+            return
+        }
+
+        if(user.isverified) {
+            return
+        }
+
+        //generate the reset token
+        const verificationToken: string = generateToken()
+
+        const newEmailToken: NewEmailToken = {
+            userId: user.userId,
+            token: hashToken(verificationToken),
+            expiresAt: new Date(Date.now() + 24*60*60*1000)
+        }
+
+        // delete the existing verification tokens
+        await db
+        .delete(emailVerificationTokens)
+        .where(eq(emailVerificationTokens.userId, user.userId))
+
+        // insert the new email verification token
+        await db
+        .insert(emailVerificationTokens)
+        .values(newEmailToken)
+
+        // send email with verification token
+        await sendEmailVerificationMail(data.email, verificationToken)
     }
 }

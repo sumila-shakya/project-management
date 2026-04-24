@@ -1,5 +1,7 @@
-import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean } from "drizzle-orm/mysql-core";
 import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY } from "../utils/constants";
+
+/* ------------------------------------------ SCHEMA DEFINITIONS ------------------------------------------ */
 
 // USERS SCHEMA
 export const users = mysqlTable('users', {
@@ -9,7 +11,8 @@ export const users = mysqlTable('users', {
     name: varchar('name', { length: 100 }).notNull(),
     bio: text('bio'),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow()
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
+    isverified: boolean('is_verified').notNull().default(false)
 })
 
 // TEAMS SCHEMA
@@ -107,6 +110,19 @@ export const resetPasswordTokens = mysqlTable('reset_password_tokens', {
     return { userIdIdx: index('user_id_idx').on(table.userId) }
 })
 
+// EMAIL VERIFICATION SCHEMA
+export const emailVerificationTokens = mysqlTable('email_verification_tokens', {
+    tokenId: serial('token_id').primaryKey(),
+    token: varchar('token', { length: 512 }).notNull(),
+    userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+}, (table) => {
+    return { userIdIdx: index('user_id_idx').on(table.userId) }
+})
+
+/* ------------------------------------------ TYPE DEFINITIONS ------------------------------------------ */
+
 // USERS SCHEMA TYPE
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -135,8 +151,14 @@ export type NewTaskAssets = typeof taskAssets.$inferInsert
 export type Comment = typeof comments.$inferSelect
 export type NewComment = typeof comments.$inferInsert
 
+// REFRESH TOKEN TYPE
 export type Token = typeof refreshTokens.$inferSelect
 export type NewToken = typeof refreshTokens.$inferInsert
 
+// RESET TOKEN TYPE
 export type ResetPassToken = typeof resetPasswordTokens.$inferSelect
 export type NewResetPassToken = typeof resetPasswordTokens.$inferInsert
+
+// EMAIL VERIFICATION TOKEN TYPE
+export type EmailToken = typeof emailVerificationTokens.$inferSelect
+export type NewEmailToken = typeof emailVerificationTokens.$inferInsert

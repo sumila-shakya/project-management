@@ -7,6 +7,9 @@ const router = Router()
 // REGISTRATION ROUTE
 router.post('/register', authController.register)
 
+// EMAIL VERIFCATION ROUTE
+router.post('/verify-email', authController.verifyEmail)
+
 // LOGIN ROUTE
 router.post('/login', authController.login)
 
@@ -30,5 +33,8 @@ router.post('/forget-password', authController.forgetPassword)
 
 // RESET PASSWORD ROUTE
 router.post('/reset-password', authController.resetPassword)
+
+// RE REQUEST VERIFICATION ROUTE
+router.post('/resend-verification', authController.resendVerification)
 
 export default router

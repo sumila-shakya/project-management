@@ -3,6 +3,7 @@ import { Payload } from "../@types/interface";
 import { ApiError } from "../utils/apiError";
 import { jwtUtils } from "../utils/jwt";
 
+// AUTHENTICATION MIDDLEWARE
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // grab the authentication header of the request

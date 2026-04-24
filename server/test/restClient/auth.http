@@ -20,11 +20,11 @@ Content-Type: application/json
 ### logout check
 POST http://localhost:3000/api/auth/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc1NjEzOSwiZXhwIjoxNzc2NzU2NzM5fQ.WCOw-26KTJLcayQ1hna4aKLo-8CHHPwHuqJQv3Fle9s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzAzMDk0MCwiZXhwIjoxNzc3MDMxNTQwfQ.Bua2fNd_ez6IgKRgKHuR5CS02mmgUxb5NccgDHtEit0
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njg0NzkxMywiZXhwIjoxNzc2ODQ4NTEzfQ.Q76dlHFTebbERCrmuT9zFKxJbnhfTImQyXdxtIsTh4M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzAzMDk0MCwiZXhwIjoxNzc3MDMxNTQwfQ.Bua2fNd_ez6IgKRgKHuR5CS02mmgUxb5NccgDHtEit0
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh
@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ### update account
 PATCH http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njg0NzkxMywiZXhwIjoxNzc2ODQ4NTEzfQ.Q76dlHFTebbERCrmuT9zFKxJbnhfTImQyXdxtIsTh4M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzAzMDk0MCwiZXhwIjoxNzc3MDMxNTQwfQ.Bua2fNd_ez6IgKRgKHuR5CS02mmgUxb5NccgDHtEit0
 Content-Type: application/json
 
 {
@@ -59,10 +59,15 @@ Content-Type: application/json
 }
 
 ### reset password
-POST http://localhost:3000/api/auth/reset-password
+POST http://localhost:3000/api/auth/reset-password?token=814cc3cf7fcaf4624834af80b864f0aa
 Content-Type: application/json
 
 {
-    "token": "aad041ae3d57e458a256609ef3aba1b9",
     "password": "P@ssw0rd"
 }
+
+### verify email
+POST http://localhost:3000/api/auth/verify-email?token=814cc3cf7fcaf4624834af80b864f0aa
+Content-Type: application/json
+
+{}

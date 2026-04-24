@@ -1,4 +1,4 @@
-import { email, z } from 'zod'
+import { z } from 'zod'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -10,6 +10,13 @@ export const registrationSchema = z.object({
     .regex(/[0-9]/, { message:"Password must contain at least one digit" })
     .regex(/[^a-zA-Z0-9\s]/, { message:"Password must contain at least one special character" }),
     bio: z.string().optional()
+})
+
+// EMAIL VERIFICATION SCHEMA
+export const emailVerificationSchema = z.object({
+    token: z.string()
+    .length(32, {message: "Invalid token"})
+    .regex(/^[0-9a-f]+$/, {message: "Invalid token"})  
 })
 
 // LOGIN SCHEMA
@@ -45,7 +52,8 @@ export const forgetPasswordSchema = z.object({
 
 // RESET PASSWORD SCHEMA
 export const resetPasswordSchema = z.object({
-    token: z.string().length(32, {message: "Invalid token"})
+    token: z.string()
+    .length(32, {message: "Invalid token"})
     .regex(/^[0-9a-f]+$/, {message: "Invalid token"}),
     password: z.string().min(8, { message:"Password must be atleast 8 characters long" })
     .regex(/[A-Z]/, { message:"Password must contain at least one uppercase letter" })
@@ -54,10 +62,17 @@ export const resetPasswordSchema = z.object({
     .regex(/[^a-zA-Z0-9\s]/, { message:"Password must contain at least one special character" })
 })
 
+// RE REQUEST EMAIL SCHEMA
+export const requestVerificationSchema = z.object({
+    email: z.string().email({ message: "Invalid email format" })
+})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
+export type emailVerificationType = z.infer<typeof emailVerificationSchema>
 export type loginType = z.infer<typeof loginSchema>
 export type changePasswordType = z.infer<typeof changePasswordSchema>
 export type updateAccountType = z.infer<typeof updateAccountSchema>
 export type forgetPasswordType = z.infer<typeof forgetPasswordSchema>
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>
+export type requestVerificationType = z.infer<typeof requestVerificationSchema>

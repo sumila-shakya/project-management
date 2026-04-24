@@ -13,6 +13,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 
+// ROUTES
 app.use('/api/auth', authRouter)
 
 // HEALTH STATUS CHECKUP
@@ -29,6 +30,7 @@ app.get('/api/health', async (req, res, next) => {
         //testing the mysql connection
         await db.execute('SELECT 1')
 
+        // health data
         const healthData = {
             server: "UP",
             mysql: "Connected",

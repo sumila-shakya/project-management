@@ -6,11 +6,12 @@ import { COOKIES_OPTIONS } from "../utils/constants";
 import { jwtUtils } from "../utils/jwt";
 import { Payload } from "../@types/interface";
 import { 
-    registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema, forgetPasswordSchema, resetPasswordSchema,
-    registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType } 
+    registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema, forgetPasswordSchema, resetPasswordSchema, emailVerificationSchema, requestVerificationSchema,
+    registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType, emailVerificationType, requestVerificationType } 
 from "../utils/validator";
 
 export const authController = {
+    // USER REGISTRATION CONTROLLER FUNCTION
     async register(req: Request, res: Response, next: NextFunction) {
         try {
             // validate the user data
@@ -19,19 +20,34 @@ export const authController = {
             // register the new user
             const newUser = await authServices.register(validatedData)
 
-            // seperate the refresh token from the rest of the data
-            const {refreshToken, ...data} = newUser
-
             // send 201 successfully created message
-            res.status(201)
-            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
-            .json(new ApiResponse(201, data, "User registered successfully"))
+            res
+            .status(201)
+            .json(new ApiResponse(201, newUser, "User registered successfully, Please, verify your email"))
 
         } catch(error) {
             next(error)
         }
     },
 
+    // EMAIL VERIFICATION CONTROLLER FUNCTION
+    async verifyEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const validatedData: emailVerificationType = emailVerificationSchema.parse(req.query)
+
+            await authServices.verifyEmail(validatedData)
+
+            // send 200 success message
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Email verified successfully. Please, login to continue"))
+
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    // USER LOGIN CONTROLLER FUNCTION
     async login(req: Request, res: Response, next: NextFunction) {
         try {
             // validate the user data
@@ -53,6 +69,7 @@ export const authController = {
         }
     },
 
+    // USER LOGOUT CONTROLLER FUNCTION
     async logout(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -82,6 +99,7 @@ export const authController = {
         }
     },
 
+    // USER ACCOUNT VIEW CONTROLLER FUNCTION
     async getAccount(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -105,6 +123,7 @@ export const authController = {
         }
     },
 
+    // REFRESH ACCESS TOKEN CONTROLLER FUNCTION
     async refreshToken(req: Request, res: Response, next: NextFunction) {
         try {
             //get refresh token from the cookie
@@ -119,7 +138,7 @@ export const authController = {
             const { userId }: Payload = jwtUtils.verifyRefreshToken(token)
 
             //get the new access and refresh token
-            const { accessToken, refreshToken} = await authServices.refreshToken(token, userId)
+            const { accessToken, refreshToken } = await authServices.refreshToken(token, userId)
 
             // send 200 message
             res.status(200)
@@ -130,6 +149,7 @@ export const authController = {
         }
     },
 
+    // CHANGE PASSWORD CONTROLLER FUNCTION
     async changePassword(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -143,7 +163,8 @@ export const authController = {
             // validate the user data
             const validatedData: changePasswordType = changePasswordSchema.parse(req.body)
 
-            const { accessToken, refreshToken} = await authServices.changePassword(userId, validatedData)
+            // get the new access token and refresh token after updating the password
+            const { accessToken, refreshToken } = await authServices.changePassword(userId, validatedData)
 
             // send 200 message
             res.status(200)
@@ -155,6 +176,7 @@ export const authController = {
         }
     },
 
+    // UPDATE USER ACCOUNT CONTROLLER FUNCTION
     async updateAccount(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -165,14 +187,18 @@ export const authController = {
                 throw new ApiError(401, "Access Denied")
             }
 
+            // validate the user data
             const updates: updateAccountType = updateAccountSchema.parse(req.body)
 
+            // if no data was provided throw error
             if( Object.keys(updates).length === 0 ) {
                 throw new ApiError(400, "No data provided for updates")
             }
 
+            // update the account
             const updatedAccount = await authServices.updateAccount(userId, updates)
 
+            // send 200 success message
             res
             .status(200)
             .json(new ApiResponse(200, updatedAccount, "Successfully updated account"))
@@ -182,14 +208,16 @@ export const authController = {
         }
     },
 
+    // FORGET PASSWORD CONTROLLER FUNCTION
     async forgetPassword(req: Request, res: Response, next: NextFunction) {
         try {
-            //validate the user data
+            // validate the user data
             const userInfo: forgetPasswordType = forgetPasswordSchema.parse(req.body)
 
-            //db query for the user data send by the user
+            // db query for the user data send by the user
             await authServices.forgetPassword(userInfo)
 
+            // send 200 success message despite any error
             res.status(200)
             .json(new ApiResponse(200, {}, "Token has been send to your email. Please, check your email"))
         } catch(error) {
@@ -197,11 +225,13 @@ export const authController = {
         }
     },
 
+    // RESET PASSWORD CONTROLLER FUNCTION
     async resetPassword(req: Request, res: Response, next: NextFunction) {
         try {
-            //validate the user data
+            // validate the user data
             const validatedData: resetPasswordType = resetPasswordSchema.parse(req.body)
 
+            // get the new access token and refresh token after reseting password
             const {refreshToken, accessToken} = await authServices.resetPassword(validatedData)
 
             // send 200 message
@@ -211,5 +241,22 @@ export const authController = {
         } catch(error) {
             next(error)
         }
-    }
+    },
+
+    // RESEND VERIFICATION CONTROLLER FUNCTION
+    async resendVerification(req: Request, res: Response, next: NextFunction) {
+        try {
+            // validate the user data
+            const userInfo: requestVerificationType = requestVerificationSchema.parse(req.body)
+
+            // db query for the user data send by the user
+            await authServices.resendVerification(userInfo)
+
+            // send 200 success message despite any error
+            res.status(200)
+            .json(new ApiResponse(200, {}, "Token has been send to your email. Please, check your email"))
+        } catch(error) {
+            next(error)
+        }
+    },
 }

@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
 //generate reset token
-export const generateResetToken = (): string => {
+export const generateToken = (): string => {
     return crypto.randomBytes(16).toString('hex')
 }
 
