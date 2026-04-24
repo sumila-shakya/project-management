@@ -22,7 +22,13 @@ router.post('/refresh', authController.refreshToken)
 // CHANGE THE PASSWORD ROUTE
 router.patch('/change-password', authMiddleware, authController.changePassword)
 
-// UPDATE THE USER ACCOUNT
+// UPDATE THE USER ACCOUNT ROUTE
 router.patch('/me', authMiddleware, authController.updateAccount)
+
+// FORGET PASSWORD ROUTE
+router.post('/forget-password', authController.forgetPassword)
+
+// RESET PASSWORD ROUTE
+router.post('/reset-password', authController.resetPassword)
 
 export default router

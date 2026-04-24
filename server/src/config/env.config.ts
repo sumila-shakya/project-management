@@ -8,7 +8,13 @@ declare global {
             DB_NAME: string,
             MONGODB_URI: string,
             ACCESS_TOKEN_SECRET: string,
-            REFRESH_TOKEN_SECRET: string
+            REFRESH_TOKEN_SECRET: string,
+            MAIL_HOST: string,
+            MAIL_PORT: string,
+            MAIL_USER: string,
+            MAIL_PASS: string,
+            MAIL_FROM: string,
+            CLIENT_URL: string
         }
     }
 }

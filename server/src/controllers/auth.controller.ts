@@ -6,8 +6,8 @@ import { COOKIES_OPTIONS } from "../utils/constants";
 import { jwtUtils } from "../utils/jwt";
 import { Payload } from "../@types/interface";
 import { 
-    registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema,
-    registrationType, loginType, changePasswordType, updateAccountType } 
+    registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema, forgetPasswordSchema, resetPasswordSchema,
+    registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType } 
 from "../utils/validator";
 
 export const authController = {
@@ -143,12 +143,12 @@ export const authController = {
             // validate the user data
             const validatedData: changePasswordType = changePasswordSchema.parse(req.body)
 
-            const { accessToken, refreshToken} = await authServices.resetPassword(userId, validatedData)
+            const { accessToken, refreshToken} = await authServices.changePassword(userId, validatedData)
 
             // send 200 message
             res.status(200)
             .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
-            .json(new ApiResponse(200, {accessToken}, "Successfully password reset"))
+            .json(new ApiResponse(200, {accessToken}, "Successfully password changed"))
 
         } catch(error) {
             next(error)
@@ -177,6 +177,37 @@ export const authController = {
             .status(200)
             .json(new ApiResponse(200, updatedAccount, "Successfully updated account"))
 
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async forgetPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            //validate the user data
+            const userInfo: forgetPasswordType = forgetPasswordSchema.parse(req.body)
+
+            //db query for the user data send by the user
+            await authServices.forgetPassword(userInfo)
+
+            res.status(200)
+            .json(new ApiResponse(200, {}, "Token has been send to your email. Please, check your email"))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async resetPassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            //validate the user data
+            const validatedData: resetPasswordType = resetPasswordSchema.parse(req.body)
+
+            const {refreshToken, accessToken} = await authServices.resetPassword(validatedData)
+
+            // send 200 message
+            res.status(200)
+            .cookie('refreshToken', refreshToken, COOKIES_OPTIONS)
+            .json(new ApiResponse(200, {accessToken}, "Successfully password reset, You are logged in"))
         } catch(error) {
             next(error)
         }

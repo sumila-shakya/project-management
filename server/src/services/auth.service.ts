@@ -1,11 +1,13 @@
 import { db } from "../config/mysql.config";
-import { users, User, NewUser, refreshTokens, NewToken } from "../models/mysql.model";
-import { registrationType, loginType, changePasswordType, updateAccountType } from "../utils/validator";
+import { users, User, NewUser, refreshTokens, NewToken, resetPasswordTokens, NewResetPassToken } from "../models/mysql.model";
+import { registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType } from "../utils/validator";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'
 import { Payload } from "../@types/interface";
 import { jwtUtils } from "../utils/jwt";
+import { hashToken, generateResetToken } from "../utils/resetToken";
+import { sendResetPasswordMail } from "../utils/mailer";
 
 export const authServices = {
     async register(data: registrationType) {
@@ -199,7 +201,7 @@ export const authServices = {
         }
     },
 
-    async resetPassword(userId: number, data: changePasswordType) {
+    async changePassword(userId: number, data: changePasswordType) {
         // hash the password for safety
         const hashedPassword: string = await bcrypt.hash(data.password, 10)
 
@@ -263,5 +265,109 @@ export const authServices = {
 
         //return the data without the password
         return userInfo
+    },
+
+    async forgetPassword(data: forgetPasswordType) {
+        //find the user according to the email
+        const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, data.email))
+
+        if(!user) {
+            return
+        }
+
+        /*
+        const [tokenRecord] = await db
+        .select()
+        .from(resetPasswordTokens)
+        .where(eq(resetPasswordTokens.userId, user.userId))
+
+        if(tokenRecord && tokenRecord.expiresAt > new Date()) {
+            return
+        }
+        */
+
+        //generate the reset token
+        const resetToken: string = generateResetToken()
+
+        const newResetToken: NewResetPassToken = {
+            userId: user.userId,
+            token: hashToken(resetToken),
+            expiresAt: new Date(Date.now() + 15*60*1000)
+        }
+
+        await db
+        .delete(resetPasswordTokens)
+        .where(eq(resetPasswordTokens.userId, user.userId))
+
+        await db
+        .insert(resetPasswordTokens)
+        .values(newResetToken)
+
+        await sendResetPasswordMail(user.email, resetToken)
+    },
+
+    async resetPassword(data: resetPasswordType) {
+        //check for the token in the database
+        const [tokenRecord] = await db
+        .select()
+        .from(resetPasswordTokens)
+        .where(eq(resetPasswordTokens.token, hashToken(data.token)))
+
+        //if token doesn't exists throw error
+        if(!tokenRecord) {
+            throw new ApiError(400, "Invalid token")
+        }
+
+        //if the token is expired throw error
+        if(tokenRecord.expiresAt < new Date()) {
+            throw new ApiError(400, "Token Expired")
+        }
+
+        // hash the password for safety
+        const hashedPassword: string = await bcrypt.hash(data.password, 10)
+
+        // update the database with new password
+        const [result] = await db.update(users)
+        .set({
+            password: hashedPassword
+        })
+        .where(eq(users.userId, tokenRecord.userId))
+
+        if(result.affectedRows === 0) {
+            throw new ApiError(404, "User Not Found")
+        }
+
+        const payload: Payload = {
+            userId: tokenRecord.userId
+        }
+
+        // generate the new access and refresh tokens
+        const accessToken: string = jwtUtils.generateAccessToken(payload)
+        const refreshToken: string = jwtUtils.generateRefreshToken(payload)
+        const expiryDate: Date = jwtUtils.getExpiryDate()
+
+        // delete the old token
+        await db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.userId, tokenRecord.userId))
+
+        const newToken: NewToken = {
+            userId: tokenRecord.userId,
+            token: refreshToken,
+            expiresAt: expiryDate
+        }
+
+        // insert the new token
+        await db
+        .insert(refreshTokens)
+        .values(newToken)
+        
+        return {
+            accessToken,
+            refreshToken
+        }
     }
 }

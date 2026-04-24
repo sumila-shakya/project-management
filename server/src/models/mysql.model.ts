@@ -85,7 +85,19 @@ export const comments = mysqlTable('comments', {
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
 })
 
+// REFRESH TOKEN SCHEMA
 export const refreshTokens = mysqlTable('refresh_tokens', {
+    tokenId: serial('token_id').primaryKey(),
+    token: varchar('token', { length: 512 }).notNull(),
+    userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+}, (table) => {
+    return { userIdIdx: index('user_id_idx').on(table.userId) }
+})
+
+// PASSWORD RESET SCHEMA
+export const resetPasswordTokens = mysqlTable('reset_password_tokens', {
     tokenId: serial('token_id').primaryKey(),
     token: varchar('token', { length: 512 }).notNull(),
     userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -125,3 +137,6 @@ export type NewComment = typeof comments.$inferInsert
 
 export type Token = typeof refreshTokens.$inferSelect
 export type NewToken = typeof refreshTokens.$inferInsert
+
+export type ResetPassToken = typeof resetPasswordTokens.$inferSelect
+export type NewResetPassToken = typeof resetPasswordTokens.$inferInsert

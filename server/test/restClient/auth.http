@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
     "email":"sumi123@gmail.com",
-    "password":"P@ssw0rd123"
+    "password":"P@ssw0rd"
 }
 
 ### logout check
@@ -48,4 +48,21 @@ Content-Type: application/json
 
 {
     "bio": "hello i am good"
+}
+
+### forget password
+POST http://localhost:3000/api/auth/forget-password
+Content-Type: application/json
+
+{
+    "email":"sumi123@gmail.com"
+}
+
+### reset password
+POST http://localhost:3000/api/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "aad041ae3d57e458a256609ef3aba1b9",
+    "password": "P@ssw0rd"
 }
