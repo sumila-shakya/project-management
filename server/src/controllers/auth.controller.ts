@@ -33,8 +33,10 @@ export const authController = {
     // EMAIL VERIFICATION CONTROLLER FUNCTION
     async verifyEmail(req: Request, res: Response, next: NextFunction) {
         try {
+            //validate the token
             const validatedData: emailVerificationType = emailVerificationSchema.parse(req.query)
 
+            // verify the email
             await authServices.verifyEmail(validatedData)
 
             // send 200 success message
@@ -228,8 +230,11 @@ export const authController = {
     // RESET PASSWORD CONTROLLER FUNCTION
     async resetPassword(req: Request, res: Response, next: NextFunction) {
         try {
+            // get the token from the query field
+            const { token } = req.query
+
             // validate the user data
-            const validatedData: resetPasswordType = resetPasswordSchema.parse(req.body)
+            const validatedData: resetPasswordType = resetPasswordSchema.parse({token, ...req.body})
 
             // get the new access token and refresh token after reseting password
             const {refreshToken, accessToken} = await authServices.resetPassword(validatedData)
