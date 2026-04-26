@@ -7,3 +7,11 @@ Content-Type: application/json
     "teamName": "test",
     "description": "this team is to test the code"
 }
+
+### get all the users team
+GET http://localhost:3000/api/teams
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4NDczMSwiZXhwIjoxNzc3MTg1MzMxfQ.ocB6auRG4gsW0KwyIUaCbAKJe4W3-weZZMY4noV1M0A
+
+### get team by id
+GET http://localhost:3000/api/teams/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4NDczMSwiZXhwIjoxNzc3MTg1MzMxfQ.ocB6auRG4gsW0KwyIUaCbAKJe4W3-weZZMY4noV1M0A

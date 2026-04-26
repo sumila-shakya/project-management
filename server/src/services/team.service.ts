@@ -1,6 +1,8 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
+import { ApiError } from "../utils/apiError";
 import { createTeamType } from "../utils/validator";
+import { and, eq } from "drizzle-orm";
 
 export const teamServices = {
     // CREATE TEAM SERVICE FUNCTION
@@ -32,5 +34,55 @@ export const teamServices = {
             teamName: data.teamName,
             ...(data.description && {description: data.description})
         }
-    }
+    },
+
+    // GET USERS TEAMS SERVICE FUNCTION
+    async getTeams(userId: number) {
+        // get all the teams where user is member
+        const userTeams = await db
+        .select({
+            teamId: teams.teamId,
+            teamName: teams.teamName,
+            description: teams.description,
+            createdBy: teams.createdBy,
+            createdAt: teams.createdAt,
+            role: teamMembers.role,
+            joinedAt: teamMembers.joinedAt
+        })
+        .from(teamMembers)
+        .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
+        .where(eq(teamMembers.userId, userId))
+
+        return userTeams
+    },
+
+    // GET USERS TEAM BY ID SERVICE FUNCTION
+    async getTeamById(userId: number, teamId: number) {
+        // get the team and team member record
+        const [[team], [teamMember]] = await Promise.all([
+            db
+            .select()
+            .from(teams)
+            .where(eq(teams.teamId, teamId)),
+
+            db
+            .select()
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, userId)
+            ))
+        ])
+
+        // throw error if user is not the member of the team
+        if(!team || !teamMember) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        return {
+            ...team,
+            role: teamMember.role,
+            joinedAt: teamMember.joinedAt
+        }
+    } 
 }

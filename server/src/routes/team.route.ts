@@ -11,4 +11,10 @@ router.use(authMiddleware)
 // TEAM CREATION ROUTE
 router.post('/', teamController.createTeam)
 
+// GET ALL TEAMS ROUTE
+router.get('/', teamController.getTeams)
+
+// GET TEAM BY ID ROUTE
+router.get('/:teamId', teamController.getTeamsById)
+
 export default router
