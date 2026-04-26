@@ -67,6 +67,12 @@ export const requestVerificationSchema = z.object({
     email: z.string().email({ message: "Invalid email format" })
 })
 
+// CREATE TEAM SCHEMA
+export const createTeamSchema = z.object({
+    teamName: z.string().min(2, { message: "Name must be atleast two charaters long" }).trim(),
+    description: z.string().max(500, { message: "Description must be under 500 characters" }).optional()
+})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -76,3 +82,4 @@ export type updateAccountType = z.infer<typeof updateAccountSchema>
 export type forgetPasswordType = z.infer<typeof forgetPasswordSchema>
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>
 export type requestVerificationType = z.infer<typeof requestVerificationSchema>
+export type createTeamType = z.infer<typeof createTeamSchema>

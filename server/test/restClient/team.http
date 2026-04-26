@@ -1,0 +1,9 @@
+### create team 
+POST http://localhost:3000/api/teams
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4MTk3MiwiZXhwIjoxNzc3MTgyNTcyfQ.O2QIET8fyEejf1TXzK0GwEa8m1s4NzrGNeo9Jbeq64I
+Content-Type: application/json
+
+{
+    "teamName": "test",
+    "description": "this team is to test the code"
+}

@@ -3,6 +3,7 @@ import { ApiResponse } from './utils/apiResponse'
 import { errorHandler } from './middlewares/error.middleware'
 import { db } from './config/mysql.config'
 import authRouter from './routes/auth.route'
+import teamRouter from './routes/team.route'
 import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 
@@ -15,6 +16,7 @@ app.use(cookieParser())
 
 // ROUTES
 app.use('/api/auth', authRouter)
+app.use('/api/teams', teamRouter)
 
 // HEALTH STATUS CHECKUP
 app.get('/api/health', async (req, res, next) => {
