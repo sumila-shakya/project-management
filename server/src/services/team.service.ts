@@ -1,7 +1,7 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { createTeamType } from "../utils/validator";
+import { createTeamType, updateTeamType } from "../utils/validator";
 import { and, eq } from "drizzle-orm";
 
 export const teamServices = {
@@ -84,5 +84,53 @@ export const teamServices = {
             role: teamMember.role,
             joinedAt: teamMember.joinedAt
         }
-    } 
+    },
+    
+    async updateTeam(userId: number, teamId: number, updates: updateTeamType) {
+        // check if the user is the admin
+        const [member] = await db
+        .select()
+        .from(teamMembers)
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!member || member.role !== 'admin') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        await db
+        .update(teams)
+        .set(updates)
+        .where(eq(teams.teamId, teamId))
+
+        return {
+            teamId: teamId,
+            ...updates
+        }
+    },
+
+    async deleteTeam(userId: number, teamId: number) {
+        // check if the user is the admin
+        const [member] = await db
+        .select()
+        .from(teamMembers)
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!member || member.role !== 'admin') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        await db
+        .delete(teamMembers)
+        .where(eq(teamMembers.teamId, teamId))
+
+        await db
+        .delete(teams)
+        .where(eq(teams.teamId, teamId))
+    }
 }

@@ -73,6 +73,8 @@ export const createTeamSchema = z.object({
     description: z.string().max(500, { message: "Description must be under 500 characters" }).optional()
 })
 
+export const updateTeamSchema = createTeamSchema.partial()
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -83,3 +85,4 @@ export type forgetPasswordType = z.infer<typeof forgetPasswordSchema>
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>
 export type requestVerificationType = z.infer<typeof requestVerificationSchema>
 export type createTeamType = z.infer<typeof createTeamSchema>
+export type updateTeamType = z.infer<typeof updateTeamSchema>

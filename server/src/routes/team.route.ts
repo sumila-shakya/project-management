@@ -17,4 +17,9 @@ router.get('/', teamController.getTeams)
 // GET TEAM BY ID ROUTE
 router.get('/:teamId', teamController.getTeamsById)
 
+/* ------------------------------------ ROLE BASED TEAM ROUTES ------------------------------------ */
+//only accessible by the admin
+router.patch('/:teamId', teamController.updateTeam)
+router.delete('/:teamId', teamController.deleteTeam)
+
 export default router

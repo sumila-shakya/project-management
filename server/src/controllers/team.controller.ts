@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { createTeamSchema, createTeamType } from "../utils/validator";
+import { createTeamSchema, updateTeamSchema, createTeamType, updateTeamType } from "../utils/validator";
 import { teamServices } from "../services/team.service";
 
 export const teamController = {
@@ -80,6 +80,69 @@ export const teamController = {
             res
             .status(200)
             .json(new ApiResponse(200, teamInfo))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async updateTeam(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = Number(req.params.teamId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(teamId) || teamId <= 0) {
+                throw new ApiError(400, "Invalid teamId")
+            }
+
+            const updates: updateTeamType = updateTeamSchema.parse(req.body)
+
+            // if no data was provided throw error
+            if( Object.keys(updates).length === 0 ) {
+                throw new ApiError(400, "No data provided for updates")
+            }
+
+            const data = await teamServices.updateTeam(userId, teamId, updates)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, data, "team details updated sucessfully"))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async deleteTeam(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = Number(req.params.teamId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(teamId) || teamId <= 0) {
+                throw new ApiError(400, "Invalid teamId")
+            }
+
+            await teamServices.deleteTeam(userId, teamId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "team deleted successfully"))
         } catch(error) {
             next(error)
         }
