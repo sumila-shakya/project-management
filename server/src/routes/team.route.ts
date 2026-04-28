@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { teamController } from "../controllers/team.controller";
+import { teamController, teamMembersController } from "../controllers/team.controller";
 
 const router = Router()
 
@@ -21,5 +21,8 @@ router.get('/:teamId', teamController.getTeamsById)
 //only accessible by the admin
 router.patch('/:teamId', teamController.updateTeam)
 router.delete('/:teamId', teamController.deleteTeam)
+
+/* ------------------------------------ TEAM MEMBERS ROUTES ------------------------------------ */
+router.get('/:teamId/members', teamMembersController.getTeamMembers)
 
 export default router

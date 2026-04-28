@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { createTeamSchema, updateTeamSchema, createTeamType, updateTeamType } from "../utils/validator";
-import { teamServices } from "../services/team.service";
+import { teamMembersServices, teamServices } from "../services/team.service";
 
 export const teamController = {
     // CREATE TEAM CONTROLLER FUNCTION
@@ -143,6 +143,36 @@ export const teamController = {
             res
             .status(200)
             .json(new ApiResponse(200, {}, "team deleted successfully"))
+        } catch(error) {
+            next(error)
+        }
+    }
+}
+
+export const teamMembersController = {
+    async getTeamMembers(req: Request, res: Response, next:NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = Number(req.params.teamId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(teamId) || teamId <= 0) {
+                throw new ApiError(400, "Invalid teamId")
+            }
+
+            const members = await teamMembersServices.getTeamMembers(userId, teamId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, members))
         } catch(error) {
             next(error)
         }

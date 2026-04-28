@@ -125,12 +125,46 @@ export const teamServices = {
             throw new ApiError(403, "Access Denied")
         }
 
-        await db
-        .delete(teamMembers)
+        await db.transaction(async(tx) => {
+            await tx
+            .delete(teamMembers)
+            .where(eq(teamMembers.teamId, teamId))
+
+            await tx
+            .delete(teams)
+            .where(eq(teams.teamId, teamId))
+        })
+    }
+}
+
+export const teamMembersServices = {
+    async getTeamMembers(userId: number, teamId: number) {
+        // check if the user is the admin
+        const [isMember] = await db
+        .select()
+        .from(teamMembers)
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!isMember) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        const members = await db
+        .select({
+            userId: users.userId,
+            name: users.name,
+            email: users.email,
+            role: teamMembers.role,
+            joinedAt: teamMembers.joinedAt
+        })
+        .from(teamMembers)
+        .innerJoin(users, eq(users.userId, teamMembers.userId))
         .where(eq(teamMembers.teamId, teamId))
 
-        await db
-        .delete(teams)
-        .where(eq(teams.teamId, teamId))
+        return members
+
     }
 }
