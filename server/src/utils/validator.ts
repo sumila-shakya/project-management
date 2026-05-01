@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PROCESS_INVITATION_STATUS } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -75,6 +76,17 @@ export const createTeamSchema = z.object({
 
 export const updateTeamSchema = createTeamSchema.partial()
 
+export const invitationSchema = z.object({
+    inviteeId: z.coerce.number().positive()
+})
+
+export const processInvitationSchema = z.object({
+    token: z.string()
+    .length(32, {message: "Invalid token"})
+    .regex(/^[0-9a-f]+$/, {message: "Invalid token"}),
+    action: z.enum(PROCESS_INVITATION_STATUS, {message: "Invalid action"})
+})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -86,3 +98,5 @@ export type resetPasswordType = z.infer<typeof resetPasswordSchema>
 export type requestVerificationType = z.infer<typeof requestVerificationSchema>
 export type createTeamType = z.infer<typeof createTeamSchema>
 export type updateTeamType = z.infer<typeof updateTeamSchema>
+export type invitationType = z.infer<typeof invitationSchema>
+export type processInvitationType = z.infer<typeof processInvitationSchema>

@@ -20,11 +20,11 @@ Content-Type: application/json
 ### logout check
 POST http://localhost:3000/api/auth/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzAzMDk0MCwiZXhwIjoxNzc3MDMxNTQwfQ.Bua2fNd_ez6IgKRgKHuR5CS02mmgUxb5NccgDHtEit0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzYyMCwiZXhwIjoxNzc3NjI4MjIwfQ.fcLC4LO6_n4fB80YfZGu-BpcoSoVIdSLa0Ll1de0F5M
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4MTk3MiwiZXhwIjoxNzc3MTgyNTcyfQ.O2QIET8fyEejf1TXzK0GwEa8m1s4NzrGNeo9Jbeq64I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzYyMCwiZXhwIjoxNzc3NjI4MjIwfQ.fcLC4LO6_n4fB80YfZGu-BpcoSoVIdSLa0Ll1de0F5M
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh
@@ -67,7 +67,27 @@ Content-Type: application/json
 }
 
 ### verify email
-POST http://localhost:3000/api/auth/verify-email?token=814cc3cf7fcaf4624834af80b864f0aa
+POST http://localhost:3000/api/auth/verify-email?token=2780ef842695331b7a5b78bb9c6fa9d3
 Content-Type: application/json
 
 {}
+
+### Register new user
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+    "name":"mohan",
+    "email":"mohan123@gmail.com",
+    "password":"P@ssw0rd123",
+    "bio": "i am a developer"
+}
+
+### Login check
+POST  http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email":"mohan123@gmail.com",
+    "password":"P@ssw0rd123"
+}

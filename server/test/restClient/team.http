@@ -1,6 +1,6 @@
 ### create team 
 POST http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4MTk3MiwiZXhwIjoxNzc3MTgyNTcyfQ.O2QIET8fyEejf1TXzK0GwEa8m1s4NzrGNeo9Jbeq64I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzMyNSwiZXhwIjoxNzc3NjI3OTI1fQ.FUBlOo1YHq-zE3EJafV3QkyS-oHEkTML4u5M__FHvZI
 Content-Type: application/json
 
 {
@@ -10,11 +10,11 @@ Content-Type: application/json
 
 ### get all the users team
 GET http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzM4NDQ2MiwiZXhwIjoxNzc3Mzg1MDYyfQ.Boia7hcgpYDvLIR1VdkIpDduYZamNTz9lxO-fd7kP88
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzMyNSwiZXhwIjoxNzc3NjI3OTI1fQ.FUBlOo1YHq-zE3EJafV3QkyS-oHEkTML4u5M__FHvZI
 
 ### get team by id
 GET http://localhost:3000/api/teams/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzE4NDczMSwiZXhwIjoxNzc3MTg1MzMxfQ.ocB6auRG4gsW0KwyIUaCbAKJe4W3-weZZMY4noV1M0A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNjI3NSwiZXhwIjoxNzc3NjI2ODc1fQ.sQPGig4NFc-Pbd1LohhA5Yv7ACWRlOkII6ct6q087Kc
 
 ### update team
 PATCH http://localhost:3000/api/teams/1
@@ -30,3 +30,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 ### get all team members
 GET http://localhost:3000/api/teams/1/members
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzM4NDQ2MiwiZXhwIjoxNzc3Mzg1MDYyfQ.Boia7hcgpYDvLIR1VdkIpDduYZamNTz9lxO-fd7kP88
+
+### send invitation
+POST http://localhost:3000/api/teams/1/invite
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzYyMCwiZXhwIjoxNzc3NjI4MjIwfQ.fcLC4LO6_n4fB80YfZGu-BpcoSoVIdSLa0Ll1de0F5M
+Content-Type: application/json
+
+{
+    "inviteeId": 2
+}

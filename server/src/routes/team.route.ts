@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { teamController, teamMembersController } from "../controllers/team.controller";
+import { invitationController } from "../controllers/invitation.controller";
 
 const router = Router()
 
@@ -17,12 +18,13 @@ router.get('/', teamController.getTeams)
 // GET TEAM BY ID ROUTE
 router.get('/:teamId', teamController.getTeamsById)
 
-/* ------------------------------------ ROLE BASED TEAM ROUTES ------------------------------------ */
 //only accessible by the admin
 router.patch('/:teamId', teamController.updateTeam)
 router.delete('/:teamId', teamController.deleteTeam)
 
 /* ------------------------------------ TEAM MEMBERS ROUTES ------------------------------------ */
 router.get('/:teamId/members', teamMembersController.getTeamMembers)
+
+router.post('/:teamId/invite', invitationController.sendInvitation)
 
 export default router

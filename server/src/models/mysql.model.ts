@@ -1,5 +1,5 @@
 import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean } from "drizzle-orm/mysql-core";
-import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY } from "../utils/constants";
+import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS } from "../utils/constants";
 
 /* ------------------------------------------ SCHEMA DEFINITIONS ------------------------------------------ */
 
@@ -121,6 +121,17 @@ export const emailVerificationTokens = mysqlTable('email_verification_tokens', {
     return { userIdIdx: index('user_id_idx').on(table.userId) }
 })
 
+export const invitations = mysqlTable('invitations', {
+    invitationId: serial('invitation_id').primaryKey(),
+    teamId: bigint('team_id', { mode: 'number', unsigned: true }).notNull().references(() => teams.teamId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    invitedBy: bigint('invited_by', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    inviteeId: bigint('invitee_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    token: varchar('token', { length: 512 }).notNull(),
+    invitationStatus: mysqlEnum('invitation_status', INVITATION_STATUS).notNull().default('pending'),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
+})
+
 /* ------------------------------------------ TYPE DEFINITIONS ------------------------------------------ */
 
 // USERS SCHEMA TYPE
@@ -162,3 +173,6 @@ export type NewResetPassToken = typeof resetPasswordTokens.$inferInsert
 // EMAIL VERIFICATION TOKEN TYPE
 export type EmailToken = typeof emailVerificationTokens.$inferSelect
 export type NewEmailToken = typeof emailVerificationTokens.$inferInsert
+
+export type Invitation = typeof invitations.$inferSelect
+export type NewInvitation = typeof invitations.$inferInsert
