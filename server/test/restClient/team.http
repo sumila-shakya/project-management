@@ -29,7 +29,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get all team members
 GET http://localhost:3000/api/teams/1/members
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzM4NDQ2MiwiZXhwIjoxNzc3Mzg1MDYyfQ.Boia7hcgpYDvLIR1VdkIpDduYZamNTz9lxO-fd7kP88
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
 
 ### send invitation
 POST http://localhost:3000/api/teams/1/invite
@@ -39,3 +39,16 @@ Content-Type: application/json
 {
     "inviteeId": 2
 }
+
+### update team member
+PATCH http://localhost:3000/api/teams/1/members/2/role
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
+Content-Type: application/json
+
+{
+    "role": "team_leader"
+}
+
+### remove team member
+DELETE http://localhost:3000/api/teams/1/members/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU

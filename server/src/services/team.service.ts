@@ -1,8 +1,8 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { createTeamType, updateTeamType } from "../utils/validator";
-import { and, eq } from "drizzle-orm";
+import { createTeamType, updateTeamType, updateTeamMemberType } from "../utils/validator";
+import { and, count, eq } from "drizzle-orm";
 
 export const teamServices = {
     // CREATE TEAM SERVICE FUNCTION
@@ -165,6 +165,114 @@ export const teamMembersServices = {
         .where(eq(teamMembers.teamId, teamId))
 
         return members
+    },
 
+    async removeMember(requestingUserId: number, teamId: number, userToRemoveId: number) {
+        const [[requestingUser], [userToRemove], [adminCount]] = await Promise.all([
+            db.select()
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, requestingUserId)
+            )),
+
+            db
+            .select()
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, userToRemoveId)
+            )),
+
+            db
+            .select({
+                count: count()
+            })
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.role, 'admin')
+            ))
+        ])
+
+        if(!requestingUser || requestingUser.role !== 'admin') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(!userToRemove) {
+            throw new ApiError(404, "User not found")
+        }
+
+        if(adminCount.count === 1 && userToRemove.role === 'admin') {
+            throw new ApiError(400, "Cannot remove the only admin")
+        }
+        
+        await db
+        .delete(teamMembers)
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userToRemoveId)
+        ))
+    },
+
+    async updateMember(requestingUserId: number, teamId: number, userToUpdateId: number, data: updateTeamMemberType) {
+        const [[requestingUser], [userToUpdate], [adminCount]] = await Promise.all([
+            db.select()
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, requestingUserId)
+            )),
+
+            db
+            .select()
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.userId, userToUpdateId)
+            )),
+
+            db
+            .select({
+                count: count()
+            })
+            .from(teamMembers)
+            .where(and(
+                eq(teamMembers.teamId, teamId),
+                eq(teamMembers.role, 'admin')
+            ))
+        ])
+
+        if(!requestingUser || requestingUser.role !== 'admin') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(!userToUpdate) {
+            throw new ApiError(404, "User not found")
+        }
+
+        if(userToUpdate.role === data.role) {
+            throw new ApiError(400, `User already has the role ${userToUpdate.role}`)
+        }
+
+        if(adminCount.count === 1 && userToUpdate.role === 'admin') {
+            throw new ApiError(400, "Cannot demote the only admin")
+        }
+
+        await db
+        .update(teamMembers)
+        .set({
+            'role': data.role
+        })
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userToUpdateId)
+        ))
+
+        return {
+            teamId: teamId, 
+            userId: userToUpdateId,
+            role: data.role
+        }
     }
 }

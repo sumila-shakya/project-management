@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { createTeamSchema, updateTeamSchema, createTeamType, updateTeamType } from "../utils/validator";
+import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, createTeamType, updateTeamType, updateTeamMemberType } from "../utils/validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
 
 export const teamController = {
@@ -173,6 +173,80 @@ export const teamMembersController = {
             res
             .status(200)
             .json(new ApiResponse(200, members))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async removeMember(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = Number(req.params.teamId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(teamId) || teamId <= 0) {
+                throw new ApiError(400, "Invalid teamId")
+            }
+
+            // get the teamId from the request params
+            const memberId = Number(req.params.memberId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(memberId) || memberId <= 0) {
+                throw new ApiError(400, "Invalid memberId")
+            }
+
+            await teamMembersServices.removeMember(userId, teamId, memberId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "User removed from the team successfully"))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async updateMember(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = Number(req.params.teamId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(teamId) || teamId <= 0) {
+                throw new ApiError(400, "Invalid teamId")
+            }
+
+            // get the teamId from the request params
+            const memberId = Number(req.params.memberId)
+
+            //check if the teamId is a actual positive number
+            if(isNaN(memberId) || memberId <= 0) {
+                throw new ApiError(400, "Invalid memberId")
+            }
+
+            const validatedData: updateTeamMemberType = updateTeamMemberSchema.parse(req.body)
+
+            const updatedMember = await teamMembersServices.updateMember(userId, teamId, memberId, validatedData)
+
+            res
+            .status(200)
+            .json(new ApiResponse(300, updatedMember, "Member updated successfully"))
         } catch(error) {
             next(error)
         }

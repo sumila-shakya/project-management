@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { users, teams, teamMembers, invitations, NewInvitation, Invitation, NewTeamMember } from "../models/mysql.model";
+import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
 import { invitationType, processInvitationType } from "../utils/validator";
 import { generateToken, hashToken } from "../utils/token";
 import { and, eq} from "drizzle-orm";

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROCESS_INVITATION_STATUS } from './constants'
+import { PROCESS_INVITATION_STATUS, ROLE } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -87,6 +87,10 @@ export const processInvitationSchema = z.object({
     action: z.enum(PROCESS_INVITATION_STATUS, {message: "Invalid action"})
 })
 
+export const updateTeamMemberSchema = z.object({
+    role: z.enum(ROLE, {message: "Invalid role"})
+})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -100,3 +104,4 @@ export type createTeamType = z.infer<typeof createTeamSchema>
 export type updateTeamType = z.infer<typeof updateTeamSchema>
 export type invitationType = z.infer<typeof invitationSchema>
 export type processInvitationType = z.infer<typeof processInvitationSchema>
+export type updateTeamMemberType = z.infer<typeof updateTeamMemberSchema>

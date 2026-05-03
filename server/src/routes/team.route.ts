@@ -27,4 +27,8 @@ router.get('/:teamId/members', teamMembersController.getTeamMembers)
 
 router.post('/:teamId/invite', invitationController.sendInvitation)
 
+//only accesible by the admin
+router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
+router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
+
 export default router
