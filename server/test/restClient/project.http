@@ -1,0 +1,14 @@
+### create projects
+POST http://localhost:3000/api/teams/1/projects
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3Nzc5ODAwNSwiZXhwIjoxNzc3Nzk4NjA1fQ.MvrtohJhHtUic55oruVey4PHN8DEdwfOiWshJUqUQ-s
+Content-Type: application/json
+
+{
+    "projectName": "Task Management",
+    "endDate": "2026-05-25",
+    "description": "this a task management project"
+}
+
+### get all the team projects
+GET http://localhost:3000/api/teams/1/projects
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3Nzc5ODAwNSwiZXhwIjoxNzc3Nzk4NjA1fQ.MvrtohJhHtUic55oruVey4PHN8DEdwfOiWshJUqUQ-s

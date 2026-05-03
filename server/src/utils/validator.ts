@@ -95,6 +95,15 @@ export const updateTeamMemberSchema = z.object({
     role: z.enum(ROLE, {message: "Invalid role"})
 })
 
+// PROJECT SCHEMA
+export const projectSchema = z.object({
+    projectName: z.string().min(2, { message: "Project name must be atleast two charaters long" }).trim(),
+    startDate: z.coerce.date().refine((date)=> date >= new Date(), {message: "Start Date must be greater than now"}).default(() => new Date()),
+    endDate: z.coerce.date(),
+    description: z.string().max(500, { message: "Description must be under 500 characters" }).optional()
+})
+.refine((data) => data.endDate > data.startDate, {message: "End date must be greater than start date"})
+
 /* ---------------------------------VALIDATION TYPES--------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -109,3 +118,4 @@ export type updateTeamType = z.infer<typeof updateTeamSchema>
 export type invitationType = z.infer<typeof invitationSchema>
 export type processInvitationType = z.infer<typeof processInvitationSchema>
 export type updateTeamMemberType = z.infer<typeof updateTeamMemberSchema>
+export type projectType = z.infer<typeof projectSchema>

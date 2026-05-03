@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { teamController, teamMembersController } from "../controllers/team.controller";
 import { invitationController } from "../controllers/invitation.controller";
+import { projectController } from "../controllers/project.controller";
 
 const router = Router()
 
@@ -39,5 +40,13 @@ router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
 
 // UPDATE THE TEAM MEMBER ROLE ROUTE
 router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
+
+
+/* ------------------------------------ TEAM MEMBERS ROUTES ------------------------------------ */
+// CREATE PROJECT ROUTE
+router.post('/:teamId/projects', projectController.createProject)
+
+// GET ALL PROJECTS ROUTE
+router.get('/:teamId/projects', projectController.getProjects)
 
 export default router
