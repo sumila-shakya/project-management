@@ -86,6 +86,7 @@ export const teamServices = {
         }
     },
     
+    // UPDATE TEAM SERVICE FUNCTION
     async updateTeam(userId: number, teamId: number, updates: updateTeamType) {
         // check if the user is the admin
         const [member] = await db
@@ -96,10 +97,12 @@ export const teamServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // if the user is not admi throw the error
         if(!member || member.role !== 'admin') {
             throw new ApiError(403, "Access Denied")
         }
 
+        // update the team
         await db
         .update(teams)
         .set(updates)
@@ -111,6 +114,7 @@ export const teamServices = {
         }
     },
 
+    // DELETE TEAM SERVICE FUNCTION
     async deleteTeam(userId: number, teamId: number) {
         // check if the user is the admin
         const [member] = await db
@@ -121,15 +125,18 @@ export const teamServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // if the user is not the admin throw error
         if(!member || member.role !== 'admin') {
             throw new ApiError(403, "Access Denied")
         }
 
         await db.transaction(async(tx) => {
+            // delete the team members record
             await tx
             .delete(teamMembers)
             .where(eq(teamMembers.teamId, teamId))
 
+            // delete the team itself
             await tx
             .delete(teams)
             .where(eq(teams.teamId, teamId))
@@ -138,6 +145,7 @@ export const teamServices = {
 }
 
 export const teamMembersServices = {
+    // GET TEAM MEMBERS SERVICE FUNCTION
     async getTeamMembers(userId: number, teamId: number) {
         // check if the user is the admin
         const [isMember] = await db
@@ -148,10 +156,12 @@ export const teamMembersServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // if the user is not the member of the team throw the error
         if(!isMember) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // get all the team members
         const members = await db
         .select({
             userId: users.userId,
@@ -167,6 +177,7 @@ export const teamMembersServices = {
         return members
     },
 
+    // REMOVE TEAM  MEMBERS SERVICE FUNCTION
     async removeMember(requestingUserId: number, teamId: number, userToRemoveId: number) {
         const [[requestingUser], [userToRemove], [adminCount]] = await Promise.all([
             db.select()
@@ -195,18 +206,22 @@ export const teamMembersServices = {
             ))
         ])
 
+        // if the user is not the admin throw error
         if(!requestingUser || requestingUser.role !== 'admin') {
             throw new ApiError(403, "Access Denied")
         }
 
+        // if the user to remove is not found throw the error
         if(!userToRemove) {
             throw new ApiError(404, "User not found")
         }
 
+        // if only one admin is left do not allow to remove the admin
         if(adminCount.count === 1 && userToRemove.role === 'admin') {
             throw new ApiError(400, "Cannot remove the only admin")
         }
         
+        // remove the user from the team
         await db
         .delete(teamMembers)
         .where(and(
@@ -215,6 +230,7 @@ export const teamMembersServices = {
         ))
     },
 
+    // UPDATE TEAM MEMBERS SERVICE FUNCTION
     async updateMember(requestingUserId: number, teamId: number, userToUpdateId: number, data: updateTeamMemberType) {
         const [[requestingUser], [userToUpdate], [adminCount]] = await Promise.all([
             db.select()
@@ -243,22 +259,27 @@ export const teamMembersServices = {
             ))
         ])
 
+        // if the user is not the admin throw error
         if(!requestingUser || requestingUser.role !== 'admin') {
             throw new ApiError(403, "Access Denied")
         }
 
+        // if the user to update is not found throw the error
         if(!userToUpdate) {
             throw new ApiError(404, "User not found")
         }
 
+        // if the user has the same role as the update throw error
         if(userToUpdate.role === data.role) {
             throw new ApiError(400, `User already has the role ${userToUpdate.role}`)
         }
 
+        // do not allow to demote the only admin
         if(adminCount.count === 1 && userToUpdate.role === 'admin') {
             throw new ApiError(400, "Cannot demote the only admin")
         }
 
+        // update the team member role
         await db
         .update(teamMembers)
         .set({

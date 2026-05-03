@@ -121,6 +121,7 @@ export const emailVerificationTokens = mysqlTable('email_verification_tokens', {
     return { userIdIdx: index('user_id_idx').on(table.userId) }
 })
 
+// INVITATIONS SCHEMA
 export const invitations = mysqlTable('invitations', {
     invitationId: serial('invitation_id').primaryKey(),
     teamId: bigint('team_id', { mode: 'number', unsigned: true }).notNull().references(() => teams.teamId, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -174,5 +175,6 @@ export type NewResetPassToken = typeof resetPasswordTokens.$inferInsert
 export type EmailToken = typeof emailVerificationTokens.$inferSelect
 export type NewEmailToken = typeof emailVerificationTokens.$inferInsert
 
+// INVITATION TYPE
 export type Invitation = typeof invitations.$inferSelect
 export type NewInvitation = typeof invitations.$inferInsert

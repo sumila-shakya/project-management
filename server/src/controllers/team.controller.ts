@@ -85,6 +85,7 @@ export const teamController = {
         }
     },
 
+    // UPDATE TEAM CONTROLLER FUNCTION
     async updateTeam(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -103,6 +104,7 @@ export const teamController = {
                 throw new ApiError(400, "Invalid teamId")
             }
 
+            // validate the user data
             const updates: updateTeamType = updateTeamSchema.parse(req.body)
 
             // if no data was provided throw error
@@ -110,8 +112,10 @@ export const teamController = {
                 throw new ApiError(400, "No data provided for updates")
             }
 
+            // update team
             const data = await teamServices.updateTeam(userId, teamId, updates)
 
+            // send 200 success message
             res
             .status(200)
             .json(new ApiResponse(200, data, "team details updated sucessfully"))
@@ -120,6 +124,7 @@ export const teamController = {
         }
     },
 
+    // DELETE TEAM CONTROLLER FUNCTION
     async deleteTeam(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -138,8 +143,10 @@ export const teamController = {
                 throw new ApiError(400, "Invalid teamId")
             }
 
+            // delete the team
             await teamServices.deleteTeam(userId, teamId)
 
+            // 200 success message 
             res
             .status(200)
             .json(new ApiResponse(200, {}, "team deleted successfully"))
@@ -150,6 +157,7 @@ export const teamController = {
 }
 
 export const teamMembersController = {
+    // GET TEAM MEMBERS CONTROLLER FUNCTION
     async getTeamMembers(req: Request, res: Response, next:NextFunction) {
         try {
             // get the user id
@@ -168,8 +176,10 @@ export const teamMembersController = {
                 throw new ApiError(400, "Invalid teamId")
             }
 
+            // get the teams members
             const members = await teamMembersServices.getTeamMembers(userId, teamId)
 
+            // send 200 success msg
             res
             .status(200)
             .json(new ApiResponse(200, members))
@@ -178,6 +188,7 @@ export const teamMembersController = {
         }
     },
 
+    // REMOVE TEAM MEMBERS CONTROLLER FUNCTION
     async removeMember(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -204,8 +215,10 @@ export const teamMembersController = {
                 throw new ApiError(400, "Invalid memberId")
             }
 
+            // remove the team members
             await teamMembersServices.removeMember(userId, teamId, memberId)
 
+            // 200 success message
             res
             .status(200)
             .json(new ApiResponse(200, {}, "User removed from the team successfully"))
@@ -214,6 +227,7 @@ export const teamMembersController = {
         }
     },
 
+    // UPDATE TEAM MEMBERS CONTROLLER FUNCTION
     async updateMember(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -240,10 +254,13 @@ export const teamMembersController = {
                 throw new ApiError(400, "Invalid memberId")
             }
 
+            // validate the user data
             const validatedData: updateTeamMemberType = updateTeamMemberSchema.parse(req.body)
 
+            // update team members
             const updatedMember = await teamMembersServices.updateMember(userId, teamId, memberId, validatedData)
 
+            // 200 success message
             res
             .status(200)
             .json(new ApiResponse(300, updatedMember, "Member updated successfully"))

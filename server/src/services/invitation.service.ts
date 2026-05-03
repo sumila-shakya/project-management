@@ -6,6 +6,7 @@ import { and, eq} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 
 export const invitationServices = {
+    // SEND INVITATIONS SERVICE FUNCTION
     async sendInvitation(senderId: number, teamId: number, data: invitationType) {
         const [[userToInvite], [senderMembership]] = await Promise.all([
             db
@@ -22,10 +23,12 @@ export const invitationServices = {
             ))
         ])
 
+        // if the user to invite is not found throw the error
         if(!userToInvite) {
             throw new ApiError(404, "User not found")
         }
 
+        // throw error if the sender is not the admin of the team
         if(!senderMembership || senderMembership.role !== 'admin') {
             throw new ApiError(403, "Access Denied")
         }
@@ -47,15 +50,19 @@ export const invitationServices = {
             ))
         ])
 
+        // throw if the user of invite is already the member of the team
         if(isMember) {
             throw new ApiError(400, "User is already the member of the team")
         }
 
+        // if the invitation was send and has not expired yet throw error
         if(existingInvitation && existingInvitation.expiresAt > new Date()) {
             throw new ApiError(400, "Invitation already send")
         }
 
+        // generate the invitation token
         const token: string = generateToken()
+
         const newInvitation: NewInvitation = {
             inviteeId: userToInvite.userId,
             teamId: teamId,
@@ -64,6 +71,7 @@ export const invitationServices = {
             invitedBy: senderId
         }
 
+        // delete the old invitations
         await db
         .delete(invitations)
         .where(and(
@@ -71,6 +79,7 @@ export const invitationServices = {
             eq(invitations.teamId, teamId)
         ))
 
+        // insert the new invitation into the database
         const [result] = await db
         .insert(invitations)
         .values(newInvitation)
@@ -83,8 +92,9 @@ export const invitationServices = {
         }
     },
 
+    // GET INVITATIONS SERVICE FUNCTION
     async getInvitations(userId: number) {
-
+        // get all the users invitations
         const myInvitations = await db
         .select({
             invitationId: invitations.invitationId,
@@ -106,6 +116,7 @@ export const invitationServices = {
         return myInvitations
     },
 
+    // PROCESS INVITATION SERVICE FUNCTION
     async processInvitation(userId: number, invitationId: number, data: processInvitationType) {
         const [userInvitation] = await db
         .select()
@@ -115,24 +126,35 @@ export const invitationServices = {
             eq(invitations.inviteeId, userId)
         ))
 
+        // throw error if the user is not the member of the team
         if(!userInvitation) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // if the token provided if not valid throw error
         if(userInvitation.token !== data.token) {
             throw new ApiError(400, "Invalid token")
         }
 
+        // throw error if the invitation expires
         if(userInvitation.expiresAt < new Date()) {
-            //delete the expired invitation ??
+            // delete the expired invitations
+            await db
+            .delete(invitations)
+            .where(and(
+                eq(invitations.inviteeId, userId),
+                eq(invitations.invitationId, invitationId)
+            ))
             throw new ApiError(400, "Invitation expired")
         }
 
+        // if the invitation is already process throw error
         if(userInvitation.invitationStatus !== 'pending') {
             throw new ApiError(400, `Cannot process ${userInvitation.invitationStatus} invitation`)
         }
 
         await db.transaction(async(tx) => {
+            // update the invitation status
             await tx
             .update(invitations)
             .set({
@@ -147,6 +169,7 @@ export const invitationServices = {
                     role: 'member'
                 }
 
+                // join the new team
                 await tx
                 .insert(teamMembers)
                 .values(newMember)

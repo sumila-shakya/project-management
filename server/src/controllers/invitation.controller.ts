@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { invitationServices } from "../services/invitation.service";
 
 export const invitationController = {
+    // SEND INVITATIONS CONTROLLER FUNCTION
     async sendInvitation(req: Request, res: Response, next: NextFunction) {
         try{
             // get the user id
@@ -23,10 +24,13 @@ export const invitationController = {
                 throw new ApiError(400, "Invalid teamId")
             }
 
+            // validate the user data
             const validatedData: invitationType = invitationSchema.parse(req.body)
 
+            // send the in app invitation
             const data = await invitationServices.sendInvitation(userId, teamId, validatedData)
 
+            // send 201 success message
             res
             .status(201)
             .json(new ApiResponse(201, data, "Invitation has been send"))
@@ -35,6 +39,7 @@ export const invitationController = {
         }
     },
 
+    // GET ALL INVITATIONS CONTROLLER FUNCTION
     async getInvitation(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -45,8 +50,10 @@ export const invitationController = {
                 throw new ApiError(401, "Access Denied")
             }
 
+            // get the user invitations
             const myInvitations = await invitationServices.getInvitations(userId)
 
+            // send 200 success message
             res
             .status(200)
             .json(new ApiResponse(200, myInvitations))
@@ -55,6 +62,7 @@ export const invitationController = {
         }
     },
 
+    // PROCESS (ACCEPT/ REJECT) INVITATIONS CONTROLLER FUNCTION
     async processInvitation(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -73,10 +81,13 @@ export const invitationController = {
                 throw new ApiError(400, "Invalid invitationId")
             }
 
+            // validate the user data
             const validatedData: processInvitationType = processInvitationSchema.parse(req.body)
 
+            // process the invitation
             await invitationServices.processInvitation(userId, invitationId, validatedData)
 
+            // send 200 success message
             res
             .status(200)
             .json(new ApiResponse(200, {}, "Invitation accepted sucessfully"))

@@ -19,16 +19,25 @@ router.get('/', teamController.getTeams)
 router.get('/:teamId', teamController.getTeamsById)
 
 //only accessible by the admin
+// UPDATE THE TEAM
 router.patch('/:teamId', teamController.updateTeam)
+
+// DELETE THE TEAM
 router.delete('/:teamId', teamController.deleteTeam)
 
+
 /* ------------------------------------ TEAM MEMBERS ROUTES ------------------------------------ */
+// GET ALL THE TEAM MEMBERS ROUTE
 router.get('/:teamId/members', teamMembersController.getTeamMembers)
 
+//only accesible by the admin
+// SEND INVITATIONS ROUTE
 router.post('/:teamId/invite', invitationController.sendInvitation)
 
-//only accesible by the admin
+// REMOVE THE TEAM MEMBER ROUTE
 router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
+
+// UPDATE THE TEAM MEMBER ROLE ROUTE
 router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
 
 export default router
