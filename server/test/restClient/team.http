@@ -29,7 +29,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get all team members
 GET http://localhost:3000/api/teams/1/members
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
 
 ### send invitation
 POST http://localhost:3000/api/teams/1/invite

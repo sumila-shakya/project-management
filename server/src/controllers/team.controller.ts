@@ -3,6 +3,7 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, createTeamType, updateTeamType, updateTeamMemberType } from "../utils/validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
+import { parseId } from "../utils/validateId";
 
 export const teamController = {
     // CREATE TEAM CONTROLLER FUNCTION
@@ -66,12 +67,7 @@ export const teamController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // get the team info
             const teamInfo = await teamServices.getTeamById(userId, teamId)
@@ -97,12 +93,7 @@ export const teamController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // validate the user data
             const updates: updateTeamType = updateTeamSchema.parse(req.body)
@@ -136,12 +127,7 @@ export const teamController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // delete the team
             await teamServices.deleteTeam(userId, teamId)
@@ -169,12 +155,7 @@ export const teamMembersController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // get the teams members
             const members = await teamMembersServices.getTeamMembers(userId, teamId)
@@ -200,20 +181,10 @@ export const teamMembersController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // get the teamId from the request params
-            const memberId = Number(req.params.memberId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(memberId) || memberId <= 0) {
-                throw new ApiError(400, "Invalid memberId")
-            }
+            const memberId = parseId(req.params.memberId as string)
 
             // remove the team members
             await teamMembersServices.removeMember(userId, teamId, memberId)
@@ -239,20 +210,10 @@ export const teamMembersController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // get the teamId from the request params
-            const memberId = Number(req.params.memberId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(memberId) || memberId <= 0) {
-                throw new ApiError(400, "Invalid memberId")
-            }
+            const memberId = parseId(req.params.memberId as string)
 
             // validate the user data
             const validatedData: updateTeamMemberType = updateTeamMemberSchema.parse(req.body)

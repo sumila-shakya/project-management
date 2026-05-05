@@ -3,6 +3,7 @@ import { invitationSchema, processInvitationSchema, invitationType, processInvit
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { invitationServices } from "../services/invitation.service";
+import { parseId } from "../utils/validateId";
 
 export const invitationController = {
     // SEND INVITATIONS CONTROLLER FUNCTION
@@ -17,12 +18,7 @@ export const invitationController = {
             }
 
             // get the teamId from the request params
-            const teamId = Number(req.params.teamId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(teamId) || teamId <= 0) {
-                throw new ApiError(400, "Invalid teamId")
-            }
+            const teamId = parseId(req.params.teamId as string)
 
             // validate the user data
             const validatedData: invitationType = invitationSchema.parse(req.body)
@@ -74,12 +70,7 @@ export const invitationController = {
             }
 
             // get the teamId from the request params
-            const invitationId = Number(req.params.invitationId)
-
-            //check if the teamId is a actual positive number
-            if(isNaN(invitationId) || invitationId <= 0) {
-                throw new ApiError(400, "Invalid invitationId")
-            }
+            const invitationId =  parseId(req.params.invitationId as string)
 
             // validate the user data
             const validatedData: processInvitationType = processInvitationSchema.parse(req.body)

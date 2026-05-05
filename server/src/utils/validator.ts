@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROCESS_INVITATION_STATUS, ROLE } from './constants'
+import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -95,16 +95,40 @@ export const updateTeamMemberSchema = z.object({
     role: z.enum(ROLE, {message: "Invalid role"})
 })
 
-// PROJECT SCHEMA
-export const projectSchema = z.object({
+const projectFields = z.object({
     projectName: z.string().min(2, { message: "Project name must be atleast two charaters long" }).trim(),
-    startDate: z.coerce.date().refine((date)=> date >= new Date(), {message: "Start Date must be greater than now"}).default(() => new Date()),
+    startDate: z.coerce.date(),
     endDate: z.coerce.date(),
     description: z.string().max(500, { message: "Description must be under 500 characters" }).optional()
-})
+});
+
+// PROJECT SCHEMA
+export const projectSchema = projectFields
+.refine((data) => data.startDate >= new Date(), {message: "Start date cannot be in past"})
 .refine((data) => data.endDate > data.startDate, {message: "End date must be greater than start date"})
 
-/* ---------------------------------VALIDATION TYPES--------------------------------- */
+export const updateProjectSchema = projectFields.partial()
+.refine((data) => {
+    if(data.startDate) {
+        return data.startDate >= new Date()
+    }
+    return true
+}, {message: "Start date cannot be in past"})
+.refine((data) => {
+    if(data.endDate) {
+        if(data.startDate) {
+            return data.endDate > data.startDate
+        }
+        return data.endDate >= new Date()
+    }
+    return true
+}, {message: "End date must be greater than start date"})
+
+export const filterProjectSchema = z.object({
+    projectStatus: z.enum(PROJECT_STATUS, {message: "Invalid Status"}).optional()
+})
+
+/* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
 export type loginType = z.infer<typeof loginSchema>
@@ -119,3 +143,5 @@ export type invitationType = z.infer<typeof invitationSchema>
 export type processInvitationType = z.infer<typeof processInvitationSchema>
 export type updateTeamMemberType = z.infer<typeof updateTeamMemberSchema>
 export type projectType = z.infer<typeof projectSchema>
+export type updateProjectType = z.infer<typeof updateProjectSchema>
+export type filterProjectType = z.infer<typeof filterProjectSchema>

@@ -44,7 +44,7 @@ export const projects = mysqlTable('projects', {
     teamId: bigint('team_id', { mode: 'number', unsigned: true }).notNull().references(() => teams.teamId, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdBy: bigint('created_by', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
     projectStatus: mysqlEnum('project_status', PROJECT_STATUS).notNull().default('active'),
-    startDate: timestamp('start_date',{ mode:'date' }).defaultNow(),
+    startDate: timestamp('start_date',{ mode:'date' }).notNull().defaultNow(),
     endDate: timestamp('end_date',{ mode:'date' }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow()

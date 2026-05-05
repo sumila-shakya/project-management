@@ -10,5 +10,36 @@ Content-Type: application/json
 }
 
 ### get all the team projects
-GET http://localhost:3000/api/teams/1/projects
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3Nzc5ODAwNSwiZXhwIjoxNzc3Nzk4NjA1fQ.MvrtohJhHtUic55oruVey4PHN8DEdwfOiWshJUqUQ-s
+GET http://localhost:3000/api/teams/1/projects?projectStatus=active
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+
+### get projects details
+GET http://localhost:3000/api/projects/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+
+### update project 
+PATCH http://localhost:3000/api/projects/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+Content-Type: application/json
+
+{
+    "description": "this a updated task management project"
+}
+
+### archive project 
+PATCH http://localhost:3000/api/projects/1/archive
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+Content-Type: application/json
+
+{}
+
+### restore project 
+PATCH http://localhost:3000/api/projects/1/restore
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+Content-Type: application/json
+
+{}
+
+### delete project 
+DELETE  http://localhost:3000/api/projects/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
