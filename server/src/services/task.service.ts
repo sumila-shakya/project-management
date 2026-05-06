@@ -82,5 +82,45 @@ export const taskServices = {
         .where(and(...filters))
 
         return allTasks
+    },
+
+    async getTasks(userId: number, queryFilters: filterProjectsTaskType) {
+        const filters = [eq(tasks.assignedTo, userId)]
+        filters.push(eq(projects.projectStatus, 'active'))
+
+        if(queryFilters.taskPriority) {
+            filters.push(eq(tasks.taskPriority, queryFilters.taskPriority))
+        }
+
+        if(queryFilters.taskStatus) {
+            filters.push(eq(tasks.taskStatus, queryFilters.taskStatus))
+        }
+
+        const [userTasks] = await db
+        .select({
+            taskId: tasks.taskId,
+            title: tasks.title,
+            description: tasks.description,
+            projectId: tasks.projectId,
+            projectName: projects.projectName,
+            teamId: teams.teamId,
+            teamName: teams.teamName,
+            createdBy: tasks.createdBy,
+            assignedTo: tasks.assignedTo,
+            parentTaskId: tasks.parentTaskId,
+            taskStatus: tasks.taskStatus,
+            taskPriority: tasks.taskPriority,
+            dueDate: tasks.dueDate,
+            createdAt: tasks.createdAt,
+            updatedAt: tasks.updatedAt,
+            completedAt: tasks.completedAt
+        })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .where(and(...filters))
+        .orderBy(tasks.dueDate)
+
+        return userTasks
     }
 }

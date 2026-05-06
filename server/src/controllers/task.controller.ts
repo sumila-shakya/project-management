@@ -33,7 +33,21 @@ export const taskController = {
 
     async getTasks(req: Request, res: Response, next: NextFunction) {
         try {
+            // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
 
+            const queryFilter: filterProjectsTaskType = filterProjectsTaskSchema.parse(req.query)
+
+            const userTasks = await taskServices.getTasks(userId, queryFilter)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, userTasks))
         } catch(error) {
             next(error)
         }
@@ -53,6 +67,12 @@ export const taskController = {
             const projectId = parseId(req.params.projectId as string)
 
             const queryFilter: filterProjectsTaskType = filterProjectsTaskSchema.parse(req.query)
+
+            const allTasks = await taskServices.getTasksInProjects(userId, projectId, queryFilter)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, allTasks))
         } catch(error) {
             next(error)
         }
