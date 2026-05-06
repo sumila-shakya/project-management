@@ -4,9 +4,9 @@ import { eq, and, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
 
-const helper = {
+export const helper = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
-    async projectAccess(userId: number, projectId: number, allowedRoles: string[]) {
+    async projectAccess(userId: number, projectId: number, allowedRoles?: string[]) {
         // check if the project exists
         const [existingProject] = await db
         .select()
@@ -27,8 +27,13 @@ const helper = {
             eq(teamMembers.userId, userId)
         ))
 
-        // if the user is not member or the user doesn't have access throw error
-        if(!membership || !allowedRoles.includes(membership.role)) {
+        // if the user is not member throw error
+        if(!membership) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        // if the user doesn't have access throw error
+        if(allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(membership.role)) {
             throw new ApiError(403, "Access Denied")
         }
 
@@ -120,28 +125,7 @@ export const projectServices = {
     // GET PROJECT DETAILS SERVICE FUNCTION
     async getProjectDetails(userId: number, projectId: number) {
         // check if the project exists
-        const [existingProject] = await db
-        .select()
-        .from(projects)
-        .where(eq(projects.projectId, projectId))
-
-        // if projects is not found throw error
-        if(!existingProject) {
-            throw new ApiError(404, "Project Not found")
-        }
-
-        // check if the user is the member of the team project belonging to
-        const [membership] = await db
-        .select()
-        .from(teamMembers)
-        .where(and(
-            eq(teamMembers.teamId, existingProject.teamId),
-            eq(teamMembers.userId, userId)
-        ))
-
-        if(!membership) {
-            throw new ApiError(403, "Access denied")
-        }
+        const {existingProject, membership} = await helper.projectAccess(userId, projectId)
 
         // get the total tasks and completed tasks in the project
         const [[tasksCount], [completedTasksCount]] = await Promise.all([

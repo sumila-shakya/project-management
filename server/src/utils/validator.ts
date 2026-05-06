@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS } from './constants'
+import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS, TASK_PRIORITY, TASK_STATUS } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -131,6 +131,16 @@ export const filterProjectSchema = z.object({
     projectStatus: z.enum(PROJECT_STATUS, {message: "Invalid Status"}).optional()
 })
 
+export const taskSchema =  z.object({
+    title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim(),
+    description: z.string().max(500, { message: "Description must be under 500 characters" }).optional(),
+    assignedTo: z.coerce.number().positive().optional(),
+    parentTaskId: z.coerce.number().positive().optional(),
+    taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"}).optional(),
+    taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}),
+    dueDate: z.coerce.date().refine((date) => date > new Date(), {message: "Due date must be in future"})
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -148,3 +158,4 @@ export type updateTeamMemberType = z.infer<typeof updateTeamMemberSchema>
 export type projectType = z.infer<typeof projectSchema>
 export type updateProjectType = z.infer<typeof updateProjectSchema>
 export type filterProjectType = z.infer<typeof filterProjectSchema>
+export type taskType = z.infer<typeof taskSchema>
