@@ -80,7 +80,22 @@ export const taskController = {
 
     async getTaskDetails(req: Request, res: Response, next: NextFunction) {
         try {
+            // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
 
+            // parse the task id
+            const taskId = parseId(req.params.taskId as string)
+
+            const taskDetails = await taskServices.getTaskDetails(userId, taskId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, taskDetails))
         } catch(error) {
             next(error)
         }

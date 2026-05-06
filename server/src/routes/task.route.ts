@@ -6,5 +6,8 @@ const router = Router()
 
 router.use(authMiddleware)
 
+router.get('/', taskController.getTasks)
+
+router.get('/:taskId', taskController.getTaskDetails)
 
 export default router

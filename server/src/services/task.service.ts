@@ -29,9 +29,8 @@ export const taskServices = {
     },
 
     async getTaskDetails(userId: number, taskId: number) {
-        /*
         // check if the user belongs to team task is of
-        const [membership] = await db
+        const [taskDetails] = await db
         .select({
             taskId: tasks.taskId,
             title: tasks.title,
@@ -54,8 +53,14 @@ export const taskServices = {
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
         .innerJoin(teams, eq(projects.teamId, teams.teamId))
         .where(eq(tasks.taskId, taskId))
-        */
-        
+
+        const {existingProject, membership} = await helper.projectAccess(userId, taskDetails.projectId)
+
+        if(existingProject.projectStatus === 'archived' && membership.role === 'member') {
+            throw new ApiError(403, "Access denied")
+        }
+
+        return taskDetails
     },
 
     async getTasksInProjects(userId: number, projectId: number, queryFilters: filterProjectsTaskType) {
