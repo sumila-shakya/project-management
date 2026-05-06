@@ -141,6 +141,11 @@ export const taskSchema =  z.object({
     dueDate: z.coerce.date().refine((date) => date > new Date(), {message: "Due date must be in future"})
 })
 
+export const filterProjectsTaskSchema = z.object({
+    taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"}).optional(),
+    taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}).optional(),
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -159,3 +164,4 @@ export type projectType = z.infer<typeof projectSchema>
 export type updateProjectType = z.infer<typeof updateProjectSchema>
 export type filterProjectType = z.infer<typeof filterProjectSchema>
 export type taskType = z.infer<typeof taskSchema>
+export type filterProjectsTaskType = z.infer<typeof filterProjectsTaskSchema>

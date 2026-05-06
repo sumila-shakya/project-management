@@ -2,7 +2,7 @@ import { db } from "../config/mysql.config";
 import { tasks, taskAssets, projects, teamMembers, NewTask, teams } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { eq, and } from "drizzle-orm";
-import { taskType } from "../utils/validator";
+import { taskType, filterProjectsTaskType } from "../utils/validator";
 import { helper } from "./project.service";
 
 export const taskServices = {
@@ -56,5 +56,31 @@ export const taskServices = {
         .where(eq(tasks.taskId, taskId))
         */
         
+    },
+
+    async getTasksInProjects(userId: number, projectId: number, queryFilters: filterProjectsTaskType) {
+        // check if the project exists
+        const {existingProject, membership} = await helper.projectAccess(userId, projectId)
+
+        if(existingProject.projectStatus === 'archived' && membership.role === 'member') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        const filters = [eq(tasks.projectId, existingProject.projectId)]
+
+        if(queryFilters.taskPriority) {
+            filters.push(eq(tasks.taskPriority, queryFilters.taskPriority))
+        }
+
+        if(queryFilters.taskStatus) {
+            filters.push(eq(tasks.taskStatus, queryFilters.taskStatus))
+        }
+
+        const allTasks = await db
+        .select()
+        .from(tasks)
+        .where(and(...filters))
+
+        return allTasks
     }
 }

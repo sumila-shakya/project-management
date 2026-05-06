@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
-import { taskSchema, taskType } from "../utils/validator";
+import { taskSchema, filterProjectsTaskSchema, taskType, filterProjectsTaskType } from "../utils/validator";
 import { parseId } from "../utils/validateId";
 
 export const taskController = {
@@ -41,7 +41,18 @@ export const taskController = {
 
     async getTasksInProject(req: Request, res: Response, next: NextFunction) {
         try {
+            // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+            
+            // parse the project id
+            const projectId = parseId(req.params.projectId as string)
 
+            const queryFilter: filterProjectsTaskType = filterProjectsTaskSchema.parse(req.query)
         } catch(error) {
             next(error)
         }
