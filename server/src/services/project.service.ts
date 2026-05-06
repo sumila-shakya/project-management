@@ -5,16 +5,20 @@ import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
 
 const helper = {
-    async projectAccess(userId: number, projectId: number) {
+    // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
+    async projectAccess(userId: number, projectId: number, allowedRoles: string[]) {
+        // check if the project exists
         const [existingProject] = await db
         .select()
         .from(projects)
         .where(eq(projects.projectId, projectId))
 
+        // if projects is not found throw error
         if(!existingProject) {
             throw new ApiError(404, "Project Not found")
         }
 
+        // check if the user is the member of the team project belonging to
         const [membership] = await db
         .select()
         .from(teamMembers)
@@ -23,11 +27,12 @@ const helper = {
             eq(teamMembers.userId, userId)
         ))
 
-        const allowedRoles = ['admin', 'team_leader']
+        // if the user is not member or the user doesn't have access throw error
         if(!membership || !allowedRoles.includes(membership.role)) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // return project and members information
         return { existingProject, membership }
     }
 }
@@ -35,6 +40,7 @@ const helper = {
 export const projectServices = {
     // CREATE PROJECT SERVICE FUNCTION
     async createProject(userId: number, teamId: number, data: projectType) {
+        // check if the user is the member of the team
         const [isMember] = await db
         .select()
         .from(teamMembers)
@@ -43,6 +49,7 @@ export const projectServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // if the user is not the member throw error
         if(!isMember) {
             throw new ApiError(403, "Access denied")
         }
@@ -56,10 +63,12 @@ export const projectServices = {
             ...(data.description && { description: data.description})
         }
 
+        // insert new project into the database
         const [result] = await db
         .insert(projects)
         .values(newProject)
 
+        // get the inserted project
         const [insertedProject] = await db
         .select()
         .from(projects)
@@ -70,6 +79,7 @@ export const projectServices = {
 
     // GET PROJECTS SERVICE FUNCTION
     async getProjects(userId: number, teamId: number, filter: filterProjectType) {
+        // check if the user is the member of the team
         const [membership] = await db
         .select()
         .from(teamMembers)
@@ -78,10 +88,12 @@ export const projectServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // if the user is not the member throw error
         if(!membership) {
             throw new ApiError(403, "Access denied")
         }
 
+        // if the user is only the member do not allow to see the archived projects
         if(membership.role === 'member' && filter.projectStatus === 'archived') {
             throw new ApiError(403, "Access Denied")
         }
@@ -90,11 +102,12 @@ export const projectServices = {
         const statusFilter = isMember ? 'active' : filter.projectStatus
         const queryfilters = [eq(projects.teamId, teamId)]
         
-
+        // if the filter is present query the database according to the filter
         if(statusFilter) {
             queryfilters.push(eq(projects.projectStatus, statusFilter))
         }
 
+        // get the filtered data
         const teamProjects = await db
         .select()
         .from(projects)
@@ -104,16 +117,20 @@ export const projectServices = {
         
     },
 
+    // GET PROJECT DETAILS SERVICE FUNCTION
     async getProjectDetails(userId: number, projectId: number) {
+        // check if the project exists
         const [existingProject] = await db
         .select()
         .from(projects)
         .where(eq(projects.projectId, projectId))
 
+        // if projects is not found throw error
         if(!existingProject) {
             throw new ApiError(404, "Project Not found")
         }
 
+        // check if the user is the member of the team project belonging to
         const [membership] = await db
         .select()
         .from(teamMembers)
@@ -126,6 +143,7 @@ export const projectServices = {
             throw new ApiError(403, "Access denied")
         }
 
+        // get the total tasks and completed tasks in the project
         const [[tasksCount], [completedTasksCount]] = await Promise.all([
             await db
             .select({
@@ -152,13 +170,16 @@ export const projectServices = {
         }
     },
 
+    // UPDATE PROJECT SERVICE FUNCTION
     async updateProject(userId: number, projectId: number, updates: updateProjectType) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId)
+        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin','team_leader'])
 
+        // if the end date is lesser than start date throw error
         if(updates.endDate && updates.endDate <= existingProject.startDate) {
             throw new ApiError(400, "End date must be greater than start date")
         } 
 
+        // update the project
         await db
         .update(projects)
         .set(updates)
@@ -171,9 +192,11 @@ export const projectServices = {
         }
     },
 
+    // ARCHIVE PROJECT SERVICE FUNCTION
     async archiveProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId)
+        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'])
 
+        // archive the active project
         const [result] = await db
         .update(projects)
         .set({
@@ -184,14 +207,17 @@ export const projectServices = {
             eq(projects.projectStatus, 'active')
         ))
 
+        // throw error if no projects was archived
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Project already archived")
         }
     },
 
+    // RESTORE PROJECT SERVICE FUNCTION
     async restoreProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId)
+        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'] )
 
+        // restore the archived project
         const [result] = await db
         .update(projects)
         .set({
@@ -202,6 +228,7 @@ export const projectServices = {
             eq(projects.projectStatus, 'archived')
         ))
 
+        // throw error if no projects was restored
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Project is already active")
         }
@@ -212,9 +239,11 @@ export const projectServices = {
         }
     },
 
+    // DELETE PROJECT SERVICE FUNCTION
     async deleteProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId)
+        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'] )
 
+        // delete the archived project
         const [result] = await db
         .delete(projects)
         .where(and(
@@ -222,6 +251,7 @@ export const projectServices = {
             eq(projects.projectStatus, 'archived')
         ))
 
+        // throw error if no projects was deleted
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Please archive the project first")
         }

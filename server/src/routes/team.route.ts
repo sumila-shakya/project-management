@@ -6,7 +6,7 @@ import { projectController } from "../controllers/project.controller";
 
 const router = Router()
 
-// authenticate the user
+// AUTHENTICATE THE USER
 router.use(authMiddleware)
 
 /* ------------------------------------ TEAM CRUD ROUTES ------------------------------------ */
@@ -42,7 +42,7 @@ router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
 router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
 
 
-/* ------------------------------------ TEAM MEMBERS ROUTES ------------------------------------ */
+/* ------------------------------------ TEAM PROJECTS ROUTES ------------------------------------ */
 // CREATE PROJECT ROUTE
 router.post('/:teamId/projects', projectController.createProject)
 

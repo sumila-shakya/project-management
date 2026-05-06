@@ -95,6 +95,7 @@ export const updateTeamMemberSchema = z.object({
     role: z.enum(ROLE, {message: "Invalid role"})
 })
 
+// PROJECT FIELDS
 const projectFields = z.object({
     projectName: z.string().min(2, { message: "Project name must be atleast two charaters long" }).trim(),
     startDate: z.coerce.date(),
@@ -107,6 +108,7 @@ export const projectSchema = projectFields
 .refine((data) => data.startDate >= new Date(), {message: "Start date cannot be in past"})
 .refine((data) => data.endDate > data.startDate, {message: "End date must be greater than start date"})
 
+// PROJECT UPDATES SCHEMA
 export const updateProjectSchema = projectFields.partial()
 .refine((data) => {
     if(data.startDate) {
@@ -124,6 +126,7 @@ export const updateProjectSchema = projectFields.partial()
     return true
 }, {message: "End date must be greater than start date"})
 
+// PROJECT FILTER SCHEMA
 export const filterProjectSchema = z.object({
     projectStatus: z.enum(PROJECT_STATUS, {message: "Invalid Status"}).optional()
 })

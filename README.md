@@ -10,7 +10,6 @@ A collaborative project management platform where users can create teams, manage
 ### 1. Authentication & User Management
 - User registration and login (JWT-based)
 - Email verification
-- User profiles (avatar, bio, contact info)
 - Role-based access control (Admin, Team Lead, Member)
 
 ### 2. Team Management
