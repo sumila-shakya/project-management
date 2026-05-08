@@ -2,8 +2,9 @@ import { db } from "../config/mysql.config";
 import { tasks, taskAssets, projects, teamMembers, NewTask, teams } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { eq, and, asc } from "drizzle-orm";
-import { taskType, filterProjectsTaskType, updateTaskType } from "../utils/validator";
+import { taskType, filterProjectsTaskType, updateTaskType, processTaskType } from "../utils/validator";
 import { helper } from "./project.service";
+import { statusTransition } from "../utils/statusTransition";
 
 export const taskServices = {
     async createTask(userId: number, projectId: number, data: taskType) {
@@ -174,4 +175,45 @@ export const taskServices = {
             updatedAt: new Date()
         }
     },
+
+    async processTask(userId: number, taskId: number, data: processTaskType) {
+        const [existingTask] = await db
+        .select({
+            taskId: tasks.taskId,
+            projectId: tasks.projectId,
+            assignedTo: tasks.assignedTo,
+            taskStatus: tasks.taskStatus,
+            dueDate: tasks.dueDate,
+            completedAt: tasks.completedAt,
+            projectStatus: projects.projectStatus
+        })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .where(and(
+            eq(tasks.taskId, taskId),
+            eq(tasks.assignedTo, userId)
+        ))
+
+        if(!existingTask) {
+            throw new ApiError(403, 'Access Denied')
+        }
+
+        if(existingTask.projectStatus === 'archived') {
+            throw new ApiError(400, "Cannot process a task in a archived project")
+        }
+
+        if(!statusTransition[existingTask.taskStatus].includes(data.taskStatus)) {
+            throw new ApiError(400, "Invalid status")
+        }
+
+        const completedAt = data.taskStatus === 'completed' ? new Date(): undefined
+
+        await db
+        .update(tasks)
+        .set({
+            taskStatus: data.taskStatus,
+            completedAt: completedAt
+        })
+        .where(eq(tasks.taskId, taskId))
+    }
 }
