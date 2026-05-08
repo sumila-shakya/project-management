@@ -146,6 +146,19 @@ export const filterProjectsTaskSchema = z.object({
     taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}).optional(),
 })
 
+export const updateTaskSchema = z.object({
+    title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim().optional(),
+    description: z.string().max(500, { message: "Description must be under 500 characters" }).optional(),
+    taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}).optional(),
+    dueDate: z.coerce.date().optional()
+})
+.refine((data) => {
+    if(data.dueDate) {
+        return data.dueDate > new Date()
+    }
+    return true
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -165,3 +178,4 @@ export type updateProjectType = z.infer<typeof updateProjectSchema>
 export type filterProjectType = z.infer<typeof filterProjectSchema>
 export type taskType = z.infer<typeof taskSchema>
 export type filterProjectsTaskType = z.infer<typeof filterProjectsTaskSchema>
+export type updateTaskType = z.infer<typeof updateTaskSchema>

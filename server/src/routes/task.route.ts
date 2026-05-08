@@ -10,4 +10,6 @@ router.get('/', taskController.getTasks)
 
 router.get('/:taskId', taskController.getTaskDetails)
 
+router.patch('/:taskId', taskController.updateTask)
+
 export default router

@@ -3,10 +3,11 @@ import { projects, teamMembers, NewProject, tasks } from "../models/mysql.model"
 import { eq, and, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
+import { Role } from "../@types/interface";
 
 export const helper = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
-    async projectAccess(userId: number, projectId: number, allowedRoles?: string[]) {
+    async projectAccess(userId: number, projectId: number, allowedRoles?: Role[]) {
         // check if the project exists
         const [existingProject] = await db
         .select()

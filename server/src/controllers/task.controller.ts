@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
-import { taskSchema, filterProjectsTaskSchema, taskType, filterProjectsTaskType } from "../utils/validator";
+import { taskSchema, filterProjectsTaskSchema, updateTaskSchema, taskType, filterProjectsTaskType, updateTaskType } from "../utils/validator";
 import { parseId } from "../utils/validateId";
 
 export const taskController = {
@@ -100,4 +100,34 @@ export const taskController = {
             next(error)
         }
     },
+
+    async updateTask(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // parse the task id
+            const taskId = parseId(req.params.taskId as string)
+
+            // get the updates
+            const updates: updateTaskType = updateTaskSchema.parse(req.body)
+
+            if(Object.keys(updates).length === 0) {
+                throw new ApiError(400, "No data provided for the updates")
+            }
+
+            const updateTask = await taskServices.updateTask(userId, taskId, updates)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, updateTask, "Task updated successfully"))
+        } catch(error) {
+            next(error)
+        }
+    }
 }
