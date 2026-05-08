@@ -300,5 +300,36 @@ export const taskServices = {
         .update(tasks)
         .set(data)
         .where(eq(tasks.taskId, taskId))
+    },
+
+    async getSubTasks(userId: number, taskId: number) {
+        const [existingTask] = await db
+        .select({
+            taskId: tasks.taskId,
+            projectStatus: projects.projectStatus,
+            role: teamMembers.role
+        })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(tasks.taskId, taskId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!existingTask) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingTask.projectStatus === 'archived' && existingTask.role === 'member') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        const subtasks = await db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.parentTaskId, taskId))
+
+        return subtasks
     }
 }

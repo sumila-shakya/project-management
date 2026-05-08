@@ -180,5 +180,28 @@ export const taskController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async getSubTasks(req: Request, res: Response, next: NextFunction) {
+        try {
+             // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // parse the task id
+            const taskId = parseId(req.params.taskId as string)
+
+            const subTasks = await taskServices.getSubTasks(userId, taskId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, subTasks))
+        } catch(error) {
+            next(error)
+        }
     }
 }
