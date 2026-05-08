@@ -2,9 +2,10 @@ import { db } from "../config/mysql.config";
 import { tasks, taskAssets, projects, teamMembers, NewTask, teams } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { eq, and, asc } from "drizzle-orm";
-import { taskType, filterProjectsTaskType, updateTaskType, processTaskType } from "../utils/validator";
+import { taskType, filterProjectsTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
 import { helper } from "./project.service";
 import { statusTransition } from "../utils/statusTransition";
+import { Role } from "../@types/interface";
 
 export const taskServices = {
     async createTask(userId: number, projectId: number, data: taskType) {
@@ -140,28 +141,41 @@ export const taskServices = {
     },
 
     async updateTask(userId: number, taskId: number, updates: updateTaskType) {
-        const [existingTask] = await db.select({
+        const [existingTask] = await db
+        .select({
             taskId: tasks.taskId,
+            projectId: tasks.projectId,
+            projectStatus: projects.projectStatus,
+            assignedTo: tasks.assignedTo,
             taskStatus: tasks.taskStatus,
+            taskPriority: tasks.taskPriority,
+            dueDate: tasks.dueDate,
             completedAt: tasks.completedAt,
-            projectId: projects.projectId
+            role: teamMembers.role
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .where(eq(tasks.taskId, taskId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(tasks.taskId, taskId),
+            eq(teamMembers.userId, userId)
+        ))
 
         if(!existingTask) {
-            throw new ApiError(404, "Task not found")
+            throw new ApiError(403, "Access Denied")
         }
 
-        const {existingProject, membership} = await helper.projectAccess(userId, existingTask.projectId, ['admin','team_leader'])
-
-        if(existingProject.projectStatus === 'archived') {
-            throw new ApiError(400, "Cannot update task of a archived projects")
+        if(existingTask.projectStatus === 'archived') {
+            throw new ApiError(400, "Cannot update task on a archived projects")
         }
 
         if(existingTask.taskStatus === 'completed' && existingTask.completedAt) {
             throw new ApiError(400, "Cannot update a completed task")
+        } 
+        
+        const allowedRoles: Role[] = ['admin', 'team_leader']
+        if(!allowedRoles.includes(existingTask.role)) {
+            throw new ApiError(403, "access Denied")
         }
 
         await db
@@ -202,6 +216,10 @@ export const taskServices = {
             throw new ApiError(400, "Cannot process a task in a archived project")
         }
 
+        if(existingTask.dueDate < new Date()) {
+            throw new ApiError(400, "Task due date is over")
+        }
+
         if(!statusTransition[existingTask.taskStatus].includes(data.taskStatus)) {
             throw new ApiError(400, "Invalid status")
         }
@@ -214,6 +232,73 @@ export const taskServices = {
             taskStatus: data.taskStatus,
             completedAt: completedAt
         })
+        .where(eq(tasks.taskId, taskId))
+    },
+
+    async assignTask(userId: number, taskId: number, data: assignTaskType) {
+        const [[existingTask], [membership]] = await Promise.all([
+            db
+            .select({
+                taskId: tasks.taskId,
+                projectId: tasks.projectId,
+                projectStatus: projects.projectStatus,
+                createdBy: tasks.createdBy,
+                taskStatus: tasks.taskStatus,
+                taskPriority: tasks.taskPriority,
+                dueDate: tasks.dueDate,
+                completedAt: tasks.completedAt,
+                role: teamMembers.role
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+            .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+            .where(and(
+                eq(tasks.taskId, taskId),
+                eq(teamMembers.userId, userId)
+            )),
+
+            db
+            .select({
+                taskId: tasks.taskId,
+                role: teamMembers.role
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+            .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+            .where(and(
+                eq(tasks.taskId, taskId),
+                eq(teamMembers.userId, data.assignedTo)
+            ))
+        ]) 
+
+        if(!existingTask) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingTask.projectStatus === 'archived') {
+            throw new ApiError(400, "Cannot update task on a archived projects")
+        }
+
+        if(existingTask.taskStatus === 'completed' && existingTask.completedAt) {
+            throw new ApiError(400, "Cannot update a completed task")
+        } 
+
+        if(existingTask.dueDate < new Date()) {
+            throw new ApiError(400, "Task due date is over")
+        }
+
+        if(!membership) {
+            throw new ApiError(400, "Can only assign task to the member of the team")
+        }
+
+        const allowedRoles: Role[] = ['admin', 'team_leader']
+        if(!allowedRoles.includes(existingTask.role) || existingTask.createdBy !== userId) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        await db
+        .update(tasks)
+        .set(data)
         .where(eq(tasks.taskId, taskId))
     }
 }

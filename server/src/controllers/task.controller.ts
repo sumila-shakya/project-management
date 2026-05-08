@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
-import { taskSchema, filterProjectsTaskSchema, updateTaskSchema, processTaskSchema, taskType, filterProjectsTaskType, updateTaskType, processTaskType } from "../utils/validator";
+import { taskSchema, filterProjectsTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema,
+         taskType, filterProjectsTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
 import { parseId } from "../utils/validateId";
 
 export const taskController = {
@@ -151,6 +152,31 @@ export const taskController = {
             res
             .status(200)
             .json(new ApiResponse(200, {}, `task status changed successfully to ${validatedData.taskStatus}`))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async assignTask(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // parse the task id
+            const taskId = parseId(req.params.taskId as string)
+
+            const validatedData: assignTaskType = assignTaskSchema.parse(req.body)
+
+            await taskServices.assignTask(userId, taskId, validatedData)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, `task successfully assigned to ${validatedData.assignedTo}`))
         } catch(error) {
             next(error)
         }

@@ -14,4 +14,6 @@ router.patch('/:taskId', taskController.updateTask)
 
 router.patch('/:taskId/status', taskController.processTask)
 
+router.patch('/:taskId/assign', taskController.assignTask)
+
 export default router

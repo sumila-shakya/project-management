@@ -163,6 +163,10 @@ export const processTaskSchema = z.object({
     taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"})
 })
 
+export const assignTaskSchema = z.object({
+    assignedTo: z.coerce.number().positive()
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -184,3 +188,4 @@ export type taskType = z.infer<typeof taskSchema>
 export type filterProjectsTaskType = z.infer<typeof filterProjectsTaskSchema>
 export type updateTaskType = z.infer<typeof updateTaskSchema>
 export type processTaskType = z.infer<typeof processTaskSchema>
+export type assignTaskType = z.infer<typeof assignTaskSchema>
