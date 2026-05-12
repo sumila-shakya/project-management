@@ -1,6 +1,6 @@
 ### create team 
 POST http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzMyNSwiZXhwIjoxNzc3NjI3OTI1fQ.FUBlOo1YHq-zE3EJafV3QkyS-oHEkTML4u5M__FHvZI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzIxMSwiZXhwIjoxNzc4NTk3ODExfQ.01GHxqsC_wsQrpycEe7VPvbzt0Nbt3R_cA6XcU9wp9M
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ### get all the users team
 GET http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzMyNSwiZXhwIjoxNzc3NjI3OTI1fQ.FUBlOo1YHq-zE3EJafV3QkyS-oHEkTML4u5M__FHvZI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzQwMCwiZXhwIjoxNzc4NTk4MDAwfQ.LdxQ3Y7HOwwaSQMIK4lfdRmYEzlTX-unwBksCzLjVBM
 
 ### get team by id
 GET http://localhost:3000/api/teams/1
@@ -29,11 +29,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get all team members
 GET http://localhost:3000/api/teams/1/members
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzk2NTY5NCwiZXhwIjoxNzc3OTY2Mjk0fQ.Bjk3OYO4w4nTfrGhRhdBClmUTwawvcIlHqKz4nI3B2M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
 
 ### send invitation
 POST http://localhost:3000/api/teams/1/invite
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzYyNzYyMCwiZXhwIjoxNzc3NjI4MjIwfQ.fcLC4LO6_n4fB80YfZGu-BpcoSoVIdSLa0Ll1de0F5M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzQwMCwiZXhwIjoxNzc4NTk4MDAwfQ.LdxQ3Y7HOwwaSQMIK4lfdRmYEzlTX-unwBksCzLjVBM
 Content-Type: application/json
 
 {
@@ -42,7 +42,7 @@ Content-Type: application/json
 
 ### update team member
 PATCH http://localhost:3000/api/teams/1/members/2/role
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
 Content-Type: application/json
 
 {

@@ -1,0 +1,1 @@
+ALTER TABLE `projects` MODIFY COLUMN `start_date` timestamp NOT NULL DEFAULT (now());

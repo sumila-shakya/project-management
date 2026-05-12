@@ -1,13 +1,13 @@
 ### get all invitations
 GET http://localhost:3000/api/invitations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3NzYyNzY5MywiZXhwIjoxNzc3NjI4MjkzfQ.6fwwG0OOSNq0eeaB9Dyd2a-PEnmcJ5bdkGTiAP8BOtw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
 
 ### process invitations
 PATCH http://localhost:3000/api/invitations/1/process
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3NzYyNzY5MywiZXhwIjoxNzc3NjI4MjkzfQ.6fwwG0OOSNq0eeaB9Dyd2a-PEnmcJ5bdkGTiAP8BOtw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
 Content-Type: application/json
 
 {
-    "token": "7683194622cd3daa61e6693053907d35",
+    "token": "36d57a2a459195d5cdff41328d38bfa2",
     "action": "accepted"
 }

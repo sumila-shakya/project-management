@@ -64,8 +64,8 @@ export const projectServices = {
             projectName: data.projectName,
             teamId: teamId, 
             createdBy: userId,
-            startDate: data.startDate,
             endDate: data.endDate,
+            ...(data.startDate && { startDate: data.startDate}),
             ...(data.description && { description: data.description})
         }
 

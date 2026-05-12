@@ -1,0 +1,54 @@
+### create new task
+POST http://localhost:3000/api/projects/1/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Content-Type: application/json
+
+{
+    "title": "test",
+    "description": "this is a test task",
+    "taskPriority": "medium",
+    "dueDate": "2026-05-25"
+}
+
+### get all tasks in projects
+GET http://localhost:3000/api/projects/1/tasks?title=test&taskPriority=low
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+
+### get all users tasks
+GET http://localhost:3000/api/tasks/my-tasks?title=test&taskPriority=low
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+
+### get the task details
+GET http://localhost:3000/api/tasks/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+
+### update the task
+PATCH http://localhost:3000/api/tasks/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Content-Type: application/json
+
+{
+    "description": "this is a updated test task"
+}
+
+### process task
+PATCH http://localhost:3000/api/tasks/1/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Content-Type: application/json
+
+{
+    "taskStatus": "in_progress"
+}
+
+### assign task
+PATCH http://localhost:3000/api/tasks/1/assign
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Content-Type: application/json
+
+{
+    "assignedTo": 2
+}
+
+### get sub tasks
+GET http://localhost:3000/api/tasks/1/subtasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs

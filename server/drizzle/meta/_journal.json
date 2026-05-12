@@ -15,6 +15,13 @@
       "when": 1777627050236,
       "tag": "0001_absurd_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778596546299,
+      "tag": "0002_absent_lionheart",
+      "breakpoints": true
     }
   ]
 }

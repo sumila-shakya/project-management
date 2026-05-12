@@ -98,15 +98,25 @@ export const updateTeamMemberSchema = z.object({
 // PROJECT FIELDS
 const projectFields = z.object({
     projectName: z.string().min(2, { message: "Project name must be atleast two charaters long" }).trim(),
-    startDate: z.coerce.date(),
+    startDate: z.coerce.date().optional(),
     endDate: z.coerce.date(),
     description: z.string().max(500, { message: "Description must be under 500 characters" }).optional()
 });
 
 // PROJECT SCHEMA
 export const projectSchema = projectFields
-.refine((data) => data.startDate >= new Date(), {message: "Start date cannot be in past"})
-.refine((data) => data.endDate > data.startDate, {message: "End date must be greater than start date"})
+.refine((data) => {
+    if(data.startDate) {
+        return data.startDate >= new Date()
+    }
+    return true
+}, {message: "Start date cannot be in past"})
+.refine((data) => {
+    if(data.startDate) {
+        return data.endDate > data.startDate
+    }
+    return true
+}, {message: "End date must be greater than start date"})
 
 // PROJECT UPDATES SCHEMA
 export const updateProjectSchema = projectFields.partial()
@@ -141,7 +151,8 @@ export const taskSchema =  z.object({
     dueDate: z.coerce.date().refine((date) => date > new Date(), {message: "Due date must be in future"})
 })
 
-export const filterProjectsTaskSchema = z.object({
+export const filterTaskSchema = z.object({
+    title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim().optional(),
     taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"}).optional(),
     taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}).optional(),
 })
@@ -185,7 +196,7 @@ export type projectType = z.infer<typeof projectSchema>
 export type updateProjectType = z.infer<typeof updateProjectSchema>
 export type filterProjectType = z.infer<typeof filterProjectSchema>
 export type taskType = z.infer<typeof taskSchema>
-export type filterProjectsTaskType = z.infer<typeof filterProjectsTaskSchema>
+export type filterTaskType = z.infer<typeof filterTaskSchema>
 export type updateTaskType = z.infer<typeof updateTaskSchema>
 export type processTaskType = z.infer<typeof processTaskSchema>
 export type assignTaskType = z.infer<typeof assignTaskSchema>

@@ -8,6 +8,7 @@ const router = Router()
 // AUTHENTICATE THE USER
 router.use(authMiddleware)
 
+/* ------------------------------------ PROJECT ROUTES ------------------------------------ */
 // GET PROJECT DETAILS ROUTE
 router.get('/:projectId', projectController.getProjectDetails)
 
@@ -23,8 +24,11 @@ router.patch('/:projectId/restore', projectController.restoreProject)
 // DELETE PROJECT ROUTE
 router.delete('/:projectId', projectController.deleteProject)
 
+/* ------------------------------------ TASK ROUTES ------------------------------------ */
+// CREATE TASK ROUTE
 router.post('/:projectId/tasks', taskController.createTask)
 
+// GET TASKS IN PROJECT ROUTE
 router.get('/:projectId/tasks', taskController.getTasksInProject)
 
 export default router
