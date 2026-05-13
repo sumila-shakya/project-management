@@ -52,5 +52,30 @@ export const commentController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async editComment(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const authorId = req.user?.userId
+            
+            //if not the user id throw error
+            if(!authorId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // parse the comment id
+            const commentId = parseId(req.params.commentId as string)
+
+            const commentContent: commentContentType = commentContentSchema.parse(req.body)
+
+            const editedComment = await commentServices.editComment(authorId, commentId, commentContent)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, editedComment, "Comment edited successfully"))
+        } catch(error) {
+            next(error)
+        }
     }
 }

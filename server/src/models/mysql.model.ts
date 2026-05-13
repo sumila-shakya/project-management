@@ -86,6 +86,7 @@ export const comments = mysqlTable('comments', {
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
+    isEdited: boolean('is_edited').notNull().default(false)
 })
 
 // REFRESH TOKEN SCHEMA

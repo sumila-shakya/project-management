@@ -30,7 +30,7 @@ export const commentServices = {
         
         // throw error if the project was archived
         if(existingTask.projectStatus === 'archived') {
-            throw new ApiError(400, "Cannot comment on task on a archived projects")
+            throw new ApiError(403, "Cannot comment on task on a archived projects")
         }
 
         const newComment: NewComment = {
@@ -94,5 +94,47 @@ export const commentServices = {
         .orderBy(desc(comments.createdAt))
 
         return commentsOnTask
+    },
+
+    async editComment(authorId: number, commentId: number, updates: commentContentType) {
+        const [existingComment] = await db
+        .select({
+            commentId: comments.commentId,
+            projectStatus: projects.projectStatus
+        })
+        .from(comments)
+        .innerJoin(tasks, eq(comments.taskId, tasks.taskId))
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .where(and(
+            eq(comments.commentId, commentId),
+            eq(comments.authorId, authorId)
+        ))
+
+        if(!existingComment) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingComment.projectStatus === 'archived') {
+            throw new ApiError(403, "Cannot edit comment on archived projects")
+        }
+
+        const [result] = await db
+        .update(comments)
+        .set({
+            content: updates.content,
+            isEdited: true
+        })
+        .where(eq(comments.commentId, commentId))
+
+        if(result.affectedRows === 0) {
+            throw new ApiError(400, "Invalid data for update")
+        }
+
+        const editedComment = await db
+        .select()
+        .from(comments)
+        .where(eq(comments.commentId, commentId)) 
+
+        return editedComment
     }
 }
