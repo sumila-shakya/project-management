@@ -178,6 +178,12 @@ export const assignTaskSchema = z.object({
     assignedTo: z.coerce.number().positive()
 })
 
+export const commentContentSchema = z.object({
+    content: z.string()
+    .min(2, { message: "Comment must be atleast two charaters long" })
+    .max(2000, { message: "Comment must be under 2000 characters" })
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -200,3 +206,4 @@ export type filterTaskType = z.infer<typeof filterTaskSchema>
 export type updateTaskType = z.infer<typeof updateTaskSchema>
 export type processTaskType = z.infer<typeof processTaskSchema>
 export type assignTaskType = z.infer<typeof assignTaskSchema>
+export type commentContentType = z.infer<typeof commentContentSchema>

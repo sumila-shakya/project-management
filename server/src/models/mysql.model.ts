@@ -82,7 +82,7 @@ export const taskAssets = mysqlTable('task_assets', {
 export const comments = mysqlTable('comments', {
     commentId: serial('comment_id').primaryKey(),
     taskId: bigint('task_id', { mode: 'number', unsigned: true }).notNull().references(() => tasks.taskId, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    userId: bigint('user_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    authorId: bigint('author_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
