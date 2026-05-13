@@ -29,6 +29,9 @@ router.get('/:taskId/subtasks', taskController.getSubTasks)
 
 /* ------------------------------------ COMMENT ROUTES ------------------------------------ */
 // ADD COMMENT
-router.post('/:taskId/comment', commentController.addComment)
+router.post('/:taskId/comments', commentController.addComment)
+
+// GET COMMENTS
+router.get('/:taskId/comments', commentController.getComments)
 
 export default router
