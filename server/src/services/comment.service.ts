@@ -136,5 +136,39 @@ export const commentServices = {
         .where(eq(comments.commentId, commentId)) 
 
         return editedComment
+    },
+
+    async deleteComment(userId: number, commentId: number) {
+        const [existingComment] = await db
+        .select({
+            commentId: comments.commentId,
+            authorId: comments.authorId,
+            projectStatus: projects.projectStatus,
+            role: teamMembers.role
+        })
+        .from(comments)
+        .innerJoin(tasks, eq(comments.taskId, tasks.taskId))
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(comments.commentId, commentId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!existingComment) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingComment.role !== 'admin' || existingComment.authorId === userId) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingComment.authorId === userId && existingComment.projectStatus === 'archived') {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        await db
+        .delete(comments)
+        .where(eq(comments.commentId, commentId))
     }
 }
