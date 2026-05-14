@@ -3,7 +3,8 @@ import { projects, teamMembers, NewProject, tasks } from "../models/mysql.model"
 import { eq, and, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
-import { Role } from "../@types/interface";
+import { Role, IAnalyticsLog } from "../@types/interface";
+import { AnalyticsLog } from "../models/mongodb.model";
 
 export const helper = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
@@ -228,6 +229,20 @@ export const projectServices = {
     async deleteProject(userId: number, projectId: number) {
         const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'] )
 
+        const allTasks = await db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.projectId, existingProject.projectId))
+
+        const logs: IAnalyticsLog[] = allTasks.map(data => {
+            return {
+                taskId: String(data.taskId),
+                userId: String(userId),
+                action: 'deleted',
+                timestamp: new Date()
+            }
+        })
+
         // delete the archived project
         const [result] = await db
         .delete(projects)
@@ -240,5 +255,7 @@ export const projectServices = {
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Please archive the project first")
         }
+
+        await AnalyticsLog.insertMany(logs)
     },
 }

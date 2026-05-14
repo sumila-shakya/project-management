@@ -39,10 +39,12 @@ export const commentServices = {
             content: data.content
         }
 
+        // inser the new comment into the database
         const [result] = await db
         .insert(comments)
         .values(newComment)
 
+        // write into the log
         if(result) {
             await AnalyticsLog.create({
                 taskId: taskId,
@@ -82,11 +84,12 @@ export const commentServices = {
             throw new ApiError(403, "Access Denied")
         }
         
-        // throw error if the project was archived
+        // if the user is only the member do not allow to see the comments on task of archived projects
         if(existingTask.projectStatus === 'archived' && existingTask.userRole === 'member') {
             throw new ApiError(403, "Access Denied")
         }
 
+        // get the comments
         const commentsOnTask = await db
         .select()
         .from(comments)
@@ -97,6 +100,7 @@ export const commentServices = {
     },
 
     async editComment(authorId: number, commentId: number, updates: commentContentType) {
+        // get the comment where the user is the author
         const [existingComment] = await db
         .select({
             commentId: comments.commentId,
@@ -110,14 +114,17 @@ export const commentServices = {
             eq(comments.authorId, authorId)
         ))
 
+        // throw error if the comment is not found
         if(!existingComment) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // throw error if the project was archived
         if(existingComment.projectStatus === 'archived') {
             throw new ApiError(403, "Cannot edit comment on archived projects")
         }
 
+        // update the database
         const [result] = await db
         .update(comments)
         .set({
@@ -126,10 +133,12 @@ export const commentServices = {
         })
         .where(eq(comments.commentId, commentId))
 
+        // throw error if no row was updated
         if(result.affectedRows === 0) {
-            throw new ApiError(400, "Invalid data for update")
+            throw new ApiError(400, "No changes applied")
         }
 
+        // get the edited comment
         const editedComment = await db
         .select()
         .from(comments)
@@ -139,6 +148,7 @@ export const commentServices = {
     },
 
     async deleteComment(userId: number, commentId: number) {
+        // get the comment
         const [existingComment] = await db
         .select({
             commentId: comments.commentId,
@@ -155,18 +165,22 @@ export const commentServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // throw error if the comment is not found
         if(!existingComment) {
             throw new ApiError(403, "Access Denied")
         }
 
-        if(existingComment.role !== 'admin' || existingComment.authorId === userId) {
+        // throw error if the user is not the admin or the author
+        if(existingComment.role !== 'admin' && existingComment.authorId !== userId) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // throw error if the author is trying to delete the comment on a archived project
         if(existingComment.authorId === userId && existingComment.projectStatus === 'archived') {
             throw new ApiError(403, "Access Denied")
         }
 
+        // delete the comment
         await db
         .delete(comments)
         .where(eq(comments.commentId, commentId))

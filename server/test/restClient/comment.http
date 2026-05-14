@@ -1,0 +1,25 @@
+### add comment to a task
+POST http://localhost:3000/api/tasks/1/comments
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "content": "this is a test comment"
+}
+
+### get comments on a task
+GET  http://localhost:3000/api/tasks/1/comments
+Authorization: Bearer 
+
+### edit comment to a task
+POST http://localhost:3000/api/comments/1
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "content": "this is a edited test comment"
+}
+
+### delete comments on a task
+GET  http://localhost:3000/api/comments/1
+Authorization: Bearer 

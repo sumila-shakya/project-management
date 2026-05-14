@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import { ACTIONS } from "../utils/constants";
+import { IAnalyticsLog } from "../@types/interface";
 
-const analyticsSchema = new mongoose.Schema({
+const analyticsSchema = new mongoose.Schema<IAnalyticsLog>({
     taskId: {
-        type: Number, 
+        type: String, 
         required: true,
         index: true
     },
     userId: {
-        type: Number, 
+        type: String, 
         required: true
     },
     action: {
@@ -28,4 +29,4 @@ const analyticsSchema = new mongoose.Schema({
     },
 })
 
-export const AnalyticsLog = mongoose.model('AnalyticsLog', analyticsSchema)
+export const AnalyticsLog = mongoose.model<IAnalyticsLog>('AnalyticsLog', analyticsSchema)

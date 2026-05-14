@@ -5,7 +5,7 @@ import { eq, and, asc, like } from "drizzle-orm";
 import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
 import { helper } from "./project.service";
 import { statusTransition } from "../utils/statusTransition";
-import { Role } from "../@types/interface";
+import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 
 export const taskServices = {
@@ -66,13 +66,17 @@ export const taskServices = {
         .insert(tasks)
         .values(newTask)
 
-        // write into the analytics log
-        await AnalyticsLog.create({
-            taskId: result.insertId,
-            userId: userId,
+        const log: IAnalyticsLog = {
+            taskId: String(result.insertId),
+            userId: String(userId),
             action: 'created',
             timestamp: new Date()
-        })
+        }
+
+        // write into the analytics log
+        if(result) {
+            await AnalyticsLog.create(log)
+        }
 
         // get the new inserted task
         const [insertedTask] = await db
@@ -276,20 +280,22 @@ export const taskServices = {
 
         // if no record was updated throw error
         if(result.affectedRows === 0) {
-            throw new ApiError(400, "Invalid update data")
+            throw new ApiError(400, "No changes applied")
         }
 
         // get all the changes
-        const changes = getChanges(existingTask, updates)
+        const changes: IChanges[] = getChanges(existingTask, updates)
 
-        // write the changes in analytics log
-        await AnalyticsLog.create({
-            taskId: taskId,
-            userId: userId,
+        const log: IAnalyticsLog = {
+            taskId: String(taskId),
+            userId: String(userId),
             action: 'updated',
             changes: changes,
             timestamp: new Date()
-        })
+        }
+
+        // write the changes in analytics log
+        await AnalyticsLog.create(log)
 
         return {
             ...existingTask,
@@ -350,7 +356,7 @@ export const taskServices = {
         .where(eq(tasks.taskId, taskId))
 
         // record the changes
-        const changes = []
+        const changes: IChanges[] = []
         changes.push({
             field: 'taskStatus',
             oldValue: existingTask.taskStatus,
@@ -365,14 +371,16 @@ export const taskServices = {
             })
         }
 
-        // write the changes to the analytics log
-        await AnalyticsLog.create({
-            taskId: taskId,
-            userId: userId,
+        const log: IAnalyticsLog = {
+            taskId: String(taskId),
+            userId: String(userId),
             action: data.taskStatus === 'completed' ? 'completed' : 'updated',
             changes: changes,
             timestamp: new Date()
-        })
+        }
+
+        // write the changes to the analytics log
+        await AnalyticsLog.create(log)
     },
 
     async assignTask(userId: number, taskId: number, data: assignTaskType) {
@@ -457,10 +465,9 @@ export const taskServices = {
         .set(data)
         .where(eq(tasks.taskId, taskId))
 
-        // write into the analytics log
-        await AnalyticsLog.create({
-            taskId: taskId,
-            userId: userId,
+        const log: IAnalyticsLog = {
+            taskId: String(taskId),
+            userId: String(userId),
             action: 'assigned',
             changes: [{
                 field: 'assignedTo',
@@ -468,7 +475,10 @@ export const taskServices = {
                 newValue: data.assignedTo
             }],
             timestamp: new Date()
-        })
+        }
+
+        // write into the analytics log
+        await AnalyticsLog.create(log)
     },
 
     async getSubTasks(userId: number, taskId: number) {
@@ -504,6 +514,56 @@ export const taskServices = {
         .where(eq(tasks.parentTaskId, taskId))
 
         return subtasks
+    },
+
+    async deleteTask(userId: number, taskId: number) {
+        // get the existing task
+        const [existingTask] = await db
+        .select({
+            taskId: tasks.taskId,
+            projectId: tasks.projectId,
+            projectStatus: projects.projectStatus,
+            role: teamMembers.role
+        })
+        .from(tasks)
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(tasks.taskId, taskId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        // if task data does not exists throw error
+        if(!existingTask) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        // throw error if the project was archived
+        if(existingTask.projectStatus === 'archived') {
+            throw new ApiError(400, "Cannot update task on a archived projects")
+        }
+
+        // throw error if the user is not the admin
+        if(existingTask.role !== 'admin') {
+            throw new ApiError(403, "access Denied")
+        }
+
+        // delete the task
+        const [result] = await db
+        .delete(tasks)
+        .where(eq(tasks.taskId, taskId))
+
+        // write into the log
+        if(result.affectedRows > 0) {
+            const log: IAnalyticsLog = {
+                taskId: String(taskId),
+                userId: String(userId),
+                action: 'deleted',
+                timestamp: new Date()
+            }
+
+            await AnalyticsLog.create(log)
+        }
     }
 }
 

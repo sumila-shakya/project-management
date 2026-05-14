@@ -225,5 +225,30 @@ export const taskController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async deleteTask(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the taskId from the request params
+            const taskId = parseId(req.params.taskId as string)
+
+            // delete task
+            await taskServices.deleteTask(userId, taskId)
+
+            // send 200 success msg
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Task deleted successfully"))
+        } catch(error) {
+            next(error)
+        }
     }
 }

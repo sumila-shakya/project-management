@@ -52,3 +52,7 @@ Content-Type: application/json
 ### get sub tasks
 GET http://localhost:3000/api/tasks/1/subtasks
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+
+### delete the task
+DELETE http://localhost:3000/api/tasks/1
+Authorization: Bearer 

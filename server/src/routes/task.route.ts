@@ -27,6 +27,9 @@ router.patch('/:taskId/assign', taskController.assignTask)
 // GET SUB TASKS ROUTE
 router.get('/:taskId/subtasks', taskController.getSubTasks)
 
+// DELETE THE TASK ROUTE
+router.delete('/:taskId', taskController.deleteTask)
+
 /* ------------------------------------ COMMENT ROUTES ------------------------------------ */
 // ADD COMMENT
 router.post('/:taskId/comments', commentController.addComment)

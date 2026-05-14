@@ -7,6 +7,7 @@ import teamRouter from './routes/team.route'
 import invitationRouter from './routes/invitation.route'
 import projectRouter from './routes/project.route'
 import taskRouter from './routes/task.route'
+import commentRouter from './routes/comment.route'
 import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 
@@ -23,6 +24,7 @@ app.use('/api/teams', teamRouter)
 app.use('/api/invitations', invitationRouter)
 app.use('/api/projects', projectRouter)
 app.use('/api/tasks', taskRouter)
+app.use('/api/comments', commentRouter)
 
 // HEALTH STATUS CHECKUP
 app.get('/api/health', async (req, res, next) => {
