@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { tasks, taskAssets, projects, teamMembers, NewTask, teams } from "../models/mysql.model";
+import { tasks, taskAssets, projects, teamMembers, users, NewTask, teams } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { eq, and, asc, like } from "drizzle-orm";
 import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
@@ -67,9 +67,24 @@ export const taskServices = {
         .values(newTask)
 
         const log: IAnalyticsLog = {
-            taskId: String(result.insertId),
-            userId: String(userId),
+            actor: {
+                userId: String(userId),
+                userName: membership.userName,
+                role: membership.role
+            },
+            target: {
+                taskId: String(result.insertId),
+                taskName: data.title
+            },
             action: 'created',
+            team: {
+                teamId: String(membership.teamId),
+                teamName: membership.teamName
+            },
+            project: {
+                projectId: String(existingProject.projectId),
+                projectName: existingProject.projectName
+            },
             timestamp: new Date()
         }
 
@@ -229,17 +244,23 @@ export const taskServices = {
             description: tasks.description,
             projectId: tasks.projectId,
             projectStatus: projects.projectStatus,
+            projectName: projects.projectName,
+            teamId: projects.teamId,
+            teamName: teams.teamName,
             assignedTo: tasks.assignedTo,
             taskStatus: tasks.taskStatus,
             taskPriority: tasks.taskPriority,
             dueDate: tasks.dueDate,
             completedAt: tasks.completedAt,
             projectEndDate: projects.endDate,
+            userName: users.name,
             role: teamMembers.role
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(tasks.taskId, taskId),
             eq(teamMembers.userId, userId)
@@ -287,10 +308,25 @@ export const taskServices = {
         const changes: IChanges[] = getChanges(existingTask, updates)
 
         const log: IAnalyticsLog = {
-            taskId: String(taskId),
-            userId: String(userId),
+            actor: {
+                userId: String(userId),
+                userName: existingTask.userName,
+                role: existingTask.role
+            },
+            target: {
+                taskId: String(taskId),
+                taskName: existingTask.title
+            },
             action: 'updated',
             changes: changes,
+            team: {
+                teamId: String(existingTask.teamId),
+                teamName: existingTask.teamName
+            },
+            project: {
+                projectId: String(existingTask.projectId),
+                projectName: existingTask.projectName
+            },
             timestamp: new Date()
         }
 
@@ -309,15 +345,25 @@ export const taskServices = {
         const [existingTask] = await db
         .select({
             taskId: tasks.taskId,
+            title: tasks.title,
             projectId: tasks.projectId,
+            projectName: projects.projectName,
+            teamId: projects.teamId,
+            teamName: teams.teamName,
             assignedTo: tasks.assignedTo,
             taskStatus: tasks.taskStatus,
             dueDate: tasks.dueDate,
             completedAt: tasks.completedAt,
-            projectStatus: projects.projectStatus
+            projectStatus: projects.projectStatus,
+            userName: users.name,
+            role: teamMembers.role
+
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(tasks.taskId, taskId),
             eq(tasks.assignedTo, userId)
@@ -372,10 +418,25 @@ export const taskServices = {
         }
 
         const log: IAnalyticsLog = {
-            taskId: String(taskId),
-            userId: String(userId),
+            actor: {
+                userId: String(userId),
+                userName: existingTask.userName,
+                role: existingTask.role
+            },
+            target: {
+                taskId: String(taskId),
+                taskName: existingTask.title
+            },
             action: data.taskStatus === 'completed' ? 'completed' : 'updated',
             changes: changes,
+            team: {
+                teamId: String(existingTask.teamId),
+                teamName: existingTask.teamName
+            },
+            project: {
+                projectId: String(existingTask.projectId),
+                projectName: existingTask.projectName
+            },
             timestamp: new Date()
         }
 
@@ -389,7 +450,11 @@ export const taskServices = {
             db
             .select({
                 taskId: tasks.taskId,
+                title: tasks.title,
                 projectId: tasks.projectId,
+                projectName: projects.projectName,
+                teamId: projects.teamId,
+                teamName: teams.teamName,
                 projectStatus: projects.projectStatus,
                 createdBy: tasks.createdBy,
                 assignedTo:tasks.assignedTo,
@@ -397,11 +462,14 @@ export const taskServices = {
                 taskPriority: tasks.taskPriority,
                 dueDate: tasks.dueDate,
                 completedAt: tasks.completedAt,
+                userName: users.name,
                 role: teamMembers.role
             })
             .from(tasks)
             .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-            .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+            .innerJoin(teams, eq(projects.teamId, teams.teamId))
+            .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+            .innerJoin(users, eq(teamMembers.userId, users.userId))
             .where(and(
                 eq(tasks.taskId, taskId),
                 eq(teamMembers.userId, userId)
@@ -466,14 +534,29 @@ export const taskServices = {
         .where(eq(tasks.taskId, taskId))
 
         const log: IAnalyticsLog = {
-            taskId: String(taskId),
-            userId: String(userId),
+            actor: {
+                userId: String(userId),
+                userName: existingTask.userName,
+                role: existingTask.role
+            },
+            target: {
+                taskId: String(taskId),
+                taskName: existingTask.title
+            },
             action: 'assigned',
             changes: [{
                 field: 'assignedTo',
                 oldValue: existingTask.assignedTo,
                 newValue: data.assignedTo
             }],
+            team: {
+                teamId: String(existingTask.teamId),
+                teamName: existingTask.teamName
+            },
+            project: {
+                projectId: String(existingTask.projectId),
+                projectName: existingTask.projectName
+            },
             timestamp: new Date()
         }
 
@@ -521,13 +604,20 @@ export const taskServices = {
         const [existingTask] = await db
         .select({
             taskId: tasks.taskId,
+            title: tasks.title,
             projectId: tasks.projectId,
+            projectName: projects.projectName,
+            teamId: projects.teamId,
+            teamName: teams.teamName,
             projectStatus: projects.projectStatus,
+            userName: users.name,
             role: teamMembers.role
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(tasks.taskId, taskId),
             eq(teamMembers.userId, userId)
@@ -556,9 +646,24 @@ export const taskServices = {
         // write into the log
         if(result.affectedRows > 0) {
             const log: IAnalyticsLog = {
-                taskId: String(taskId),
-                userId: String(userId),
+                actor: {
+                    userId: String(userId),
+                    userName: existingTask.userName,
+                    role: existingTask.role
+                },
+                target: {
+                    taskId: String(taskId),
+                    taskName: existingTask.title
+                },
                 action: 'deleted',
+                team: {
+                    teamId: String(existingTask.teamId),
+                    teamName: existingTask.teamName
+                },
+                project: {
+                    projectId: String(existingTask.projectId),
+                    projectName: existingTask.projectName
+                },
                 timestamp: new Date()
             }
 

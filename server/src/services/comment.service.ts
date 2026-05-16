@@ -1,9 +1,10 @@
 import { db } from "../config/mysql.config";
-import { comments, projects, tasks, teamMembers, NewComment } from "../models/mysql.model";
+import { comments, projects, tasks, teamMembers, NewComment, teams, users } from "../models/mysql.model";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../utils/validator";
 import { eq, and, desc } from "drizzle-orm";
+import { IAnalyticsLog } from "../@types/interface";
 
 export const commentServices = {
     async addComment(authorId: number, taskId: number, data: commentContentType) {
@@ -11,13 +12,20 @@ export const commentServices = {
         const [existingTask] = await db
         .select({
             taskId: tasks.taskId,
+            taskName: tasks.title,
             projectId: tasks.projectId,
+            projectName: projects.projectName,
+            teamId: projects.teamId,
+            teamName: teams.teamName,
             projectStatus: projects.projectStatus,
+            userName: users.name,
             role: teamMembers.role
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(tasks.taskId, taskId),
             eq(teamMembers.userId, authorId)
@@ -46,12 +54,29 @@ export const commentServices = {
 
         // write into the log
         if(result) {
-            await AnalyticsLog.create({
-                taskId: taskId,
-                userId: authorId,
+            const log: IAnalyticsLog = {
+                actor: {
+                    userId: String(authorId),
+                    userName: existingTask.userName,
+                    role: existingTask.role
+                },
+                target: {
+                    taskId: String(taskId),
+                    taskName: existingTask.taskName
+                },
                 action: 'commented',
+                team: {
+                    teamId: String(existingTask.teamId),
+                    teamName: existingTask.teamName
+                },
+                project: {
+                    projectId: String(existingTask.projectId),
+                    projectName: existingTask.projectName
+                },
                 timestamp: new Date()
-            })
+            }
+
+            await AnalyticsLog.create(log)
         }
 
         return {

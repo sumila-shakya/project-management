@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, createTeamType, updateTeamType, updateTeamMemberType } from "../utils/validator";
+import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema,
+         createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../utils/validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
 import { parseId } from "../utils/validateId";
 
@@ -136,6 +137,31 @@ export const teamController = {
             res
             .status(200)
             .json(new ApiResponse(200, {}, "team deleted successfully"))
+        } catch(error) {
+            next(error)
+        }
+    },
+
+    async getAnalyticsLog(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id
+            const userId = req.user?.userId
+
+            // if the userId is missing throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = parseId(req.params.teamId as string)
+
+            const queryFilter: filterAnalyticsLogType = filterAnalyticsLogSchema.parse(req.query)
+
+            const logs = teamServices.getAnalyticsLog(userId, teamId, queryFilter)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, logs))
         } catch(error) {
             next(error)
         }

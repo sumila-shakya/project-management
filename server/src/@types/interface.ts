@@ -16,10 +16,33 @@ export interface IChanges {
     newValue: unknown
 }
 
-export interface IAnalyticsLog {
-    taskId: string,
+export interface ActorMetaData {
     userId: string,
+    userName: string,
+    role: Role
+}
+
+export interface ProjectMetaData {
+    projectId: string,
+    projectName: string
+}
+
+export interface TeamMetaData {
+    teamId: string,
+    teamName: string
+}
+
+export interface TaskMetaData {
+    taskId: string,
+    taskName: string
+}
+
+export interface IAnalyticsLog {
+    actor: ActorMetaData,
+    target: TaskMetaData,
     action: Actions,
     changes?: IChanges[],
+    team: TeamMetaData,
+    project: ProjectMetaData,
     timestamp: Date
 }

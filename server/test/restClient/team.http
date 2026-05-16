@@ -52,3 +52,7 @@ Content-Type: application/json
 ### remove team member
 DELETE http://localhost:3000/api/teams/1/members/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
+
+### get analytics log
+GET http://localhost:3000/api/teams/1/activity?projectId=1&action=deleted
+Authorization: Bearer 

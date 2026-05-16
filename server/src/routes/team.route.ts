@@ -49,4 +49,7 @@ router.post('/:teamId/projects', projectController.createProject)
 // GET ALL PROJECTS ROUTE
 router.get('/:teamId/projects', projectController.getProjects)
 
+/* ------------------------------------ ANALYTICS LOG ROUTES ------------------------------------ */
+router.get('/:teamId/activity', teamController.getAnalyticsLog)
+
 export default router

@@ -1,7 +1,8 @@
 import { db } from "../config/mysql.config";
-import { users, teams, teamMembers, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
+import { AnalyticsLog } from "../models/mongodb.model";
+import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { createTeamType, updateTeamType, updateTeamMemberType } from "../utils/validator";
+import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../utils/validator";
 import { and, count, eq } from "drizzle-orm";
 
 export const teamServices = {
@@ -141,6 +142,36 @@ export const teamServices = {
             .delete(teams)
             .where(eq(teams.teamId, teamId))
         })
+    },
+
+    async getAnalyticsLog(userId: number, teamId: number, filters: filterAnalyticsLogType) {
+        // check if the user is the member
+        const [member] = await db
+        .select()
+        .from(teamMembers)
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!member) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        const queryFilters: Record<string, unknown> = {}
+        queryFilters['team.teamId'] = String(teamId)
+        if(filters.action) queryFilters['action'] = filters.action
+        if(filters.taskId) queryFilters['target.taskId'] = filters.taskId
+        if(filters.userId) queryFilters['actor.userId'] = filters.userId
+        if(filters.projectId) queryFilters['project.projectId'] = filters.projectId
+        if(filters.role) queryFilters['actor.role'] = filters.role
+
+        const logs = await AnalyticsLog.aggregate([
+            { $match: queryFilters},
+            { $sort: { timestamp: -1 }}
+        ])
+
+        return logs
     }
 }
 

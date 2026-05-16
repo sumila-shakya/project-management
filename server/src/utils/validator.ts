@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS, TASK_PRIORITY, TASK_STATUS } from './constants'
+import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS, TASK_PRIORITY, TASK_STATUS, ACTIONS } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -184,6 +184,14 @@ export const commentContentSchema = z.object({
     .max(2000, { message: "Comment must be under 2000 characters" })
 })
 
+export const filterAnalyticsLogSchema = z.object({
+    taskId: z.coerce.number().positive().optional(),
+    userId: z.coerce.number().positive().optional(),
+    projectId: z.coerce.number().positive().optional(),
+    role: z.enum(ROLE, {message: "Invalid role"}).optional(),
+    action: z.enum(ACTIONS, {message: "Invalid action"}).optional()
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -207,3 +215,4 @@ export type updateTaskType = z.infer<typeof updateTaskSchema>
 export type processTaskType = z.infer<typeof processTaskSchema>
 export type assignTaskType = z.infer<typeof assignTaskSchema>
 export type commentContentType = z.infer<typeof commentContentSchema>
+export type filterAnalyticsLogType = z.infer<typeof filterAnalyticsLogSchema>

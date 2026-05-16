@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { projects, teamMembers, NewProject, tasks } from "../models/mysql.model";
+import { projects, teamMembers, NewProject, tasks, users, teams } from "../models/mysql.model";
 import { eq, and, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
@@ -22,8 +22,17 @@ export const helper = {
 
         // check if the user is the member of the team project belonging to
         const [membership] = await db
-        .select()
+        .select({
+            id: teamMembers.id,
+            teamId: teamMembers.teamId,
+            teamName: teams.teamName,
+            userId: teamMembers.userId,
+            userName: users.name,
+            role: teamMembers.role
+        })
         .from(teamMembers)
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
+        .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
         .where(and(
             eq(teamMembers.teamId, existingProject.teamId),
             eq(teamMembers.userId, userId)
@@ -235,12 +244,28 @@ export const projectServices = {
         .where(eq(tasks.projectId, existingProject.projectId))
 
         const logs: IAnalyticsLog[] = allTasks.map(data => {
-            return {
-                taskId: String(data.taskId),
-                userId: String(userId),
+            const log: IAnalyticsLog = {
+                actor: {
+                    userId: String(userId),
+                    userName: membership.userName,
+                    role: membership.role
+                },
+                target: {
+                    taskId: String(data.taskId),
+                    taskName: data.title
+                },
                 action: 'deleted',
+                team: {
+                    teamId: String(membership.teamId),
+                    teamName: membership.teamName
+                },
+                project: {
+                    projectId: String(existingProject.projectId),
+                    projectName: existingProject.projectName
+                },
                 timestamp: new Date()
             }
+            return log
         })
 
         // delete the archived project
