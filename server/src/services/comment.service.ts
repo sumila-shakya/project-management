@@ -5,41 +5,11 @@ import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../utils/validator";
 import { eq, and, desc } from "drizzle-orm";
 import { IAnalyticsLog } from "../@types/interface";
+import { taskGuard } from "./task.service";
 
 export const commentServices = {
     async addComment(authorId: number, taskId: number, data: commentContentType) {
-        // get the existing task
-        const [existingTask] = await db
-        .select({
-            taskId: tasks.taskId,
-            taskName: tasks.title,
-            projectId: tasks.projectId,
-            projectName: projects.projectName,
-            teamId: projects.teamId,
-            teamName: teams.teamName,
-            projectStatus: projects.projectStatus,
-            userName: users.name,
-            role: teamMembers.role
-        })
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teams, eq(projects.teamId, teams.teamId))
-        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
-        .innerJoin(users, eq(teamMembers.userId, users.userId))
-        .where(and(
-            eq(tasks.taskId, taskId),
-            eq(teamMembers.userId, authorId)
-        ))
-        
-        // if task data does not exists throw error
-        if(!existingTask) {
-            throw new ApiError(403, "Access Denied")
-        }
-        
-        // throw error if the project was archived
-        if(existingTask.projectStatus === 'archived') {
-            throw new ApiError(403, "Cannot comment on task on a archived projects")
-        }
+        const existingTask = await taskGuard.validateAccess(authorId, taskId)
 
         const newComment: NewComment = {
             authorId: authorId,
@@ -62,7 +32,7 @@ export const commentServices = {
                 },
                 target: {
                     taskId: String(taskId),
-                    taskName: existingTask.taskName
+                    taskName: existingTask.title
                 },
                 action: 'commented',
                 team: {

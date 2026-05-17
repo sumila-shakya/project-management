@@ -6,9 +6,9 @@ import { projectType, updateProjectType, filterProjectType } from "../utils/vali
 import { Role, IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 
-export const helper = {
+export const projectGuard = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
-    async projectAccess(userId: number, projectId: number, allowedRoles?: Role[]) {
+    async validateAccess(userId: number, projectId: number, allowedRoles?: Role[]) {
         // check if the project exists
         const [existingProject] = await db
         .select()
@@ -136,7 +136,7 @@ export const projectServices = {
     // GET PROJECT DETAILS SERVICE FUNCTION
     async getProjectDetails(userId: number, projectId: number) {
         // check if the project exists
-        const {existingProject, membership} = await helper.projectAccess(userId, projectId)
+        const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
 
         // get the total tasks and completed tasks in the project
         const [[tasksCount], [completedTasksCount]] = await Promise.all([
@@ -167,7 +167,7 @@ export const projectServices = {
 
     // UPDATE PROJECT SERVICE FUNCTION
     async updateProject(userId: number, projectId: number, updates: updateProjectType) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin','team_leader'])
+        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin','team_leader'])
 
         // if the end date is lesser than start date throw error
         if(updates.endDate && updates.endDate <= existingProject.startDate) {
@@ -189,7 +189,7 @@ export const projectServices = {
 
     // ARCHIVE PROJECT SERVICE FUNCTION
     async archiveProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'])
+        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin', 'team_leader'])
 
         // archive the active project
         const [result] = await db
@@ -210,7 +210,7 @@ export const projectServices = {
 
     // RESTORE PROJECT SERVICE FUNCTION
     async restoreProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'] )
+        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin', 'team_leader'] )
 
         // restore the archived project
         const [result] = await db
@@ -236,8 +236,9 @@ export const projectServices = {
 
     // DELETE PROJECT SERVICE FUNCTION
     async deleteProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await helper.projectAccess(userId, projectId, ['admin', 'team_leader'] )
+        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin', 'team_leader'] )
 
+        // get all the tasks belonging to the project
         const allTasks = await db
         .select()
         .from(tasks)
@@ -281,6 +282,7 @@ export const projectServices = {
             throw new ApiError(400, "Please archive the project first")
         }
 
+        // write into the log
         await AnalyticsLog.insertMany(logs)
     },
 }

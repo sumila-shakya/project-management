@@ -1,13 +1,22 @@
-### get all invitations
-GET http://localhost:3000/api/invitations
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
-
-### process invitations
-PATCH http://localhost:3000/api/invitations/1/process
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
+### send invitation
+POST http://localhost:3000/api/teams/1/invite
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3OTAzNjI4NCwiZXhwIjoxNzc5MDM2ODg0fQ.ZMEYRDpVsRGIWDjb7TprnDEIBjpmvmbG8cKbvRzagco
 Content-Type: application/json
 
 {
-    "token": "36d57a2a459195d5cdff41328d38bfa2",
+    "inviteeId": 2
+}
+
+### get all invitations
+GET http://localhost:3000/api/invitations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+
+### process invitations
+PATCH http://localhost:3000/api/invitations/1/process
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+Content-Type: application/json
+
+{
+    "token": "f990ece28e618a6d4d1d7824bfa34759",
     "action": "accepted"
 }

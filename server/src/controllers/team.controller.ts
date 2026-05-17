@@ -157,7 +157,7 @@ export const teamController = {
 
             const queryFilter: filterAnalyticsLogType = filterAnalyticsLogSchema.parse(req.query)
 
-            const logs = teamServices.getAnalyticsLog(userId, teamId, queryFilter)
+            const logs = await teamServices.getAnalyticsLog(userId, teamId, queryFilter)
 
             res
             .status(200)

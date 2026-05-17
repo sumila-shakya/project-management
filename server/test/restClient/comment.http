@@ -1,6 +1,6 @@
 ### add comment to a task
 POST http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 Content-Type: application/json
 
 {
@@ -8,12 +8,12 @@ Content-Type: application/json
 }
 
 ### get comments on a task
-GET  http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer 
+GET http://localhost:3000/api/tasks/1/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 
 ### edit comment to a task
-POST http://localhost:3000/api/comments/1
-Authorization: Bearer 
+PATCH http://localhost:3000/api/comments/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 Content-Type: application/json
 
 {
@@ -21,5 +21,5 @@ Content-Type: application/json
 }
 
 ### delete comments on a task
-GET  http://localhost:3000/api/comments/1
-Authorization: Bearer 
+DELETE http://localhost:3000/api/comments/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50

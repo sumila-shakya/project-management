@@ -142,6 +142,11 @@ export const teamServices = {
             .delete(teams)
             .where(eq(teams.teamId, teamId))
         })
+
+        // delete the team log
+        await AnalyticsLog.deleteMany({
+            "team.teamId": String(teamId)
+        })
     },
 
     async getAnalyticsLog(userId: number, teamId: number, filters: filterAnalyticsLogType) {
@@ -154,22 +159,26 @@ export const teamServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // throw error if user is not the member
         if(!member) {
             throw new ApiError(403, "Access Denied")
         }
 
-        const queryFilters: Record<string, unknown> = {}
+        // get the filters
+        const queryFilters: Record<string, string> = {}
         queryFilters['team.teamId'] = String(teamId)
         if(filters.action) queryFilters['action'] = filters.action
-        if(filters.taskId) queryFilters['target.taskId'] = filters.taskId
-        if(filters.userId) queryFilters['actor.userId'] = filters.userId
-        if(filters.projectId) queryFilters['project.projectId'] = filters.projectId
+        if(filters.taskId) queryFilters['target.taskId'] = String(filters.taskId)
+        if(filters.userId) queryFilters['actor.userId'] = String(filters.userId)
+        if(filters.projectId) queryFilters['project.projectId'] = String(filters.projectId)
         if(filters.role) queryFilters['actor.role'] = filters.role
 
-        const logs = await AnalyticsLog.aggregate([
-            { $match: queryFilters},
-            { $sort: { timestamp: -1 }}
-        ])
+        // get the analytics log
+        const logs = await AnalyticsLog
+        .find(queryFilters)
+        .select('-_id -__v')
+        .sort({ timestamp: -1 })
+        .lean()
 
         return logs
     }

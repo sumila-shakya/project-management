@@ -1,18 +1,18 @@
 ### create new task
 POST http://localhost:3000/api/projects/1/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 Content-Type: application/json
 
 {
     "title": "test",
     "description": "this is a test task",
     "taskPriority": "medium",
-    "dueDate": "2026-05-25"
+    "dueDate": "2026-07-25"
 }
 
 ### get all tasks in projects
 GET http://localhost:3000/api/projects/1/tasks?title=test&taskPriority=low
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 
 ### get all users tasks
 GET http://localhost:3000/api/tasks/my-tasks?title=test&taskPriority=low
@@ -20,7 +20,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhd
 
 ### get the task details
 GET http://localhost:3000/api/tasks/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNTQyMCwiZXhwIjoxNzc5MDM2MDIwfQ.isqX1ABwc72Dxt9Rg-z6UwAQd1LWfDFFZQ7oOdGqQPo
 
 ### update the task
 PATCH http://localhost:3000/api/tasks/1
@@ -33,7 +33,7 @@ Content-Type: application/json
 
 ### process task
 PATCH http://localhost:3000/api/tasks/1/status
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 Content-Type: application/json
 
 {
@@ -42,7 +42,7 @@ Content-Type: application/json
 
 ### assign task
 PATCH http://localhost:3000/api/tasks/1/assign
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 Content-Type: application/json
 
 {
@@ -51,8 +51,8 @@ Content-Type: application/json
 
 ### get sub tasks
 GET http://localhost:3000/api/tasks/1/subtasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODYwMTkwNCwiZXhwIjoxNzc4NjAyNTA0fQ.uZWHKCXyLH7EmWy5ZM-Tc7aw2K828e5ZkNEfBYbfcLs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 
 ### delete the task
 DELETE http://localhost:3000/api/tasks/1
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50

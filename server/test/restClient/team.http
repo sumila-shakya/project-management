@@ -1,6 +1,6 @@
 ### create team 
 POST http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzIxMSwiZXhwIjoxNzc4NTk3ODExfQ.01GHxqsC_wsQrpycEe7VPvbzt0Nbt3R_cA6XcU9wp9M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3OTAzNjI4NCwiZXhwIjoxNzc5MDM2ODg0fQ.ZMEYRDpVsRGIWDjb7TprnDEIBjpmvmbG8cKbvRzagco
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ### get all the users team
 GET http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzQwMCwiZXhwIjoxNzc4NTk4MDAwfQ.LdxQ3Y7HOwwaSQMIK4lfdRmYEzlTX-unwBksCzLjVBM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
 
 ### get team by id
 GET http://localhost:3000/api/teams/1
@@ -29,16 +29,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhd
 
 ### get all team members
 GET http://localhost:3000/api/teams/1/members
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3ODU5NzQ3NywiZXhwIjoxNzc4NTk4MDc3fQ.gsoPdhxwzxz6C-QNPnIoBpOvXrDqXKFCBZwChYunzoQ
-
-### send invitation
-POST http://localhost:3000/api/teams/1/invite
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3ODU5NzQwMCwiZXhwIjoxNzc4NTk4MDAwfQ.LdxQ3Y7HOwwaSQMIK4lfdRmYEzlTX-unwBksCzLjVBM
-Content-Type: application/json
-
-{
-    "inviteeId": 2
-}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNTQyMCwiZXhwIjoxNzc5MDM2MDIwfQ.isqX1ABwc72Dxt9Rg-z6UwAQd1LWfDFFZQ7oOdGqQPo
 
 ### update team member
 PATCH http://localhost:3000/api/teams/1/members/2/role
@@ -54,5 +45,5 @@ DELETE http://localhost:3000/api/teams/1/members/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Nzc4MDQ5NSwiZXhwIjoxNzc3NzgxMDk1fQ.fg0kgnjvkFHCPuHchjc0javawSeyMdLTvqprlXDWBzU
 
 ### get analytics log
-GET http://localhost:3000/api/teams/1/activity?projectId=1&action=deleted
-Authorization: Bearer 
+GET http://localhost:3000/api/teams/1/activity
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNzA1OCwiZXhwIjoxNzc5MDM3NjU4fQ.sv6qoek5tII4LYwnn6ngBYCv7qWXC47t75gWi76ZLgc
