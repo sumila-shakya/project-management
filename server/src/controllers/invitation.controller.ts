@@ -3,7 +3,7 @@ import { invitationSchema, processInvitationSchema, invitationType, processInvit
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { invitationServices } from "../services/invitation.service";
-import { parseId } from "../utils/validateId";
+import { parseId } from "../utils/validate-id";
 
 export const invitationController = {
     // SEND INVITATIONS CONTROLLER FUNCTION

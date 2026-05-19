@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema,
          createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../utils/validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
-import { parseId } from "../utils/validateId";
+import { parseId } from "../utils/validate-id";
 
 export const teamController = {
     // CREATE TEAM CONTROLLER FUNCTION

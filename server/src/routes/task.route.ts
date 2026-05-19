@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { taskController } from "../controllers/task.controller";
 import { commentController } from "../controllers/comment.controller";
+import { taskAssetsController } from "../controllers/task-assets.controller";
+import { upload } from "../middlewares/multer.middleware";
 
 const router = Router()
 
@@ -36,5 +38,9 @@ router.post('/:taskId/comments', commentController.addComment)
 
 // GET COMMENTS
 router.get('/:taskId/comments', commentController.getComments)
+
+/* ------------------------------------ TASK ASSETS ROUTES ------------------------------------ */
+// ATTACH ASSETS
+router.post('/:taskId/attachments', upload.single('asset'), taskAssetsController.attachAsset)
 
 export default router

@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
 import { taskSchema, filterTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema,
          taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
-import { parseId } from "../utils/validateId";
+import { parseId } from "../utils/validate-id";
 
 export const taskController = {
     async createTask(req: Request, res: Response, next: NextFunction) {

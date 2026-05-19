@@ -4,7 +4,7 @@ import { ApiError } from "../utils/apiError";
 import { eq, and, asc, like } from "drizzle-orm";
 import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
 import { projectGuard } from "./project.service";
-import { statusTransition } from "../utils/statusTransition";
+import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 

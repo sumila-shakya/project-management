@@ -14,7 +14,10 @@ declare global {
             MAIL_USER: string,
             MAIL_PASS: string,
             MAIL_FROM: string,
-            CLIENT_URL: string
+            CLIENT_URL: string,
+            CLOUDINARY_CLOUD_NAME: string,
+            CLOUDINARY_API_KEY: string,
+            CLOUDINARY_API_SECRET: string
         }
     }
 }

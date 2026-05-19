@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { parseId } from "../utils/validateId";
+import { parseId } from "../utils/validate-id";
 import { commentServices } from "../services/comment.service";
 import { commentContentSchema, commentContentType } from "../utils/validator";
 
