@@ -191,22 +191,12 @@ export const taskServices = {
             throw new ApiError(403, "Access Denied")
         }
 
-        // if the user is only the member do not allow to see the task of archived projects
-        if(taskDetails.projectStatus === 'archived' && taskDetails.role === 'member') {
-            throw new ApiError(403, "Access denied")
-        }
-
         return taskDetails
     },
 
     async getTasksInProjects(userId: number, projectId: number, queryFilters: filterTaskType) {
         // check if the project exists
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
-
-        // if the user is only the member do not allow to see the tasks of archived projects
-        if(existingProject.projectStatus === 'archived' && membership.role === 'member') {
-            throw new ApiError(403, "Access Denied")
-        }
 
         // filter only the tasks belonging to the project mentioned
         const filters = [eq(tasks.projectId, existingProject.projectId)]
@@ -239,9 +229,6 @@ export const taskServices = {
     async getMyTasks(userId: number, queryFilters: filterTaskType) {
         // filter the tasks assigned to the user
         const filters = [eq(tasks.assignedTo, userId)]
-
-        // filter only the tasks from the active projects
-        filters.push(eq(projects.projectStatus, 'active'))
 
         // add filter for task title
         if(queryFilters.title) {
@@ -549,11 +536,6 @@ export const taskServices = {
 
         // throw error if the task is not found
         if(!existingTask) {
-            throw new ApiError(403, "Access Denied")
-        }
-
-        // if the user is only the member do not allow to see the tasks of archived projects
-        if(existingTask.projectStatus === 'archived' && existingTask.role === 'member') {
             throw new ApiError(403, "Access Denied")
         }
 

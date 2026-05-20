@@ -6,4 +6,6 @@ const router = Router()
 
 router.use(authMiddleware)
 
+router.get('/:assetId/download', taskAssetsController.downloadAsset)
+
 export default router

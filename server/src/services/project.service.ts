@@ -109,18 +109,11 @@ export const projectServices = {
             throw new ApiError(403, "Access denied")
         }
 
-        // if the user is only the member do not allow to see the archived projects
-        if(membership.role === 'member' && filter.projectStatus === 'archived') {
-            throw new ApiError(403, "Access Denied")
-        }
-
-        const isMember: boolean = membership.role === 'member'
-        const statusFilter = isMember ? 'active' : filter.projectStatus
         const queryfilters = [eq(projects.teamId, teamId)]
         
         // if the filter is present query the database according to the filter
-        if(statusFilter) {
-            queryfilters.push(eq(projects.projectStatus, statusFilter))
+        if(filter.projectStatus) {
+            queryfilters.push(eq(projects.projectStatus, filter.projectStatus))
         }
 
         // get the filtered data
@@ -168,6 +161,10 @@ export const projectServices = {
     // UPDATE PROJECT SERVICE FUNCTION
     async updateProject(userId: number, projectId: number, updates: updateProjectType) {
         const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin','team_leader'])
+
+        if(existingProject.projectStatus === 'archived') {
+            throw new ApiError(403, "This project is archived. Cannot update on a archived project")
+        }
 
         // if the end date is lesser than start date throw error
         if(updates.endDate && updates.endDate <= existingProject.startDate) {
@@ -236,7 +233,7 @@ export const projectServices = {
 
     // DELETE PROJECT SERVICE FUNCTION
     async deleteProject(userId: number, projectId: number) {
-        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin', 'team_leader'] )
+        const { existingProject, membership} = await projectGuard.validateAccess(userId, projectId, ['admin'] )
 
         // get all the tasks belonging to the project
         const allTasks = await db

@@ -78,11 +78,6 @@ export const commentServices = {
         if(!existingTask) {
             throw new ApiError(403, "Access Denied")
         }
-        
-        // if the user is only the member do not allow to see the comments on task of archived projects
-        if(existingTask.projectStatus === 'archived' && existingTask.userRole === 'member') {
-            throw new ApiError(403, "Access Denied")
-        }
 
         // get the comments
         const commentsOnTask = await db
@@ -170,8 +165,8 @@ export const commentServices = {
             throw new ApiError(403, "Access Denied")
         }
 
-        // throw error if the author is trying to delete the comment on a archived project
-        if(existingComment.authorId === userId && existingComment.projectStatus === 'archived') {
+        // throw error if the author or admin is trying to delete the comment on a archived project
+        if(existingComment.projectStatus === 'archived') {
             throw new ApiError(403, "Access Denied")
         }
 

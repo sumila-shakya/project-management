@@ -67,5 +67,27 @@ export const taskAssetsController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async downloadAsset(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the assetId from the request params
+            const assetId = parseId(req.params.assetId as string)
+
+            const fileUrl = await taskAssetsServices.downloadAsset(userId, assetId)
+
+            res
+            .redirect(fileUrl)
+        } catch(error) {
+            next(error)
+        }
     }
 }

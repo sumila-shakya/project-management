@@ -53,7 +53,6 @@ export const taskAssetsServices = {
         .select({
             taskId: tasks.taskId,
             projectId: tasks.projectId,
-            projectStatus: projects.projectStatus,
             userRole: teamMembers.role
         })
         .from(tasks)
@@ -66,11 +65,6 @@ export const taskAssetsServices = {
                 
         // if task data does not exists throw error
         if(!existingTask) {
-            throw new ApiError(403, "Access Denied")
-        }
-                
-        // if the user is only the member do not allow to see the comments on task of archived projects
-        if(existingTask.projectStatus === 'archived' && existingTask.userRole === 'member') {
             throw new ApiError(403, "Access Denied")
         }
 
@@ -93,5 +87,28 @@ export const taskAssetsServices = {
         .where(and(...filters))
 
         return allTaskAssets
+    },
+
+    async downloadAsset(userId: number, assetId: number) {
+        const [existingAsset] = await db
+        .select({
+            assetId: taskAssets.assetId,
+            fileUrl: taskAssets.fileUrl,
+            role: teamMembers.role
+        })
+        .from(taskAssets)
+        .innerJoin(tasks, eq(taskAssets.taskId, tasks.taskId))
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(taskAssets.assetId, assetId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!existingAsset) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        return existingAsset.fileUrl
     }
 }
