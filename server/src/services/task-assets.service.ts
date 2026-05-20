@@ -110,5 +110,39 @@ export const taskAssetsServices = {
         }
 
         return existingAsset.fileUrl
+    },
+
+    async deleteAsset(userId: number, assetId: number) {
+        const [existingAsset] = await db
+        .select({
+            assetId: taskAssets.assetId,
+            uploadedBy: taskAssets.uploadedBy,
+            projectStatus: projects.projectStatus,
+            role: teamMembers.role
+        })
+        .from(taskAssets)
+        .innerJoin(tasks, eq(taskAssets.taskId, tasks.taskId))
+        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .where(and(
+            eq(taskAssets.assetId, assetId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!existingAsset) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingAsset.role !== 'admin' && existingAsset.uploadedBy !== userId) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        if(existingAsset.projectStatus === 'archived') {
+            throw new ApiError(403, "Access denied")
+        }
+
+        await db
+        .delete(taskAssets)
+        .where(eq(taskAssets.assetId, assetId))
     }
 }

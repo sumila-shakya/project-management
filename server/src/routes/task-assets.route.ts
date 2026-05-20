@@ -8,4 +8,6 @@ router.use(authMiddleware)
 
 router.get('/:assetId/download', taskAssetsController.downloadAsset)
 
+router.delete('/:assetId', taskAssetsController.deleteAsset)
+
 export default router

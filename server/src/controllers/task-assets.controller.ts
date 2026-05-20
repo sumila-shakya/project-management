@@ -89,5 +89,28 @@ export const taskAssetsController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async deleteAsset(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the assetId from the request params
+            const assetId = parseId(req.params.assetId as string)
+
+            await taskAssetsServices.deleteAsset(userId, assetId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Asset deleted successfully"))
+        } catch(error) {
+            next(error)
+        }
     }
 }
