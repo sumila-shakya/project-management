@@ -10,6 +10,7 @@ const router = Router()
 // AUTHENTICATE THE USER
 router.use(authMiddleware)
 
+
 /* ------------------------------------ TASK ROUTES ------------------------------------ */
 // GET MY TASK ROUTE
 router.get('/my-tasks', taskController.getMyTasks)
@@ -32,6 +33,7 @@ router.get('/:taskId/subtasks', taskController.getSubTasks)
 // DELETE THE TASK ROUTE
 router.delete('/:taskId', taskController.deleteTask)
 
+
 /* ------------------------------------ COMMENT ROUTES ------------------------------------ */
 // ADD COMMENT
 router.post('/:taskId/comments', commentController.addComment)
@@ -39,8 +41,13 @@ router.post('/:taskId/comments', commentController.addComment)
 // GET COMMENTS
 router.get('/:taskId/comments', commentController.getComments)
 
+
 /* ------------------------------------ TASK ASSETS ROUTES ------------------------------------ */
 // ATTACH ASSETS
-router.post('/:taskId/attachments', upload.single('asset'), taskAssetsController.attachAsset)
+router.post('/:taskId/assets', upload.single('asset'), taskAssetsController.attachAsset)
+
+// GET ALL TASK ASSETS META DATA
+router.get('/:taskId/assets', taskAssetsController.getTaskAssets)
+
 
 export default router

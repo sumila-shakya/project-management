@@ -1,5 +1,5 @@
 import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean } from "drizzle-orm/mysql-core";
-import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS } from "../utils/constants";
+import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS, ALLOWED_FILE_TYPE } from "../utils/constants";
 
 /* ------------------------------------------ SCHEMA DEFINITIONS ------------------------------------------ */
 
@@ -71,6 +71,7 @@ export const tasks = mysqlTable('tasks', {
 export const taskAssets = mysqlTable('task_assets', {
     assetId: serial('asset_id').primaryKey(),
     taskId: bigint('task_id', { mode: 'number', unsigned: true }).notNull().references(() => tasks.taskId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    fileCategory: mysqlEnum('file_category', ALLOWED_FILE_TYPE).notNull(),
     fileName: varchar('file_name', { length: 100 }).notNull(),
     fileUrl: varchar('file_url', { length: 500 }).notNull(),
     fileSize: bigint('file_size', { mode: 'number', unsigned: true}).notNull(),

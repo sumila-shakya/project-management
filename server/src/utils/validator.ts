@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS, TASK_PRIORITY, TASK_STATUS, ACTIONS } from './constants'
+import { PROCESS_INVITATION_STATUS, ROLE, PROJECT_STATUS, TASK_PRIORITY, TASK_STATUS, ACTIONS, ALLOWED_FILE_TYPE } from './constants'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
@@ -192,6 +192,10 @@ export const filterAnalyticsLogSchema = z.object({
     action: z.enum(ACTIONS, {message: "Invalid action"}).optional()
 })
 
+export const filterAssetsSchema = z.object({
+    fileCategory: z.enum(ALLOWED_FILE_TYPE, {message: "Invalid file category"}).optional()
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -216,3 +220,4 @@ export type processTaskType = z.infer<typeof processTaskSchema>
 export type assignTaskType = z.infer<typeof assignTaskSchema>
 export type commentContentType = z.infer<typeof commentContentSchema>
 export type filterAnalyticsLogType = z.infer<typeof filterAnalyticsLogSchema>
+export type filterAssetsType = z.infer<typeof filterAssetsSchema>

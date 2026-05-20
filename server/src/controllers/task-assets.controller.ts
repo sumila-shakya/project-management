@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { parseId } from "../utils/validate-id";
 import { taskAssetsServices } from "../services/task-assets.service";
 import { FileMetaData, MimeType } from "../@types/interface";
+import { filterAssetsSchema, filterAssetsType } from "../utils/validator";
 import fs from 'fs'
 
 export const taskAssetsController = {
@@ -39,6 +40,31 @@ export const taskAssetsController = {
         } catch(error) {
             // delete the local asset in case of failure
             if(req.file) fs.unlinkSync(req.file.path)
+            next(error)
+        }
+    },
+
+    async getTaskAssets(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the taskId from the request params
+            const taskId = parseId(req.params.taskId as string)
+
+            const queryFilters: filterAssetsType = filterAssetsSchema.parse(req.query)
+
+            const allTaskAssets = await taskAssetsServices.getTaskAssets(userId, taskId, queryFilters)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, allTaskAssets))
+        } catch(error) {
             next(error)
         }
     }
