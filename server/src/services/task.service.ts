@@ -551,6 +551,28 @@ export const taskServices = {
     async deleteTask(userId: number, taskId: number) {
         const existingTask = await taskGuard.validateAccess(userId, taskId, ['admin'])
 
+        const log: IAnalyticsLog = {
+            actor: {
+                userId: String(userId),
+                userName: existingTask.userName,
+                role: existingTask.role
+            },
+            target: {
+                taskId: String(taskId),
+                taskName: existingTask.title
+            },
+            action: 'deleted',
+            team: {
+                teamId: String(existingTask.teamId),
+                teamName: existingTask.teamName
+            },
+            project: {
+                projectId: String(existingTask.projectId),
+                projectName: existingTask.projectName
+            },
+            timestamp: new Date()
+        }
+
         // delete the task
         const [result] = await db
         .delete(tasks)
@@ -558,28 +580,6 @@ export const taskServices = {
 
         // write into the log
         if(result.affectedRows > 0) {
-            const log: IAnalyticsLog = {
-                actor: {
-                    userId: String(userId),
-                    userName: existingTask.userName,
-                    role: existingTask.role
-                },
-                target: {
-                    taskId: String(taskId),
-                    taskName: existingTask.title
-                },
-                action: 'deleted',
-                team: {
-                    teamId: String(existingTask.teamId),
-                    teamName: existingTask.teamName
-                },
-                project: {
-                    projectId: String(existingTask.projectId),
-                    projectName: existingTask.projectName
-                },
-                timestamp: new Date()
-            }
-
             await AnalyticsLog.create(log)
         }
     }

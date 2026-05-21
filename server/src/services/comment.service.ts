@@ -22,6 +22,9 @@ export const commentServices = {
         .insert(comments)
         .values(newComment)
 
+        const contentLength: number = data.content.length
+        const previewLength: number = contentLength <= 50 ? contentLength : 50
+
         // write into the log
         if(result) {
             const log: IAnalyticsLog = {
@@ -35,6 +38,14 @@ export const commentServices = {
                     taskName: existingTask.title
                 },
                 action: 'commented',
+                changes: [{
+                    field: 'comment',
+                    oldValue: null,
+                    newValue: {
+                        commentId: String(result.insertId),
+                        commentPreview: `${data.content.substring(0, previewLength)}...`
+                    }
+                }],
                 team: {
                     teamId: String(existingTask.teamId),
                     teamName: existingTask.teamName
@@ -142,14 +153,24 @@ export const commentServices = {
         const [existingComment] = await db
         .select({
             commentId: comments.commentId,
+            content: comments.content,
             authorId: comments.authorId,
+            taskId: tasks.taskId,
+            taskName: tasks.title,
+            projectId: projects.projectId,
+            projectName: projects.projectName,
             projectStatus: projects.projectStatus,
+            teamId: teams.teamId,
+            teamName: teams.teamName,
+            userName: users.name,
             role: teamMembers.role
         })
         .from(comments)
         .innerJoin(tasks, eq(comments.taskId, tasks.taskId))
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .innerJoin(teams, eq(projects.teamId, teams.teamId))
+        .innerJoin(teamMembers, eq(teams.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(comments.commentId, commentId),
             eq(teamMembers.userId, userId)
@@ -170,9 +191,44 @@ export const commentServices = {
             throw new ApiError(403, "Access Denied")
         }
 
+        const contentLength: number = existingComment.content.length
+        const previewLength: number = contentLength <= 50 ? contentLength : 50
+
+        const log: IAnalyticsLog = {
+            actor: {
+                userId: String(userId),
+                userName: existingComment.userName,
+                role: existingComment.role
+            },
+            target: {
+                taskId: String(existingComment.taskId),
+                taskName: existingComment.taskName
+            },
+            action: 'comment_deleted',
+            changes: [{
+                field: 'comment',
+                oldValue: {
+                    commentId: String(commentId),
+                    commentPreview: `${existingComment.content.substring(0, previewLength)}...`
+                },
+                newValue: null
+            }],
+            team: {
+                teamId: String(existingComment.teamId),
+                teamName: existingComment.teamName
+            },
+            project: {
+                projectId: String(existingComment.projectId),
+                projectName: existingComment.projectName
+            },
+            timestamp: new Date()
+        }
+
         // delete the comment
         await db
         .delete(comments)
         .where(eq(comments.commentId, commentId))
+
+        await AnalyticsLog.create(log)
     }
 }

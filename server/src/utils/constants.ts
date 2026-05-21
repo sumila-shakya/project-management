@@ -4,7 +4,7 @@ export const TASK_STATUS = ['todo', 'in_progress', 'in_review', 'completed'] as 
 export const TASK_PRIORITY = ['low', 'medium', 'high', 'urgent'] as const
 export const INVITATION_STATUS = ['pending', 'accepted', 'rejected'] as const
 export const PROCESS_INVITATION_STATUS = ['accepted', 'rejected'] as const
-export const ACTIONS = ['created', 'updated', 'deleted', 'completed', 'commented', 'assigned'] as const
+export const ACTIONS = ['created', 'updated', 'deleted', 'completed', 'commented', 'comment_deleted', 'assigned', 'asset_attached', 'asset_deleted'] as const
 export const ALLOWED_FILE_TYPE = ['images', 'documents', 'text', 'archives', 'video'] as const
 export const COOKIES_OPTIONS = {
     httpOnly: true,
