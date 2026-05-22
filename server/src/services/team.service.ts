@@ -2,8 +2,8 @@ import { db } from "../config/mysql.config";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../utils/validator";
-import { and, count, eq } from "drizzle-orm";
+import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType, paginationType } from "../utils/validator";
+import { and, asc, count, eq } from "drizzle-orm";
 
 export const teamServices = {
     // CREATE TEAM SERVICE FUNCTION
@@ -38,23 +38,47 @@ export const teamServices = {
     },
 
     // GET USERS TEAMS SERVICE FUNCTION
-    async getTeams(userId: number) {
-        // get all the teams where user is member
-        const userTeams = await db
-        .select({
-            teamId: teams.teamId,
-            teamName: teams.teamName,
-            description: teams.description,
-            createdBy: teams.createdBy,
-            createdAt: teams.createdAt,
-            role: teamMembers.role,
-            joinedAt: teamMembers.joinedAt
-        })
-        .from(teamMembers)
-        .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
-        .where(eq(teamMembers.userId, userId))
+    async getTeams(userId: number, paginationData: paginationType) {
+        const page = paginationData.page || 1
+        const limit = paginationData.limit || 10
+        const offset = (page - 1)*limit
 
-        return userTeams
+        // get all the teams where user is member
+        const [userTeams, [teamCount]] = await Promise.all([
+            db
+            .select({
+                teamId: teams.teamId,
+                teamName: teams.teamName,
+                description: teams.description,
+                createdBy: teams.createdBy,
+                createdAt: teams.createdAt,
+                role: teamMembers.role,
+                joinedAt: teamMembers.joinedAt
+            })
+            .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
+            .where(eq(teamMembers.userId, userId))
+            .orderBy(asc(teams.teamId))
+            .offset(offset)
+            .limit(limit),
+
+            db
+            .select({
+                total: count()
+            })
+            .from(teamMembers)
+            .where(eq(teamMembers.userId, userId))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: teamCount.total,
+                totalPages: Math.ceil(teamCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            userTeams
+        }
     },
 
     // GET USERS TEAM BY ID SERVICE FUNCTION
@@ -186,7 +210,11 @@ export const teamServices = {
 
 export const teamMembersServices = {
     // GET TEAM MEMBERS SERVICE FUNCTION
-    async getTeamMembers(userId: number, teamId: number) {
+    async getTeamMembers(userId: number, teamId: number, paginationData: paginationType) {
+        const page = paginationData.page || 1
+        const limit = paginationData.limit || 10
+        const offset = (page - 1)*limit
+
         // check if the user is the admin
         const [isMember] = await db
         .select()
@@ -201,20 +229,39 @@ export const teamMembersServices = {
             throw new ApiError(403, "Access Denied")
         }
 
-        // get all the team members
-        const members = await db
-        .select({
-            userId: users.userId,
-            name: users.name,
-            email: users.email,
-            role: teamMembers.role,
-            joinedAt: teamMembers.joinedAt
-        })
-        .from(teamMembers)
-        .innerJoin(users, eq(users.userId, teamMembers.userId))
-        .where(eq(teamMembers.teamId, teamId))
+        const [members, [memberCount]] = await Promise.all([
+            // get all the team members
+            db
+            .select({
+                userId: users.userId,
+                name: users.name,
+                email: users.email,
+                role: teamMembers.role,
+                joinedAt: teamMembers.joinedAt
+            })
+            .from(teamMembers)
+            .innerJoin(users, eq(users.userId, teamMembers.userId))
+            .where(eq(teamMembers.teamId, teamId))
+            .offset(offset)
+            .limit(limit),
 
-        return members
+            db
+            .select({
+                total: count()
+            })
+            .from(teamMembers)
+            .where(eq(teamMembers.teamId, teamId))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: memberCount.total,
+                totalPages: Math.ceil(memberCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            members
+        }
     },
 
     // REMOVE TEAM  MEMBERS SERVICE FUNCTION

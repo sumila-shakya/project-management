@@ -138,7 +138,9 @@ export const updateProjectSchema = projectFields.partial()
 
 // PROJECT FILTER SCHEMA
 export const filterProjectSchema = z.object({
-    projectStatus: z.enum(PROJECT_STATUS, {message: "Invalid Status"}).optional()
+    projectStatus: z.enum(PROJECT_STATUS, {message: "Invalid Status"}).optional(),
+    page: z.coerce.number().positive().optional(),
+    limit: z.coerce.number().positive().max(10).optional()
 })
 
 export const taskSchema =  z.object({
@@ -155,6 +157,8 @@ export const filterTaskSchema = z.object({
     title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim().optional(),
     taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"}).optional(),
     taskPriority: z.enum(TASK_PRIORITY, {message: "Invalid Priority"}).optional(),
+    page: z.coerce.number().positive().optional(),
+    limit: z.coerce.number().positive().max(10).optional(),
 })
 
 export const updateTaskSchema = z.object({
@@ -193,7 +197,14 @@ export const filterAnalyticsLogSchema = z.object({
 })
 
 export const filterAssetsSchema = z.object({
-    fileCategory: z.enum(ALLOWED_FILE_TYPE, {message: "Invalid file category"}).optional()
+    fileCategory: z.enum(ALLOWED_FILE_TYPE, {message: "Invalid file category"}).optional(),
+    page: z.coerce.number().positive().optional(),
+    limit: z.coerce.number().positive().max(10).optional(),
+})
+
+export const paginationSchema = z.object({
+    page: z.coerce.number().positive().optional(),
+    limit: z.coerce.number().positive().max(10).optional(),
 })
 
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
@@ -221,3 +232,4 @@ export type assignTaskType = z.infer<typeof assignTaskSchema>
 export type commentContentType = z.infer<typeof commentContentSchema>
 export type filterAnalyticsLogType = z.infer<typeof filterAnalyticsLogSchema>
 export type filterAssetsType = z.infer<typeof filterAssetsSchema>
+export type paginationType = z.infer<typeof paginationSchema>

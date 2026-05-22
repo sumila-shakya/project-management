@@ -1,8 +1,8 @@
 import { db } from "../config/mysql.config";
 import { tasks, taskAssets, projects, teamMembers, users, NewTask, teams } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { eq, and, asc, like } from "drizzle-orm";
-import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
+import { eq, and, asc, like, count } from "drizzle-orm";
+import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType, paginationType } from "../utils/validator";
 import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
@@ -198,6 +198,10 @@ export const taskServices = {
         // check if the project exists
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
 
+        const page = queryFilters.page || 1
+        const limit = queryFilters.limit || 10
+        const offset = (page - 1)*limit
+
         // filter only the tasks belonging to the project mentioned
         const filters = [eq(tasks.projectId, existingProject.projectId)]
 
@@ -217,16 +221,39 @@ export const taskServices = {
         }
 
         // get all the tasks according to the filter
-        const allTasks = await db
-        .select()
-        .from(tasks)
-        .where(and(...filters))
-        .orderBy(asc(tasks.dueDate))
+        const [allTasks, [taskCount]] = await Promise.all([
+            db
+            .select()
+            .from(tasks)
+            .where(and(...filters))
+            .orderBy(asc(tasks.dueDate))
+            .offset(offset)
+            .limit(limit),
 
-        return allTasks
+            db
+            .select({
+                total: count()
+            })
+            .from(tasks)
+            .where(and(...filters))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: taskCount.total,
+                totalPages: Math.ceil(taskCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            allTasks
+        }
     },
 
     async getMyTasks(userId: number, queryFilters: filterTaskType) {
+        const page = queryFilters.page || 1
+        const limit = queryFilters.limit || 10
+        const offset = (page - 1)*limit
+
         // filter the tasks assigned to the user
         const filters = [eq(tasks.assignedTo, userId)]
 
@@ -246,32 +273,51 @@ export const taskServices = {
         }
 
         // get the filtered tasks
-        const userTasks = await db
-        .select({
-            taskId: tasks.taskId,
-            title: tasks.title,
-            description: tasks.description,
-            projectId: tasks.projectId,
-            projectName: projects.projectName,
-            teamId: teams.teamId,
-            teamName: teams.teamName,
-            createdBy: tasks.createdBy,
-            assignedTo: tasks.assignedTo,
-            parentTaskId: tasks.parentTaskId,
-            taskStatus: tasks.taskStatus,
-            taskPriority: tasks.taskPriority,
-            dueDate: tasks.dueDate,
-            createdAt: tasks.createdAt,
-            updatedAt: tasks.updatedAt,
-            completedAt: tasks.completedAt
-        })
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.projectId, projects.projectId))
-        .innerJoin(teams, eq(projects.teamId, teams.teamId))
-        .where(and(...filters))
-        .orderBy(asc(tasks.dueDate))
+        const [userTasks, [taskCount]] = await Promise.all([
+            db
+            .select({
+                taskId: tasks.taskId,
+                title: tasks.title,
+                description: tasks.description,
+                projectId: tasks.projectId,
+                projectName: projects.projectName,
+                teamId: teams.teamId,
+                teamName: teams.teamName,
+                createdBy: tasks.createdBy,
+                assignedTo: tasks.assignedTo,
+                parentTaskId: tasks.parentTaskId,
+                taskStatus: tasks.taskStatus,
+                taskPriority: tasks.taskPriority,
+                dueDate: tasks.dueDate,
+                createdAt: tasks.createdAt,
+                updatedAt: tasks.updatedAt,
+                completedAt: tasks.completedAt
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(tasks.projectId, projects.projectId))
+            .innerJoin(teams, eq(projects.teamId, teams.teamId))
+            .where(and(...filters))
+            .orderBy(asc(tasks.dueDate))
+            .offset(offset)
+            .limit(limit),
 
-        return userTasks
+            db
+            .select({
+                total: count()
+            })
+            .from(tasks)
+            .where(and(...filters))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: taskCount.total,
+                totalPages: Math.ceil(taskCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            userTasks
+        }
     },
 
     async updateTask(userId: number, taskId: number, updates: updateTaskType) {
@@ -518,7 +564,11 @@ export const taskServices = {
         await AnalyticsLog.create(log)
     },
 
-    async getSubTasks(userId: number, taskId: number) {
+    async getSubTasks(userId: number, taskId: number, paginationData: paginationType) {
+        const page = paginationData.page || 1
+        const limit = paginationData.limit || 10
+        const offset = (page - 1)*limit
+
         // check for the existing task
         const [existingTask] = await db
         .select({
@@ -540,12 +590,32 @@ export const taskServices = {
         }
 
         // get all the sub tasks
-        const subtasks = await db
-        .select()
-        .from(tasks)
-        .where(eq(tasks.parentTaskId, taskId))
+        const [subtasks, [subTaskCount]] = await Promise.all([
+            db
+            .select()
+            .from(tasks)
+            .where(eq(tasks.parentTaskId, taskId))
+            .orderBy(asc(tasks.dueDate))
+            .offset(offset)
+            .limit(limit),
 
-        return subtasks
+            db
+            .select({
+                total: count()
+            })
+            .from(tasks)
+            .where(eq(tasks.parentTaskId, taskId))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: subTaskCount.total,
+                totalPages: Math.ceil(subTaskCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            subtasks
+        }
     },
 
     async deleteTask(userId: number, taskId: number) {

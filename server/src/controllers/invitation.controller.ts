@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { invitationSchema, processInvitationSchema, invitationType, processInvitationType } from "../utils/validator";
+import { invitationSchema, processInvitationSchema, paginationSchema, invitationType, processInvitationType, paginationType } from "../utils/validator";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { invitationServices } from "../services/invitation.service";
@@ -45,9 +45,12 @@ export const invitationController = {
             if(!userId) {
                 throw new ApiError(401, "Access Denied")
             }
+            
+            // get the pagination data
+            const paginationData: paginationType = paginationSchema.parse(req.query)
 
             // get the user invitations
-            const myInvitations = await invitationServices.getInvitations(userId)
+            const myInvitations = await invitationServices.getInvitations(userId, paginationData)
 
             // send 200 success message
             res

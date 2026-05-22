@@ -2,8 +2,8 @@ import { db } from "../config/mysql.config";
 import { comments, projects, tasks, teamMembers, NewComment, teams, users } from "../models/mysql.model";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
-import { commentContentType } from "../utils/validator";
-import { eq, and, desc } from "drizzle-orm";
+import { commentContentType, paginationType } from "../utils/validator";
+import { eq, and, desc, count } from "drizzle-orm";
 import { IAnalyticsLog } from "../@types/interface";
 import { taskGuard } from "./task.service";
 
@@ -68,7 +68,11 @@ export const commentServices = {
         }
     },
 
-    async getComments(userId: number, taskId: number) {
+    async getComments(userId: number, taskId: number, paginationData: paginationType) {
+        const page = paginationData.page || 1
+        const limit = paginationData.limit || 10
+        const offset = (page - 1)*limit
+
         // get the existing task
         const [existingTask] = await db
         .select({
@@ -91,13 +95,32 @@ export const commentServices = {
         }
 
         // get the comments
-        const commentsOnTask = await db
-        .select()
-        .from(comments)
-        .where(eq(comments.taskId, taskId))
-        .orderBy(desc(comments.createdAt))
+        const [commentsOnTask, [commentCount]] = await Promise.all([
+            db
+            .select()
+            .from(comments)
+            .where(eq(comments.taskId, taskId))
+            .orderBy(desc(comments.createdAt))
+            .offset(offset)
+            .limit(limit),
 
-        return commentsOnTask
+            db
+            .select({
+                total: count()
+            })
+            .from(comments)
+            .where(eq(comments.taskId, taskId))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: commentCount.total,
+                totalPages: Math.ceil(commentCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            commentsOnTask
+        }
     },
 
     async editComment(authorId: number, commentId: number, updates: commentContentType) {

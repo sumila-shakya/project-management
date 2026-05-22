@@ -1,8 +1,8 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
-import { invitationType, processInvitationType } from "../utils/validator";
+import { invitationType, processInvitationType, paginationType } from "../utils/validator";
 import { generateToken, hashToken } from "../utils/token";
-import { and, eq} from "drizzle-orm";
+import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 
 export const invitationServices = {
@@ -93,27 +93,51 @@ export const invitationServices = {
     },
 
     // GET INVITATIONS SERVICE FUNCTION
-    async getInvitations(userId: number) {
-        // get all the users invitations
-        const myInvitations = await db
-        .select({
-            invitationId: invitations.invitationId,
-            teamId: invitations.teamId,
-            teamName: teams.teamName,
-            description: teams.description,
-            invitedBy: invitations.invitedBy,
-            invitorName: users.name,
-            token: invitations.token,
-            invitationStatus: invitations.invitationStatus,
-            createdBy: invitations.createdAt,
-            expiresAt: invitations.expiresAt,
-        })
-        .from(invitations)
-        .innerJoin(teams, eq(invitations.teamId, teams.teamId))
-        .innerJoin(users, eq(invitations.invitedBy, users.userId))
-        .where(eq(invitations.inviteeId, userId))
+    async getInvitations(userId: number, paginationData: paginationType) {
+        const page = paginationData.page || 1
+        const limit = paginationData.limit || 10
+        const offset = (page - 1)*limit
 
-        return myInvitations
+        // get all the users invitations
+        const [myInvitations, [invitationCount]] = await Promise.all([
+            db
+            .select({
+                invitationId: invitations.invitationId,
+                teamId: invitations.teamId,
+                teamName: teams.teamName,
+                description: teams.description,
+                invitedBy: invitations.invitedBy,
+                invitorName: users.name,
+                token: invitations.token,
+                invitationStatus: invitations.invitationStatus,
+                createdBy: invitations.createdAt,
+                expiresAt: invitations.expiresAt,
+            })
+            .from(invitations)
+            .innerJoin(teams, eq(invitations.teamId, teams.teamId))
+            .innerJoin(users, eq(invitations.invitedBy, users.userId))
+            .where(eq(invitations.inviteeId, userId))
+            .orderBy(asc(invitations.expiresAt))
+            .offset(offset)
+            .limit(limit),
+
+            db
+            .select({
+                total: count()
+            })
+            .from(invitations)
+            .where(eq(invitations.inviteeId, userId))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: invitationCount.total,
+                totalPages: Math.ceil(invitationCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            myInvitations
+        }
     },
 
     // PROCESS INVITATION SERVICE FUNCTION

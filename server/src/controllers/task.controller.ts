@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
-import { taskSchema, filterTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema,
-         taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../utils/validator";
+import { taskSchema, filterTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema, paginationSchema,
+         taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType, paginationType } from "../utils/validator";
 import { parseId } from "../utils/validate-id";
 
 export const taskController = {
@@ -215,8 +215,11 @@ export const taskController = {
             // parse the task id
             const taskId = parseId(req.params.taskId as string)
 
+            // get the pagination data
+            const paginationData: paginationType = paginationSchema.parse(req.query)
+
             // get the sub tasks
-            const subTasks = await taskServices.getSubTasks(userId, taskId)
+            const subTasks = await taskServices.getSubTasks(userId, taskId, paginationData)
 
             // send 200 success msg
             res

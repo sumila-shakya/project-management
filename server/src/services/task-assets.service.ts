@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { taskAssets, tasks, projects, teamMembers, NewTaskAssets, teams, users } from "../models/mysql.model";
-import { eq, and } from "drizzle-orm";
+import { eq, and, asc, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { taskGuard } from "./task.service";
 import { FileType, FileMetaData } from "../@types/interface";
@@ -13,16 +13,22 @@ import { AnalyticsLog } from "../models/mongodb.model";
 
 export const taskAssetsServices = {
     async attachAsset(userId: number, taskId: number, fileData: FileMetaData) {
+        // validate the user access to the tasks
         const existingTask = await taskGuard.validateAccess(userId, taskId)
 
         // validate the file
+        // get the file type or category
         const fileType: FileType = getFileType(fileData.mimetype)
+
+        // get the file allowed size
         const fileMaxSize: number = ALLOWED_FILE_SIZE[fileType]
 
+        // throw error if the file size exceeds the maximum capacity
         if(fileData.fileSize > fileMaxSize) {
             throw new ApiError(413, "File Size too large")
         }
 
+        // upload the file to cloudinary
         const uploadedResult = await uploadOnCloudinary(fileData.localFilePath)
 
         if(!uploadedResult) {
@@ -84,6 +90,10 @@ export const taskAssetsServices = {
     },
 
     async getTaskAssets(userId: number, taskId: number, queryFilters: filterAssetsType) {
+        const page = queryFilters.page || 1
+        const limit = queryFilters.limit || 10
+        const offset = (page - 1)*limit
+
         // get the existing task
         const [existingTask] = await db
         .select({
@@ -110,19 +120,39 @@ export const taskAssetsServices = {
             filters.push(eq(taskAssets.fileCategory, queryFilters.fileCategory))
         }
 
-        const allTaskAssets = await db
-        .select({
-            assetId: taskAssets.assetId,
-            fileCategory: taskAssets.fileCategory,
-            fileName: taskAssets.fileName,
-            fileSize: taskAssets.fileSize,
-            uploadedBy: taskAssets.uploadedBy,
-            uploadedAt: taskAssets.uploadedAt
-        })
-        .from(taskAssets)
-        .where(and(...filters))
+        const [allTaskAssets, [assetCount]] = await Promise.all([
+            db
+            .select({
+                assetId: taskAssets.assetId,
+                fileCategory: taskAssets.fileCategory,
+                fileName: taskAssets.fileName,
+                fileSize: taskAssets.fileSize,
+                uploadedBy: taskAssets.uploadedBy,
+                uploadedAt: taskAssets.uploadedAt
+            })
+            .from(taskAssets)
+            .where(and(...filters))
+            .orderBy(asc(taskAssets.assetId))
+            .offset(offset)
+            .limit(limit),
 
-        return allTaskAssets
+            db
+            .select({
+                total: count()
+            })
+            .from(taskAssets)
+            .where(and(...filters))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: assetCount.total,
+                totalPages: Math.ceil(assetCount.total/limit),
+                page: page,
+                limit: limit
+            },
+            allTaskAssets
+        }
     },
 
     async downloadAsset(userId: number, assetId: number) {

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema,
-         createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../utils/validator";
+import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema, paginationSchema,
+         createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType, paginationType } from "../utils/validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
 import { parseId } from "../utils/validate-id";
 
@@ -44,8 +44,11 @@ export const teamController = {
                 throw new ApiError(401, "Access Denied")
             }
 
+            // get the pagination data
+            const paginationData: paginationType = paginationSchema.parse(req.query)
+
             // get the user teams
-            const userTeams = await teamServices.getTeams(userId)
+            const userTeams = await teamServices.getTeams(userId, paginationData)
 
             //send 200 success
             res
@@ -183,8 +186,11 @@ export const teamMembersController = {
             // get the teamId from the request params
             const teamId = parseId(req.params.teamId as string)
 
+            // get the pagination data
+            const paginationData: paginationType = paginationSchema.parse(req.query)
+
             // get the teams members
-            const members = await teamMembersServices.getTeamMembers(userId, teamId)
+            const members = await teamMembersServices.getTeamMembers(userId, teamId, paginationData)
 
             // send 200 success msg
             res

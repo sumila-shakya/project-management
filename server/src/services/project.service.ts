@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { projects, teamMembers, NewProject, tasks, users, teams } from "../models/mysql.model";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, asc } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
 import { Role, IAnalyticsLog } from "../@types/interface";
@@ -95,6 +95,10 @@ export const projectServices = {
 
     // GET PROJECTS SERVICE FUNCTION
     async getProjects(userId: number, teamId: number, filter: filterProjectType) {
+        const page = filter.page || 1
+        const limit = filter.limit || 10
+        const offset = (page - 1)*limit
+
         // check if the user is the member of the team
         const [membership] = await db
         .select()
@@ -117,12 +121,32 @@ export const projectServices = {
         }
 
         // get the filtered data
-        const teamProjects = await db
-        .select()
-        .from(projects)
-        .where(and(...queryfilters))
+        const [teamProjects, [projectCounts]] = await Promise.all([
+            db
+            .select()
+            .from(projects)
+            .where(and(...queryfilters))
+            .orderBy(asc(projects.projectId))
+            .offset(offset)
+            .limit(limit),
 
-        return teamProjects
+            db
+            .select({
+                total: count()
+            })
+            .from(projects)
+            .where(and(...queryfilters))
+        ])
+
+        return {
+            paginationInfo: {
+                totalTeamCount: projectCounts.total,
+                totalPages: Math.ceil(projectCounts.total/limit),
+                page: page,
+                limit: limit
+            },
+            teamProjects
+        }
         
     },
 

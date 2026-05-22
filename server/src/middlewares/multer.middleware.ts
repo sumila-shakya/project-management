@@ -18,7 +18,7 @@ export const upload = multer({
         if(ALLOWED_MIME_TYPES.includes(file.mimetype as any)) {
             cb(null, true)
         } else {
-            cb(new ApiError(415,`File of mime type ${file.mimetype} not supported`))
+            cb(new ApiError(415,`File of mime type ${file.mimetype} is not supported`))
         }
     }
 })
