@@ -47,11 +47,8 @@ export const commentController = {
             // parse the task id
             const taskId = parseId(req.params.taskId as string)
 
-            // get the pagination data
-            const paginationData: paginationType = paginationSchema.parse(req.query)
-
             // get the comments
-            const allCommentsOnTask = await commentServices.getComments(userId, taskId, paginationData)
+            const allCommentsOnTask = await commentServices.getComments(userId, taskId, {limit: 10})
 
             // send 200 success msg
             res

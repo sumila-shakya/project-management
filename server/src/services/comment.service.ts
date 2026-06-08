@@ -3,7 +3,7 @@ import { comments, projects, tasks, teamMembers, NewComment, teams, users } from
 import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType, paginationType } from "../utils/validator";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, asc, or, gt, SQL } from "drizzle-orm";
 import { IAnalyticsLog } from "../@types/interface";
 import { taskGuard } from "./task.service";
 
@@ -68,11 +68,7 @@ export const commentServices = {
         }
     },
 
-    async getComments(userId: number, taskId: number, paginationData: paginationType) {
-        const page = paginationData.page || 1
-        const limit = paginationData.limit || 10
-        const offset = (page - 1)*limit
-
+    async getComments(userId: number, taskId: number, paginationData: {limit: number, cursor?: {createdAt: Date, commentId: number}}) {
         // get the existing task
         const [existingTask] = await db
         .select({
@@ -94,33 +90,36 @@ export const commentServices = {
             throw new ApiError(403, "Access Denied")
         }
 
-        // get the comments
-        const [commentsOnTask, [commentCount]] = await Promise.all([
-            db
-            .select()
-            .from(comments)
-            .where(eq(comments.taskId, taskId))
-            .orderBy(desc(comments.createdAt))
-            .offset(offset)
-            .limit(limit),
-
-            db
-            .select({
-                total: count()
-            })
-            .from(comments)
-            .where(eq(comments.taskId, taskId))
-        ])
-
-        return {
-            paginationInfo: {
-                totalTeamCount: commentCount.total,
-                totalPages: Math.ceil(commentCount.total/limit),
-                page: page,
-                limit: limit
-            },
-            commentsOnTask
+        const queryfilters = []
+        queryfilters.push(eq(comments.taskId, taskId))
+        if(paginationData.cursor) {
+            queryfilters.push(or(
+                gt(comments.createdAt, paginationData.cursor.createdAt),
+                and(
+                    eq(comments.createdAt, paginationData.cursor.createdAt),
+                    gt(comments.commentId, paginationData.cursor.commentId)
+                )
+            ))
         }
+
+        // get the comments
+        const commentsOnTask = await db
+        .select()
+        .from(comments)
+        .where(and(...queryfilters))
+        .orderBy(desc(comments.createdAt), asc(comments.commentId))
+        .limit(paginationData.limit + 1)
+
+        if(commentsOnTask.length > paginationData.limit) {
+            const nextPage: boolean = true
+            const nextCursor = {
+                createdAt: commentsOnTask[paginationData.limit-1].createdAt, 
+                commentId: commentsOnTask[paginationData.limit-1].commentId
+            }
+            const currentPageData = commentsOnTask.slice(0, paginationData.limit)
+        }
+
+        return commentsOnTask
     },
 
     async editComment(authorId: number, commentId: number, updates: commentContentType) {
