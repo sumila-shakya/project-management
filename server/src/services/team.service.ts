@@ -4,6 +4,7 @@ import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMembe
 import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType, paginationType } from "../utils/validator";
 import { and, asc, count, eq } from "drizzle-orm";
+import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const teamServices = {
     // CREATE TEAM SERVICE FUNCTION
@@ -40,7 +41,7 @@ export const teamServices = {
     // GET USERS TEAMS SERVICE FUNCTION
     async getTeams(userId: number, paginationData: paginationType) {
         const page = paginationData.page || 1
-        const limit = paginationData.limit || 10
+        const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // get all the teams where user is member
@@ -212,7 +213,7 @@ export const teamMembersServices = {
     // GET TEAM MEMBERS SERVICE FUNCTION
     async getTeamMembers(userId: number, teamId: number, paginationData: paginationType) {
         const page = paginationData.page || 1
-        const limit = paginationData.limit || 10
+        const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // check if the user is the admin

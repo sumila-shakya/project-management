@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apiError";
 import { taskGuard } from "./task.service";
 import { FileType, FileMetaData } from "../@types/interface";
 import { getFileType } from "../utils/file-helper";
-import { ALLOWED_FILE_SIZE } from "../utils/constants";
+import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../utils/validator";
 import { IAnalyticsLog } from "../@types/interface";
@@ -91,7 +91,7 @@ export const taskAssetsServices = {
 
     async getTaskAssets(userId: number, taskId: number, queryFilters: filterAssetsType) {
         const page = queryFilters.page || 1
-        const limit = queryFilters.limit || 10
+        const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // get the existing task

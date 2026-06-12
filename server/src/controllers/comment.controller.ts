@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { parseId } from "../utils/validate-id";
 import { commentServices } from "../services/comment.service";
-import { commentContentSchema, paginationSchema, commentContentType, paginationType } from "../utils/validator";
+import { commentContentSchema, cursorPaginationSchema, commentContentType, cursorPaginationType } from "../utils/validator";
 
 export const commentController = {
     async addComment(req: Request, res: Response, next:NextFunction) {
@@ -47,8 +47,11 @@ export const commentController = {
             // parse the task id
             const taskId = parseId(req.params.taskId as string)
 
+            // get the pagination data
+            const paginationData: cursorPaginationType = cursorPaginationSchema.parse(req.query)
+
             // get the comments
-            const allCommentsOnTask = await commentServices.getComments(userId, taskId, {limit: 10})
+            const allCommentsOnTask = await commentServices.getComments(userId, taskId, paginationData)
 
             // send 200 success msg
             res

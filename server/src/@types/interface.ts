@@ -57,3 +57,14 @@ export interface FileMetaData {
     fileSize: number,
     fileName: string
 }
+
+export interface CursorData {
+    createdAt: Date, 
+    commentId: number
+}
+
+export interface CursorPageMetaData {
+    nextPage: boolean,
+    limit: number,
+    nextCursor?: string
+}

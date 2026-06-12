@@ -207,6 +207,12 @@ export const paginationSchema = z.object({
     limit: z.coerce.number().positive().max(10).optional(),
 })
 
+
+export const cursorPaginationSchema = z.object({
+    cursor: z.string().optional(),
+    limit: z.coerce.number().positive().max(10).optional(),
+})
+
 /* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type registrationType = z.infer<typeof registrationSchema>
 export type emailVerificationType = z.infer<typeof emailVerificationSchema>
@@ -233,3 +239,4 @@ export type commentContentType = z.infer<typeof commentContentSchema>
 export type filterAnalyticsLogType = z.infer<typeof filterAnalyticsLogSchema>
 export type filterAssetsType = z.infer<typeof filterAssetsSchema>
 export type paginationType = z.infer<typeof paginationSchema>
+export type cursorPaginationType = z.infer<typeof cursorPaginationSchema>

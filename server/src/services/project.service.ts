@@ -5,6 +5,7 @@ import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
 import { Role, IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
+import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const projectGuard = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
@@ -96,7 +97,7 @@ export const projectServices = {
     // GET PROJECTS SERVICE FUNCTION
     async getProjects(userId: number, teamId: number, filter: filterProjectType) {
         const page = filter.page || 1
-        const limit = filter.limit || 10
+        const limit = filter.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // check if the user is the member of the team

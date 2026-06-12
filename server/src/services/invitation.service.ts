@@ -4,6 +4,7 @@ import { invitationType, processInvitationType, paginationType } from "../utils/
 import { generateToken, hashToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
+import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const invitationServices = {
     // SEND INVITATIONS SERVICE FUNCTION
@@ -95,7 +96,7 @@ export const invitationServices = {
     // GET INVITATIONS SERVICE FUNCTION
     async getInvitations(userId: number, paginationData: paginationType) {
         const page = paginationData.page || 1
-        const limit = paginationData.limit || 10
+        const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // get all the users invitations

@@ -7,6 +7,7 @@ import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
+import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const taskGuard = {
     async validateAccess(userId: number, taskId: number, allowedRoles?: Role[]) {
@@ -199,7 +200,7 @@ export const taskServices = {
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
 
         const page = queryFilters.page || 1
-        const limit = queryFilters.limit || 10
+        const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // filter only the tasks belonging to the project mentioned
@@ -251,7 +252,7 @@ export const taskServices = {
 
     async getMyTasks(userId: number, queryFilters: filterTaskType) {
         const page = queryFilters.page || 1
-        const limit = queryFilters.limit || 10
+        const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // filter the tasks assigned to the user
@@ -566,7 +567,7 @@ export const taskServices = {
 
     async getSubTasks(userId: number, taskId: number, paginationData: paginationType) {
         const page = paginationData.page || 1
-        const limit = paginationData.limit || 10
+        const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
         // check for the existing task

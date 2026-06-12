@@ -1,11 +1,13 @@
 import { db } from "../config/mysql.config";
-import { comments, projects, tasks, teamMembers, NewComment, teams, users } from "../models/mysql.model";
+import { comments, projects, tasks, teamMembers, NewComment, teams, users, Comment } from "../models/mysql.model";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
-import { commentContentType, paginationType } from "../utils/validator";
-import { eq, and, desc, count, asc, or, gt, SQL } from "drizzle-orm";
-import { IAnalyticsLog } from "../@types/interface";
+import { commentContentType, cursorPaginationType } from "../utils/validator";
+import { eq, and, desc, asc, or, gt, lt } from "drizzle-orm";
+import { IAnalyticsLog, CursorData, CursorPageMetaData } from "../@types/interface";
 import { taskGuard } from "./task.service";
+import { encodeCursor, decodeCursor } from "../utils/cursor";
+import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const commentServices = {
     async addComment(authorId: number, taskId: number, data: commentContentType) {
@@ -68,7 +70,10 @@ export const commentServices = {
         }
     },
 
-    async getComments(userId: number, taskId: number, paginationData: {limit: number, cursor?: {createdAt: Date, commentId: number}}) {
+    async getComments(userId: number, taskId: number, paginationData: cursorPaginationType) {
+        // get the page limit
+        const limit: number = paginationData.limit || DEFAULT_PAGE_LIMIT
+
         // get the existing task
         const [existingTask] = await db
         .select({
@@ -91,35 +96,66 @@ export const commentServices = {
         }
 
         const queryfilters = []
+
+        // get the comments of the task id mentioned
         queryfilters.push(eq(comments.taskId, taskId))
+
+        // if cursor exists query according to the cursor
         if(paginationData.cursor) {
+            // decode the cursor
+            const cursor: CursorData = decodeCursor(paginationData.cursor)
+
             queryfilters.push(or(
-                gt(comments.createdAt, paginationData.cursor.createdAt),
+                lt(comments.createdAt, cursor.createdAt),
                 and(
-                    eq(comments.createdAt, paginationData.cursor.createdAt),
-                    gt(comments.commentId, paginationData.cursor.commentId)
+                    eq(comments.createdAt, cursor.createdAt),
+                    gt(comments.commentId, cursor.commentId)
                 )
             ))
         }
 
         // get the comments
-        const commentsOnTask = await db
+        const commentsOnTask: Comment[] = await db
         .select()
         .from(comments)
         .where(and(...queryfilters))
-        .orderBy(desc(comments.createdAt), asc(comments.commentId))
-        .limit(paginationData.limit + 1)
+        .orderBy(
+            desc(comments.createdAt), 
+            asc(comments.commentId)
+        )
+        .limit(limit + 1)
 
-        if(commentsOnTask.length > paginationData.limit) {
-            const nextPage: boolean = true
-            const nextCursor = {
-                createdAt: commentsOnTask[paginationData.limit-1].createdAt, 
-                commentId: commentsOnTask[paginationData.limit-1].commentId
-            }
-            const currentPageData = commentsOnTask.slice(0, paginationData.limit)
+        // initializa the pagination meta data
+        const pageMetaData: CursorPageMetaData = {
+            nextPage: false,
+            limit: limit
         }
 
-        return commentsOnTask
+        // if next page exists generate new cursor
+        if(commentsOnTask.length > limit) {
+            // generate the new cursor data from the last comment
+            const nextCursorData: CursorData = {
+                createdAt: commentsOnTask[limit-1].createdAt!, 
+                commentId: commentsOnTask[limit-1].commentId
+            }
+
+            // encode the cursor data
+            const nextCursor: string = encodeCursor(nextCursorData)
+
+            // update the pagination meta data
+            pageMetaData.nextPage = true
+            pageMetaData.nextCursor = nextCursor
+        }
+        
+        // if next page exists only show the current page comments
+        const currentPageData: Comment[] = pageMetaData.nextPage 
+        ? commentsOnTask.slice(0, limit) 
+        : commentsOnTask
+
+        return {
+            pageMetaData,
+            currentPageData
+        }
     },
 
     async editComment(authorId: number, commentId: number, updates: commentContentType) {
