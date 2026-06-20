@@ -193,7 +193,9 @@ export const filterAnalyticsLogSchema = z.object({
     userId: z.coerce.number().positive().optional(),
     projectId: z.coerce.number().positive().optional(),
     role: z.enum(ROLE, {message: "Invalid role"}).optional(),
-    action: z.enum(ACTIONS, {message: "Invalid action"}).optional()
+    action: z.enum(ACTIONS, {message: "Invalid action"}).optional(),
+    cursor: z.string().optional(),
+    limit: z.coerce.number().positive().max(10).optional(),
 })
 
 export const filterAssetsSchema = z.object({
@@ -206,7 +208,6 @@ export const paginationSchema = z.object({
     page: z.coerce.number().positive().optional(),
     limit: z.coerce.number().positive().max(10).optional(),
 })
-
 
 export const cursorPaginationSchema = z.object({
     cursor: z.string().optional(),

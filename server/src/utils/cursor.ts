@@ -1,15 +1,29 @@
-import { CursorData } from "../@types/interface"
+import { CommentCursor, LogCursor } from "../@types/interface"
 
-export const encodeCursor = (paginationData: CursorData): string => {
+export const encodeCommentCursor = (paginationData: CommentCursor): string => {
     const cursorString: string = JSON.stringify(paginationData)
     const encodedString: string = Buffer.from(cursorString, 'utf-8').toString('base64url')
 
     return encodedString
 }
 
-export const decodeCursor = (cursor: string): CursorData => {
+export const decodeCommentCursor = (cursor: string): CommentCursor => {
     const decodedString: string = Buffer.from(cursor, 'base64url').toString('utf-8')
-    const paginationData: CursorData = JSON.parse(decodedString)
+    const paginationData: CommentCursor = JSON.parse(decodedString)
+
+    return paginationData
+}
+
+export const encodeLogCursor = (paginationData: LogCursor): string => {
+    const cursorString: string = JSON.stringify(paginationData)
+    const encodedString: string = Buffer.from(cursorString, 'utf-8').toString('base64url')
+
+    return encodedString
+}
+
+export const decodeLogCursor = (cursor: string): LogCursor => {
+    const decodedString: string = Buffer.from(cursor, 'base64url').toString('utf-8')
+    const paginationData: LogCursor = JSON.parse(decodedString)
 
     return paginationData
 }

@@ -5,6 +5,9 @@ import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType, paginationType } from "../utils/validator";
 import { and, asc, count, eq } from "drizzle-orm";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { encodeLogCursor, decodeLogCursor } from "../utils/cursor";
+import { LogCursor, CursorPageMetaData } from "../@types/interface";
+import mongoose from "mongoose";
 
 export const teamServices = {
     // CREATE TEAM SERVICE FUNCTION
@@ -174,7 +177,14 @@ export const teamServices = {
         })
     },
 
-    async getAnalyticsLog(userId: number, teamId: number, filters: filterAnalyticsLogType) {
+    async getAnalyticsLog(userId: number, teamId: number, filters: filterAnalyticsLogType,) {
+        // get the limit
+        const limit = filters.limit || DEFAULT_PAGE_LIMIT
+        const pageMetaData: CursorPageMetaData = {
+            nextPage: false,
+            limit: limit
+        }
+        
         // check if the user is the member
         const [member] = await db
         .select()
@@ -190,7 +200,7 @@ export const teamServices = {
         }
 
         // get the filters
-        const queryFilters: Record<string, string> = {}
+        const queryFilters: Record<string, any> = {}
         queryFilters['team.teamId'] = String(teamId)
         if(filters.action) queryFilters['action'] = filters.action
         if(filters.taskId) queryFilters['target.taskId'] = String(filters.taskId)
@@ -198,14 +208,42 @@ export const teamServices = {
         if(filters.projectId) queryFilters['project.projectId'] = String(filters.projectId)
         if(filters.role) queryFilters['actor.role'] = filters.role
 
+        if(filters.cursor) {
+            const cursorDate: LogCursor = decodeLogCursor(filters.cursor)
+
+            queryFilters['$or'] = [
+                {'timestamp': {$lt: cursorDate.timestamp}},
+                {$and: [
+                    {'timestamp': cursorDate.timestamp},
+                    {'_id': {$lt: new mongoose.Types.ObjectId(cursorDate._id)}}
+                ]}
+            ]
+        }
+
         // get the analytics log
         const logs = await AnalyticsLog
         .find(queryFilters)
-        .select('-_id -__v')
-        .sort({ timestamp: -1 })
+        .sort({ timestamp: -1, _id: -1 })
+        .limit(limit+1)
         .lean()
 
-        return logs
+        if(logs.length > limit) {
+            const nextCursorData: LogCursor = {
+                timestamp: logs[limit-1].timestamp,
+                _id: String(logs[limit-1]._id)
+            }
+            const nextCursor: string = encodeLogCursor(nextCursorData)
+
+            pageMetaData.nextPage = true
+            pageMetaData.nextCursor = nextCursor
+        }
+
+        const currentPageData = pageMetaData.nextPage ? logs.slice(0,limit) : logs
+
+        return {
+            pageMetaData,
+            currentPageData
+        }
     }
 }
 

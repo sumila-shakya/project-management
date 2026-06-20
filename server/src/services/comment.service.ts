@@ -4,9 +4,9 @@ import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType, cursorPaginationType } from "../utils/validator";
 import { eq, and, desc, asc, or, gt, lt } from "drizzle-orm";
-import { IAnalyticsLog, CursorData, CursorPageMetaData } from "../@types/interface";
+import { IAnalyticsLog, CommentCursor, CursorPageMetaData } from "../@types/interface";
 import { taskGuard } from "./task.service";
-import { encodeCursor, decodeCursor } from "../utils/cursor";
+import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const commentServices = {
@@ -103,7 +103,7 @@ export const commentServices = {
         // if cursor exists query according to the cursor
         if(paginationData.cursor) {
             // decode the cursor
-            const cursor: CursorData = decodeCursor(paginationData.cursor)
+            const cursor: CommentCursor = decodeCommentCursor(paginationData.cursor)
 
             queryfilters.push(or(
                 lt(comments.createdAt, cursor.createdAt),
@@ -134,13 +134,13 @@ export const commentServices = {
         // if next page exists generate new cursor
         if(commentsOnTask.length > limit) {
             // generate the new cursor data from the last comment
-            const nextCursorData: CursorData = {
+            const nextCursorData: CommentCursor = {
                 createdAt: commentsOnTask[limit-1].createdAt!, 
                 commentId: commentsOnTask[limit-1].commentId
             }
 
             // encode the cursor data
-            const nextCursor: string = encodeCursor(nextCursorData)
+            const nextCursor: string = encodeCommentCursor(nextCursorData)
 
             // update the pagination meta data
             pageMetaData.nextPage = true

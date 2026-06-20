@@ -1,4 +1,5 @@
 import { ROLE, TASK_STATUS, ACTIONS,  ALLOWED_MIME_TYPES, ALLOWED_FILE_TYPE} from "../utils/constants"
+
 // authenticated user
 export interface Payload {
     userId: number
@@ -58,9 +59,14 @@ export interface FileMetaData {
     fileName: string
 }
 
-export interface CursorData {
+export interface CommentCursor {
     createdAt: Date, 
     commentId: number
+}
+
+export interface LogCursor {
+    timestamp: Date,
+    _id: string
 }
 
 export interface CursorPageMetaData {
