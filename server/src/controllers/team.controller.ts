@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema, paginationSchema,
-         createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType, paginationType } from "../utils/validator";
+import { createTeamSchema, updateTeamSchema, updateTeamMemberSchema, filterAnalyticsLogSchema,
+         createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../validator/team.validator";
+import { paginationSchema, paginationType } from "../validator/global.validator";
 import { teamMembersServices, teamServices } from "../services/team.service";
 import { parseId } from "../utils/validate-id";
 

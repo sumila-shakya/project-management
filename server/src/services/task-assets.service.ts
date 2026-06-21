@@ -7,7 +7,7 @@ import { FileType, FileMetaData } from "../@types/interface";
 import { getFileType } from "../utils/file-helper";
 import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { uploadOnCloudinary } from "../utils/cloudinary";
-import { filterAssetsType } from "../utils/validator";
+import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 

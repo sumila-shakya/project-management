@@ -3,7 +3,8 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { parseId } from "../utils/validate-id";
 import { commentServices } from "../services/comment.service";
-import { commentContentSchema, cursorPaginationSchema, commentContentType, cursorPaginationType } from "../utils/validator";
+import { commentContentSchema, commentContentType } from "../validator/comment.validator";
+import {cursorPaginationSchema, cursorPaginationType} from "../validator/global.validator"
 
 export const commentController = {
     async addComment(req: Request, res: Response, next:NextFunction) {

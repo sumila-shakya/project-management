@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { taskServices } from "../services/task.service";
-import { taskSchema, filterTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema, paginationSchema,
-         taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType, paginationType } from "../utils/validator";
+import { taskSchema, filterTaskSchema, updateTaskSchema, processTaskSchema, assignTaskSchema,
+         taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../validator/task.validator";
+import { paginationSchema, paginationType } from "../validator/global.validator";
 import { parseId } from "../utils/validate-id";
 
 export const taskController = {

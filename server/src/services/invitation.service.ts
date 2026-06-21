@@ -1,6 +1,7 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
-import { invitationType, processInvitationType, paginationType } from "../utils/validator";
+import { invitationType, processInvitationType } from "../validator/invitation.validator";
+import { paginationType } from "../validator/global.validator";
 import { generateToken, hashToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
@@ -118,7 +119,7 @@ export const invitationServices = {
             .innerJoin(teams, eq(invitations.teamId, teams.teamId))
             .innerJoin(users, eq(invitations.invitedBy, users.userId))
             .where(eq(invitations.inviteeId, userId))
-            .orderBy(asc(invitations.expiresAt))
+            .orderBy(asc(invitations.expiresAt),asc(invitations.invitationId))
             .offset(offset)
             .limit(limit),
 
@@ -132,7 +133,7 @@ export const invitationServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: invitationCount.total,
+                totalInvitationCount: invitationCount.total,
                 totalPages: Math.ceil(invitationCount.total/limit),
                 page: page,
                 limit: limit

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { ApiError } from './apiError'
 import { Payload } from '../@types/interface'
-import { payloadSchema } from './validator'
+import { payloadSchema } from '../validator/global.validator'
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!

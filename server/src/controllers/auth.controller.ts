@@ -8,7 +8,7 @@ import { Payload } from "../@types/interface";
 import { 
     registrationSchema, loginSchema, changePasswordSchema, updateAccountSchema, forgetPasswordSchema, resetPasswordSchema, emailVerificationSchema, requestVerificationSchema,
     registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType, emailVerificationType, requestVerificationType } 
-from "../utils/validator";
+from "../validator/auth.validator";
 
 export const authController = {
     // USER REGISTRATION CONTROLLER FUNCTION

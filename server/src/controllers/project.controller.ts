@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { projectServices } from "../services/project.service";
-import { projectSchema, updateProjectSchema, filterProjectSchema, projectType, updateProjectType, filterProjectType } from "../utils/validator";
+import { projectSchema, updateProjectSchema, filterProjectSchema, projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { parseId } from "../utils/validate-id";
 
 export const projectController = {

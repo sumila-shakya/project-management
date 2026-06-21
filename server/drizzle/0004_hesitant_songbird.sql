@@ -1,0 +1,1 @@
+ALTER TABLE `task_assets` ADD `file_category` enum('images','documents','text','archives','video') NOT NULL;

@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { users, User, NewUser, refreshTokens, NewToken, resetPasswordTokens, NewResetPassToken, emailVerificationTokens, NewEmailToken } from "../models/mysql.model";
-import { registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType, emailVerificationType, requestVerificationType } from "../utils/validator";
+import { registrationType, loginType, changePasswordType, updateAccountType, forgetPasswordType, resetPasswordType, emailVerificationType, requestVerificationType } from "../validator/auth.validator";
 import { eq, and } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import bcrypt from 'bcrypt'

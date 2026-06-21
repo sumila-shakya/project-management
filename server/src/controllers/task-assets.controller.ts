@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { parseId } from "../utils/validate-id";
 import { taskAssetsServices } from "../services/task-assets.service";
 import { FileMetaData, MimeType } from "../@types/interface";
-import { filterAssetsSchema, filterAssetsType } from "../utils/validator";
+import { filterAssetsSchema, filterAssetsType } from "../validator/assets.validator";
 import fs from 'fs'
 
 export const taskAssetsController = {

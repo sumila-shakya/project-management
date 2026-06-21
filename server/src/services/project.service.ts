@@ -2,7 +2,7 @@ import { db } from "../config/mysql.config";
 import { projects, teamMembers, NewProject, tasks, users, teams } from "../models/mysql.model";
 import { eq, and, count, asc } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
-import { projectType, updateProjectType, filterProjectType } from "../utils/validator";
+import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
