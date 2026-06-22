@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
-import { invitationType, processInvitationType } from "../validator/invitation.validator";
+import { invitationType, processInvitationType, filterInvitationType } from "../validator/invitation.validator";
 import { paginationType } from "../validator/global.validator";
 import { generateToken, hashToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
@@ -95,10 +95,15 @@ export const invitationServices = {
     },
 
     // GET INVITATIONS SERVICE FUNCTION
-    async getInvitations(userId: number, paginationData: paginationType) {
-        const page = paginationData.page || 1
-        const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
+    async getInvitations(userId: number, filterData: filterInvitationType) {
+        const page = filterData.page || 1
+        const limit = filterData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
+
+        const queryFilters = [eq(invitations.inviteeId, userId)]
+        if(filterData.invitationStatus) {
+            queryFilters.push(eq(invitations.invitationStatus, filterData.invitationStatus))
+        }
 
         // get all the users invitations
         const [myInvitations, [invitationCount]] = await Promise.all([
@@ -118,7 +123,7 @@ export const invitationServices = {
             .from(invitations)
             .innerJoin(teams, eq(invitations.teamId, teams.teamId))
             .innerJoin(users, eq(invitations.invitedBy, users.userId))
-            .where(eq(invitations.inviteeId, userId))
+            .where(and(...queryFilters))
             .orderBy(asc(invitations.expiresAt),asc(invitations.invitationId))
             .offset(offset)
             .limit(limit),
@@ -128,7 +133,7 @@ export const invitationServices = {
                 total: count()
             })
             .from(invitations)
-            .where(eq(invitations.inviteeId, userId))
+            .where(and(...queryFilters))
         ])
 
         return {

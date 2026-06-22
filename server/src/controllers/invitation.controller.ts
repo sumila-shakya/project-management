@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { invitationSchema, processInvitationSchema, invitationType, processInvitationType} from "../validator/invitation.validator";
+import { invitationSchema, processInvitationSchema, filterInvitationSchema, invitationType, processInvitationType, filterInvitationType} from "../validator/invitation.validator";
 import { paginationSchema, paginationType } from "../validator/global.validator";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
@@ -48,10 +48,10 @@ export const invitationController = {
             }
             
             // get the pagination data
-            const paginationData: paginationType = paginationSchema.parse(req.query)
+            const filterData: filterInvitationType = filterInvitationSchema.parse(req.query)
 
             // get the user invitations
-            const myInvitations = await invitationServices.getInvitations(userId, paginationData)
+            const myInvitations = await invitationServices.getInvitations(userId, filterData)
 
             // send 200 success message
             res
