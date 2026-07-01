@@ -1,0 +1,21 @@
+info:
+  name: getAssets
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://localhost:3000/api/tasks/1/assets?fileCategory=images
+  params:
+    - name: fileCategory
+      value: images
+      type: query
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4MjkyNTgwNCwiZXhwIjoxNzgyOTI2NDA0fQ.aUHMRcwfUGGzkia0-aEs5ugDbbyUQFF78SAEK2V081w
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

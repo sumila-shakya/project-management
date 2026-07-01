@@ -6,7 +6,7 @@ import { taskGuard } from "./task.service";
 import { FileType, FileMetaData } from "../@types/interface";
 import { getFileType } from "../utils/file-helper";
 import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
-import { uploadOnCloudinary } from "../utils/cloudinary";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
@@ -146,7 +146,7 @@ export const taskAssetsServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: assetCount.total,
+                totalAssetCount: assetCount.total,
                 totalPages: Math.ceil(assetCount.total/limit),
                 page: page,
                 limit: limit
@@ -185,6 +185,7 @@ export const taskAssetsServices = {
             fileCategory: taskAssets.fileCategory,
             fileName: taskAssets.fileName,
             fileSize: taskAssets.fileSize,
+            fileUrl: taskAssets.fileUrl,
             uploadedBy: taskAssets.uploadedBy,
             taskId: tasks.taskId,
             taskName: tasks.title,
@@ -251,10 +252,13 @@ export const taskAssetsServices = {
             timestamp: new Date()
         }
 
+        const secureUrl = existingAsset.fileUrl
+
         await db
         .delete(taskAssets)
         .where(eq(taskAssets.assetId, assetId))
 
+        await deleteFromCloudinary(secureUrl)
 
         await AnalyticsLog.create(log)
     }

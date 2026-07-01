@@ -1,6 +1,6 @@
 ### add comment to a task
 POST http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
 Content-Type: application/json
 
 {
@@ -9,11 +9,11 @@ Content-Type: application/json
 
 ### get comments on a task
 GET http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
 
 ### edit comment to a task
 PATCH http://localhost:3000/api/comments/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
 Content-Type: application/json
 
 {

@@ -228,7 +228,7 @@ export const taskServices = {
             .select()
             .from(tasks)
             .where(and(...filters))
-            .orderBy(asc(tasks.dueDate))
+            .orderBy(asc(tasks.dueDate), asc(tasks.taskId))
             .offset(offset)
             .limit(limit),
 
@@ -242,7 +242,7 @@ export const taskServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: taskCount.total,
+                totalTaskCount: taskCount.total,
                 totalPages: Math.ceil(taskCount.total/limit),
                 page: page,
                 limit: limit
@@ -299,7 +299,7 @@ export const taskServices = {
             .innerJoin(projects, eq(tasks.projectId, projects.projectId))
             .innerJoin(teams, eq(projects.teamId, teams.teamId))
             .where(and(...filters))
-            .orderBy(asc(tasks.dueDate))
+            .orderBy(asc(tasks.dueDate), asc(tasks.taskId))
             .offset(offset)
             .limit(limit),
 
@@ -313,7 +313,7 @@ export const taskServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: taskCount.total,
+                totalTaskCount: taskCount.total,
                 totalPages: Math.ceil(taskCount.total/limit),
                 page: page,
                 limit: limit
@@ -597,7 +597,7 @@ export const taskServices = {
             .select()
             .from(tasks)
             .where(eq(tasks.parentTaskId, taskId))
-            .orderBy(asc(tasks.dueDate))
+            .orderBy(asc(tasks.dueDate), asc(tasks.taskId))
             .offset(offset)
             .limit(limit),
 
@@ -611,7 +611,7 @@ export const taskServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: subTaskCount.total,
+                totalTaskCount: subTaskCount.total,
                 totalPages: Math.ceil(subTaskCount.total/limit),
                 page: page,
                 limit: limit

@@ -1,0 +1,17 @@
+info:
+  name: deleteAsset
+  type: http
+  seq: 6
+
+http:
+  method: DELETE
+  url: http://localhost:3000/api/assets/1
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4MjkyNTgwNCwiZXhwIjoxNzgyOTI2NDA0fQ.aUHMRcwfUGGzkia0-aEs5ugDbbyUQFF78SAEK2V081w
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

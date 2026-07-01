@@ -141,7 +141,7 @@ export const projectServices = {
 
         return {
             paginationInfo: {
-                totalTeamCount: projectCounts.total,
+                totalProjectCount: projectCounts.total,
                 totalPages: Math.ceil(projectCounts.total/limit),
                 page: page,
                 limit: limit
