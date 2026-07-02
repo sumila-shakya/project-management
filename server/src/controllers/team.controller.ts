@@ -146,6 +146,7 @@ export const teamController = {
         }
     },
 
+    // GET ANALYTICS LOG CONTROLLER FUNCTION
     async getAnalyticsLog(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id
@@ -159,10 +160,13 @@ export const teamController = {
             // get the teamId from the request params
             const teamId = parseId(req.params.teamId as string)
 
+            // grab the query filters from the url query parameters
             const queryFilter: filterAnalyticsLogType = filterAnalyticsLogSchema.parse(req.query)
 
+            // get the log
             const logs = await teamServices.getAnalyticsLog(userId, teamId, queryFilter)
 
+            // return 200 success status with the log
             res
             .status(200)
             .json(new ApiResponse(200, logs))

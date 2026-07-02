@@ -7,6 +7,7 @@ import { commentContentSchema, commentContentType } from "../validator/comment.v
 import {cursorPaginationSchema, cursorPaginationType} from "../validator/global.validator"
 
 export const commentController = {
+    // ADD COMMENT CONTROLLER FUNCTION
     async addComment(req: Request, res: Response, next:NextFunction) {
         try {
             // get the user id from the request
@@ -35,6 +36,7 @@ export const commentController = {
         }
     },
 
+    // GET COMMENTS CONTROLLER FUNCTION
     async getComments(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -63,6 +65,7 @@ export const commentController = {
         }
     },
 
+    // EDIT COMMENT CONTROLLER FUNCTION
     async editComment(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -91,6 +94,7 @@ export const commentController = {
         }
     },
 
+    // DELETE COMMENT CONTROLLER FUNCTION
     async deleteComment(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request

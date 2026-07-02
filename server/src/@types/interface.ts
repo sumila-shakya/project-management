@@ -1,10 +1,5 @@
 import { ROLE, TASK_STATUS, ACTIONS,  ALLOWED_MIME_TYPES, ALLOWED_FILE_TYPE} from "../utils/constants"
 
-// authenticated user
-export interface Payload {
-    userId: number
-}
-
 export type Role = typeof ROLE[number]
 
 export type TaskStatus = typeof TASK_STATUS[number]
@@ -14,6 +9,10 @@ export type Actions = typeof ACTIONS[number]
 export type MimeType = typeof ALLOWED_MIME_TYPES[number]
 
 export type FileType = typeof ALLOWED_FILE_TYPE[number]
+
+export interface Payload {
+    userId: number
+}
 
 export interface IChanges {
     field: string,

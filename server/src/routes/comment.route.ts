@@ -4,12 +4,13 @@ import { commentController } from "../controllers/comment.controller";
 
 const router = Router()
 
+// AUTHENTICATE THE USER
 router.use(authMiddleware)
 
-// EDIT COMMENT
+// EDIT COMMENT ROUTE
 router.patch('/:commentId', commentController.editComment)
 
-// DELETE COMMENT
+// DELETE COMMENT ROUTE
 router.delete('/:commentId', commentController.deleteComment)
 
 export default router

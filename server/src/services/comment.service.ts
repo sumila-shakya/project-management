@@ -11,6 +11,7 @@ import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
 export const commentServices = {
+    // ADD COMMENTS SERVICE FUNCTION
     async addComment(authorId: number, taskId: number, data: commentContentType) {
         const existingTask = await taskGuard.validateAccess(authorId, taskId)
 
@@ -20,7 +21,7 @@ export const commentServices = {
             content: data.content
         }
 
-        // inser the new comment into the database
+        // insert the new comment into the database
         const [result] = await db
         .insert(comments)
         .values(newComment)
@@ -71,6 +72,7 @@ export const commentServices = {
         }
     },
 
+    // GET ALL COMMENTS SERVICE FUNCTION
     async getComments(userId: number, taskId: number, paginationData: cursorPaginationType) {
         // get the page limit
         const limit: number = paginationData.limit || DEFAULT_PAGE_LIMIT
@@ -126,7 +128,7 @@ export const commentServices = {
         )
         .limit(limit + 1)
 
-        // initializa the pagination meta data
+        // initialize the pagination meta data
         const pageMetaData: CursorPageMetaData = {
             nextPage: false,
             limit: limit
@@ -159,6 +161,7 @@ export const commentServices = {
         }
     },
 
+    // EDIT COMMENTS SERVICE FUNCTION
     async editComment(authorId: number, commentId: number, updates: commentContentType) {
         // get the comment where the user is the author
         const [existingComment] = await db
@@ -207,6 +210,7 @@ export const commentServices = {
         return editedComment
     },
 
+    // DELETE COMMENT SERVICE FUNCTION
     async deleteComment(userId: number, commentId: number) {
         // get the comment
         const [existingComment] = await db

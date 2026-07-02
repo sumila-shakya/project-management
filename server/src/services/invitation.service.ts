@@ -96,10 +96,12 @@ export const invitationServices = {
 
     // GET INVITATIONS SERVICE FUNCTION
     async getInvitations(userId: number, filterData: filterInvitationType) {
+        // get the pagination data
         const page = filterData.page || 1
         const limit = filterData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
 
+        // get the query filters
         const queryFilters = [eq(invitations.inviteeId, userId)]
         if(filterData.invitationStatus) {
             queryFilters.push(eq(invitations.invitationStatus, filterData.invitationStatus))

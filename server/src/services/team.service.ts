@@ -44,6 +44,7 @@ export const teamServices = {
 
     // GET USERS TEAMS SERVICE FUNCTION
     async getTeams(userId: number, paginationData: paginationType) {
+        // get the pagination data
         const page = paginationData.page || 1
         const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -178,9 +179,12 @@ export const teamServices = {
         })
     },
 
+    // GET ANALYTICS LOG SERVICE FUNCTION
     async getAnalyticsLog(userId: number, teamId: number, filters: filterAnalyticsLogType,) {
         // get the limit
         const limit = filters.limit || DEFAULT_PAGE_LIMIT
+
+        // construct the cursor based pagination meta data
         const pageMetaData: CursorPageMetaData = {
             nextPage: false,
             limit: limit
@@ -210,8 +214,10 @@ export const teamServices = {
         if(filters.role) queryFilters['actor.role'] = filters.role
 
         if(filters.cursor) {
+            // decode the cursor
             const cursorDate: LogCursor = decodeLogCursor(filters.cursor)
 
+            // push the cursor based filter into the queryfilters
             queryFilters['$or'] = [
                 {'timestamp': {$lt: cursorDate.timestamp}},
                 {$and: [
@@ -229,16 +235,21 @@ export const teamServices = {
         .lean()
 
         if(logs.length > limit) {
+            // generate new nursor if next page exists
             const nextCursorData: LogCursor = {
                 timestamp: logs[limit-1].timestamp,
                 _id: String(logs[limit-1]._id)
             }
+
+            // encode the cursor
             const nextCursor: string = encodeLogCursor(nextCursorData)
 
+            // update the pagination meta data
             pageMetaData.nextPage = true
             pageMetaData.nextCursor = nextCursor
         }
 
+        // grab only the current page data
         const currentPageData = pageMetaData.nextPage ? logs.slice(0,limit) : logs
 
         return {
@@ -251,6 +262,7 @@ export const teamServices = {
 export const teamMembersServices = {
     // GET TEAM MEMBERS SERVICE FUNCTION
     async getTeamMembers(userId: number, teamId: number, paginationData: paginationType) {
+        // get the pagination data
         const page = paginationData.page || 1
         const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -307,6 +319,7 @@ export const teamMembersServices = {
     // REMOVE TEAM  MEMBERS SERVICE FUNCTION
     async removeMember(requestingUserId: number, teamId: number, userToRemoveId: number) {
         const [[requestingUser], [userToRemove], [adminCount]] = await Promise.all([
+            // grab information on requesting user
             db.select()
             .from(teamMembers)
             .where(and(
@@ -314,6 +327,7 @@ export const teamMembersServices = {
                 eq(teamMembers.userId, requestingUserId)
             )),
 
+            // grab information on user to remove
             db
             .select()
             .from(teamMembers)
@@ -322,6 +336,7 @@ export const teamMembersServices = {
                 eq(teamMembers.userId, userToRemoveId)
             )),
 
+            // get the no. of admins
             db
             .select({
                 count: count()
@@ -360,6 +375,7 @@ export const teamMembersServices = {
     // UPDATE TEAM MEMBERS SERVICE FUNCTION
     async updateMember(requestingUserId: number, teamId: number, userToUpdateId: number, data: updateTeamMemberType) {
         const [[requestingUser], [userToUpdate], [adminCount]] = await Promise.all([
+            // grab information on requesting user
             db.select()
             .from(teamMembers)
             .where(and(
@@ -367,6 +383,7 @@ export const teamMembersServices = {
                 eq(teamMembers.userId, requestingUserId)
             )),
 
+            // grab information on user to update
             db
             .select()
             .from(teamMembers)
@@ -375,6 +392,7 @@ export const teamMembersServices = {
                 eq(teamMembers.userId, userToUpdateId)
             )),
 
+            // get the no. of admin
             db
             .select({
                 count: count()

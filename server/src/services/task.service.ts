@@ -10,6 +10,7 @@ import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 
+// VALIDATE USER ACCESS FUNCTION
 export const taskGuard = {
     async validateAccess(userId: number, taskId: number, allowedRoles?: Role[]) {
         const [existingTask] = await db
@@ -63,6 +64,7 @@ export const taskGuard = {
 }
 
 export const taskServices = {
+    // CREATE TASK SERVICE FUNCTION
     async createTask(userId: number, projectId: number, data: taskType) {
         // check if the project exists
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
@@ -156,6 +158,7 @@ export const taskServices = {
         return insertedTask
     },
 
+    // GET TASK DETAILS SERVICE FUNCTION
     async getTaskDetails(userId: number, taskId: number) {
         // check if the user belongs to team task is of
         const [taskDetails] = await db
@@ -196,10 +199,12 @@ export const taskServices = {
         return taskDetails
     },
 
+    // GET LIST OF TASKS IN PROJECT SERVICE FUNCTION
     async getTasksInProjects(userId: number, projectId: number, queryFilters: filterTaskType) {
         // check if the project exists
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
 
+        // get the pagination data
         const page = queryFilters.page || 1
         const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -251,7 +256,9 @@ export const taskServices = {
         }
     },
 
+    // GET USER TASK SERVICE FUNCTION
     async getMyTasks(userId: number, queryFilters: filterTaskType) {
+        // get the pagination data
         const page = queryFilters.page || 1
         const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -322,6 +329,7 @@ export const taskServices = {
         }
     },
 
+    // UPDATE TASK SERVICE FUNCTION
     async updateTask(userId: number, taskId: number, updates: updateTaskType) {
         const existingTask = await taskGuard.validateAccess(userId, taskId, ['admin', 'team_leader'])
 
@@ -382,6 +390,7 @@ export const taskServices = {
         }
     },
 
+    // PROCESS TASK SERVICE FUNCTION
     async processTask(userId: number, taskId: number, data: processTaskType) {
         // check for the existing task that was assigned to the user
         const [existingTask] = await db
@@ -485,6 +494,7 @@ export const taskServices = {
         await AnalyticsLog.create(log)
     },
 
+    // ASSIGN TASK SERVICE FUNCTION
     async assignTask(userId: number, taskId: number, data: assignTaskType) {
         const existingTask = await taskGuard.validateAccess(userId, taskId)
 
@@ -566,7 +576,9 @@ export const taskServices = {
         await AnalyticsLog.create(log)
     },
 
+    // GET SUB TASKS SERVICE FUNCTION
     async getSubTasks(userId: number, taskId: number, paginationData: paginationType) {
+        // get the pagination data
         const page = paginationData.page || 1
         const limit = paginationData.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -620,6 +632,7 @@ export const taskServices = {
         }
     },
 
+    // DELETE TASK SERVICE FUNCTION
     async deleteTask(userId: number, taskId: number) {
         const existingTask = await taskGuard.validateAccess(userId, taskId, ['admin'])
 

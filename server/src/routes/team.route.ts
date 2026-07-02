@@ -50,6 +50,7 @@ router.post('/:teamId/projects', projectController.createProject)
 router.get('/:teamId/projects', projectController.getProjects)
 
 /* ------------------------------------ ANALYTICS LOG ROUTES ------------------------------------ */
+// GET THE ANALYLICS LOG ROUTE
 router.get('/:teamId/activity', teamController.getAnalyticsLog)
 
 export default router

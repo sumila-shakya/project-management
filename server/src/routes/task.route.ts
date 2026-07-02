@@ -35,18 +35,18 @@ router.delete('/:taskId', taskController.deleteTask)
 
 
 /* ------------------------------------ COMMENT ROUTES ------------------------------------ */
-// ADD COMMENT
+// ADD COMMENT ROUTE
 router.post('/:taskId/comments', commentController.addComment)
 
-// GET COMMENTS
+// GET COMMENTS ROUTE
 router.get('/:taskId/comments', commentController.getComments)
 
 
 /* ------------------------------------ TASK ASSETS ROUTES ------------------------------------ */
-// ATTACH ASSETS
+// ATTACH ASSETS ROUTE
 router.post('/:taskId/assets', upload.single('asset'), taskAssetsController.attachAsset)
 
-// GET ALL TASK ASSETS META DATA
+// GET ALL TASK ASSETS META DATA ROUTE
 router.get('/:taskId/assets', taskAssetsController.getTaskAssets)
 
 

@@ -2,6 +2,7 @@ import multer from "multer";
 import { ALLOWED_MIME_TYPES } from "../utils/constants";
 import { ApiError } from "../utils/apiError";
 
+// configure the storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -13,7 +14,11 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
     storage,
+
+    // define the maximum limit of the file size
     limits: {fileSize: 100*1024*1024},
+
+    // filter the file tyep
     fileFilter: (req, file, cb) => {
         if(ALLOWED_MIME_TYPES.includes(file.mimetype as any)) {
             cb(null, true)

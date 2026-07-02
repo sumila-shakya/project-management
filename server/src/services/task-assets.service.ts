@@ -12,6 +12,7 @@ import { IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 
 export const taskAssetsServices = {
+    // ATTACH ASSET SERVICE FUNCTION
     async attachAsset(userId: number, taskId: number, fileData: FileMetaData) {
         // validate the user access to the tasks
         const existingTask = await taskGuard.validateAccess(userId, taskId)
@@ -31,6 +32,7 @@ export const taskAssetsServices = {
         // upload the file to cloudinary
         const uploadedResult = await uploadOnCloudinary(fileData.localFilePath)
 
+        // thorw error for failed cloudinary file upload
         if(!uploadedResult) {
             throw new ApiError(500, "File upload failed")
         }
@@ -44,6 +46,7 @@ export const taskAssetsServices = {
             uploadedBy: userId
         }
 
+        // insert the data into the database
         const [result] = await db
         .insert(taskAssets)
         .values(newAsset)
@@ -80,6 +83,7 @@ export const taskAssetsServices = {
             timestamp: new Date()
         }
 
+        // write into the log
         await AnalyticsLog.create(log)
 
         return {
@@ -89,7 +93,9 @@ export const taskAssetsServices = {
         }
     },
 
+    // GET ASSETS LIST SERVICE FUNCTION
     async getTaskAssets(userId: number, taskId: number, queryFilters: filterAssetsType) {
+        // get the pagination data
         const page = queryFilters.page || 1
         const limit = queryFilters.limit || DEFAULT_PAGE_LIMIT
         const offset = (page - 1)*limit
@@ -114,6 +120,7 @@ export const taskAssetsServices = {
             throw new ApiError(403, "Access Denied")
         }
 
+        // get the query filters
         const filters = [eq(taskAssets.taskId, taskId)]
         
         if(queryFilters.fileCategory) {
@@ -121,6 +128,7 @@ export const taskAssetsServices = {
         }
 
         const [allTaskAssets, [assetCount]] = await Promise.all([
+            // fetch all the task assets
             db
             .select({
                 assetId: taskAssets.assetId,
@@ -136,6 +144,7 @@ export const taskAssetsServices = {
             .offset(offset)
             .limit(limit),
 
+            // get the assets count
             db
             .select({
                 total: count()
@@ -155,7 +164,9 @@ export const taskAssetsServices = {
         }
     },
 
+    // DOWLOAD ASSET SERVICE FUNCTION
     async downloadAsset(userId: number, assetId: number) {
+        // get the assets from the assets id
         const [existingAsset] = await db
         .select({
             assetId: taskAssets.assetId,
@@ -171,14 +182,18 @@ export const taskAssetsServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // throw error is the asset is not found
         if(!existingAsset) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // return only the secure url of the file
         return existingAsset.fileUrl
     },
 
+    // DELETE ASSET SERVICE FUNCTION
     async deleteAsset(userId: number, assetId: number) {
+        // fetch the asset from the the assetid
         const [existingAsset] = await db
         .select({
             assetId: taskAssets.assetId,
@@ -208,14 +223,17 @@ export const taskAssetsServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // throw error if asset is not found
         if(!existingAsset) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // only allow admin or the uploader to delete the asset
         if(existingAsset.role !== 'admin' && existingAsset.uploadedBy !== userId) {
             throw new ApiError(403, "Access Denied")
         }
 
+        // do not allow to delete the asset of the archived project
         if(existingAsset.projectStatus === 'archived') {
             throw new ApiError(403, "Access denied")
         }
@@ -252,14 +270,18 @@ export const taskAssetsServices = {
             timestamp: new Date()
         }
 
+        // extract the secure url of the file
         const secureUrl = existingAsset.fileUrl
 
+        // delete the record from the database
         await db
         .delete(taskAssets)
         .where(eq(taskAssets.assetId, assetId))
 
+        // delete from the cloudinary
         await deleteFromCloudinary(secureUrl)
 
+        // write into the log
         await AnalyticsLog.create(log)
     }
 }
