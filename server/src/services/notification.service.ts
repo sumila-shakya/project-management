@@ -94,5 +94,30 @@ export const notificationServices = {
             isRead: true
         })
         .where(eq(notifications.notificationId, notificationId))
+    },
+
+    async unreadNotification(userId: number, notificationId: number) {
+        const [existingNotification] = await db
+        .select()
+        .from(notifications)
+        .where(and(
+            eq(notifications.notificationId, notificationId),
+            eq(notifications.recipientId, userId)
+        )) 
+
+        if(!existingNotification) {
+            throw new ApiError(403, "Access denied")
+        }
+
+        if(!existingNotification.isRead) {
+            throw new ApiError(400, 'Notification already is not read')
+        }
+
+        await db
+        .update(notifications)
+        .set({
+            isRead: false
+        })
+        .where(eq(notifications.notificationId, notificationId))
     }
 }
