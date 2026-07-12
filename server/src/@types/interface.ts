@@ -70,6 +70,11 @@ export interface LogCursor {
     _id: string
 }
 
+export interface NotificationCursor {
+    createdAt: Date, 
+    notificationId: number
+}
+
 export interface CursorPageMetaData {
     nextPage: boolean,
     limit: number,

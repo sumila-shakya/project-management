@@ -7,6 +7,7 @@ export const INVITATION_STATUS = ['pending', 'accepted', 'rejected'] as const
 export const PROCESS_INVITATION_STATUS = ['accepted', 'rejected'] as const
 export const ACTIONS = ['created', 'updated', 'deleted', 'completed', 'commented', 'comment_deleted', 'assigned', 'asset_attached', 'asset_deleted'] as const
 export const ALLOWED_FILE_TYPE = ['images', 'documents', 'text', 'archives', 'video'] as const
+export const NOTIFICATION_STATUS = ['read', 'unread'] as const
 
 export const NOTIFICATION_TYPES = [
     'project_created',

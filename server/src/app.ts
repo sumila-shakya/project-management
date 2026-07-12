@@ -9,6 +9,7 @@ import projectRouter from './routes/project.route'
 import taskRouter from './routes/task.route'
 import commentRouter from './routes/comment.route'
 import assetRouter from './routes/task-assets.route'
+import notificationRouter from './routes/notification.route'
 import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser'
 
@@ -27,6 +28,7 @@ app.use('/api/projects', projectRouter)
 app.use('/api/tasks', taskRouter)
 app.use('/api/comments', commentRouter)
 app.use('/api/assets', assetRouter)
+app.use('/api/notification', notificationRouter)
 
 // HEALTH STATUS CHECKUP
 app.get('/api/health', async (req, res, next) => {
