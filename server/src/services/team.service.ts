@@ -7,7 +7,8 @@ import { paginationType } from "../validator/global.validator";
 import { and, asc, count, eq } from "drizzle-orm";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { encodeLogCursor, decodeLogCursor } from "../utils/cursor";
-import { LogCursor, CursorPageMetaData } from "../@types/interface";
+import { LogCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
+import { notificationEmitter } from "../events/notification.events";
 import mongoose from "mongoose";
 
 export const teamServices = {
@@ -121,8 +122,14 @@ export const teamServices = {
     async updateTeam(userId: number, teamId: number, updates: updateTeamType) {
         // check if the user is the admin
         const [member] = await db
-        .select()
+        .select({
+            teamName: teams.teamName,
+            userName: users.name,
+            role: teamMembers.role,
+        })
         .from(teamMembers)
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
+        .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
         .where(and(
             eq(teamMembers.teamId, teamId),
             eq(teamMembers.userId, userId)
@@ -138,6 +145,18 @@ export const teamServices = {
         .update(teams)
         .set(updates)
         .where(eq(teams.teamId, teamId))
+
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${member.userName}](${userId}) updated the team [${member.teamName}](${teamId})`
+        const notificationType: NotificationType = 'team_updated'
+                
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
 
         return {
             teamId: teamId,
@@ -320,8 +339,12 @@ export const teamMembersServices = {
     async removeMember(requestingUserId: number, teamId: number, userToRemoveId: number) {
         const [[requestingUser], [userToRemove], [adminCount]] = await Promise.all([
             // grab information on requesting user
-            db.select()
+            db.select({
+                userName: users.name,
+                role: teamMembers.role
+            })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.userId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.userId, requestingUserId)
@@ -329,8 +352,12 @@ export const teamMembersServices = {
 
             // grab information on user to remove
             db
-            .select()
+            .select({
+                userName: users.name,
+                role: teamMembers.role
+            })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.userId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.userId, userToRemoveId)
@@ -339,9 +366,11 @@ export const teamMembersServices = {
             // get the no. of admins
             db
             .select({
+                teamName: teams.teamName,
                 count: count()
             })
             .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.role, 'admin')
@@ -370,14 +399,32 @@ export const teamMembersServices = {
             eq(teamMembers.teamId, teamId),
             eq(teamMembers.userId, userToRemoveId)
         ))
+
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== requestingUserId && memberId !== userToRemoveId)
+        const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) removed the member [${userToRemove.userName}](${userToRemoveId}) from the team [${adminCount.teamName}](${teamId})`
+        const message = `User [${requestingUser.userName}](${requestingUserId}) removed you from the team [${adminCount.teamName}](${teamId})`
+        const notificationType: NotificationType = 'team_member_removed'
+                
+        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        notificationEmitter.emit('notification_generated', notificationType, message, userToRemove)
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
     },
 
     // UPDATE TEAM MEMBERS SERVICE FUNCTION
     async updateMember(requestingUserId: number, teamId: number, userToUpdateId: number, data: updateTeamMemberType) {
         const [[requestingUser], [userToUpdate], [adminCount]] = await Promise.all([
             // grab information on requesting user
-            db.select()
+            db.select({
+                userName: users.name,
+                role: teamMembers.role
+            })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.userId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.userId, requestingUserId)
@@ -385,8 +432,12 @@ export const teamMembersServices = {
 
             // grab information on user to update
             db
-            .select()
+            .select({
+                userName: users.name,
+                role: teamMembers.role
+            })
             .from(teamMembers)
+            .innerJoin(users, eq(teamMembers.userId, users.userId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.userId, userToUpdateId)
@@ -395,9 +446,11 @@ export const teamMembersServices = {
             // get the no. of admin
             db
             .select({
+                teamName: teams.teamName,
                 count: count()
             })
             .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.role, 'admin')
@@ -435,10 +488,35 @@ export const teamMembersServices = {
             eq(teamMembers.userId, userToUpdateId)
         ))
 
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== requestingUserId && memberId !== userToUpdateId)
+        const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) changed the role of the member [${userToUpdate.userName}](${userToUpdate}) in the team [${adminCount.teamName}](${teamId})`
+        const message = `User [${requestingUser.userName}](${requestingUserId}) changed your role in the team [${adminCount.teamName}](${teamId})`
+        const notificationType: NotificationType = 'role_updated'
+                
+        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        notificationEmitter.emit('notification_generated', notificationType, message, userToUpdateId)
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
+
         return {
             teamId: teamId, 
             userId: userToUpdateId,
             role: data.role
         }
+    },
+
+    async getTeamMembersIds(teamId: number) {
+        const members = await db
+        .select()
+        .from(teamMembers)
+        .where(eq(teamMembers.teamId, teamId))
+
+        const memberIds = members.map((member) => member.userId)
+
+        return memberIds
     }
 }

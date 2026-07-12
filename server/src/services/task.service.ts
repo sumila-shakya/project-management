@@ -6,9 +6,11 @@ import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskTy
 import { paginationType } from "../validator/global.validator";
 import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
-import { Role, IAnalyticsLog, IChanges } from "../@types/interface";
+import { Role, IAnalyticsLog, IChanges, NotificationType } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { teamMembersServices } from "./team.service";
+import { notificationEmitter } from "../events/notification.events";
 
 // VALIDATE USER ACCESS FUNCTION
 export const taskGuard = {
@@ -154,6 +156,18 @@ export const taskServices = {
         .select()
         .from(tasks)
         .where(eq(tasks.taskId, result.insertId))
+
+        /* ------------------------------------ notification ------------------------------------ */
+        
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingProject.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${membership.userName}](${userId}) created a new task on project [${existingProject.projectName}](${projectId})`
+        const notificationType: NotificationType = 'task_created'
+        
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        
+        
+        /* ------------------------------------ notification ------------------------------------ */
 
         return insertedTask
     },
@@ -383,6 +397,18 @@ export const taskServices = {
         // write the changes in analytics log
         await AnalyticsLog.create(log)
 
+        /* ------------------------------------ notification ------------------------------------ */
+        
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${existingTask.userName}](${userId}) updated the task [${existingTask.title}](${taskId})`
+        const notificationType: NotificationType = 'task_updated'
+        
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        
+        
+        /* ------------------------------------ notification ------------------------------------ */
+
         return {
             ...existingTask,
             ...updates,
@@ -465,6 +491,18 @@ export const taskServices = {
                 oldValue: existingTask.completedAt,
                 newValue: completedAt
             })
+
+
+            /* ------------------------------------ notification ------------------------------------ */
+            
+            const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+            const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+            const message = `User [${existingTask.userName}](${userId}) completed task [${existingTask.title}](${taskId})`
+            const notificationType: NotificationType = 'task_completed'
+            
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            
+            /* ------------------------------------ notification ------------------------------------ */
         }
 
         const log: IAnalyticsLog = {
@@ -499,14 +537,16 @@ export const taskServices = {
         const existingTask = await taskGuard.validateAccess(userId, taskId)
 
         // check if the user to assign to is also the member of the team
-        const membership = await db
+        const [membership] = await db
         .select({
             taskId: tasks.taskId,
+            userName: users.name,
             role: teamMembers.role
         })
         .from(tasks)
         .innerJoin(projects, eq(tasks.projectId, projects.projectId))
         .innerJoin(teamMembers, eq(projects.teamId, teamMembers.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(tasks.taskId, taskId),
             eq(teamMembers.userId, data.assignedTo)
@@ -574,6 +614,20 @@ export const taskServices = {
 
         // write into the analytics log
         await AnalyticsLog.create(log)
+
+        /* ------------------------------------ notification ------------------------------------ */
+
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId && memberId !== data.assignedTo )
+        const generalMessage = `User [${existingTask.userName}](${userId}) assigned the task [${existingTask.title}](${taskId}) to user [${membership.userName}](${data.assignedTo})`
+        const message = `You are assigned the task [${existingTask.title}](${taskId}) by the user [${existingTask.userName}](${userId})`
+        const notificationType: NotificationType = 'task_assigned'
+
+        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        notificationEmitter.emit('notification_generated', notificationType, message, [data.assignedTo])
+
+
+        /* ------------------------------------ notification ------------------------------------ */
     },
 
     // GET SUB TASKS SERVICE FUNCTION

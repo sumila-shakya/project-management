@@ -1,11 +1,13 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
 import { invitationType, processInvitationType, filterInvitationType } from "../validator/invitation.validator";
-import { paginationType } from "../validator/global.validator";
 import { generateToken, hashToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { NotificationType } from "../@types/interface";
+import { notificationEmitter } from "../events/notification.events";
+import { teamMembersServices } from "./team.service";
 
 export const invitationServices = {
     // SEND INVITATIONS SERVICE FUNCTION
@@ -17,8 +19,12 @@ export const invitationServices = {
             .where(eq(users.userId, data.inviteeId)),
 
             db
-            .select()
+            .select({
+                role: teamMembers.role,
+                teamName: teams.teamName
+            })
             .from(teamMembers)
+            .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
             .where(and(
                 eq(teamMembers.teamId, teamId),
                 eq(teamMembers.userId, senderId)
@@ -85,6 +91,16 @@ export const invitationServices = {
         const [result] = await db
         .insert(invitations)
         .values(newInvitation)
+
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const message = `You are invited to join the team [${senderMembership.teamName}](${teamId})`
+        const notificationType: NotificationType = 'invitation_received'
+                
+        notificationEmitter.emit('notification_generated', notificationType, message, [data.inviteeId])
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
         
         return {
             invitationId: result.insertId,
@@ -152,8 +168,17 @@ export const invitationServices = {
     // PROCESS INVITATION SERVICE FUNCTION
     async processInvitation(userId: number, invitationId: number, data: processInvitationType) {
         const [userInvitation] = await db
-        .select()
+        .select({
+            userName: users.name,
+            token: invitations.token,
+            expiresAt: invitations.expiresAt,
+            invitationStatus: invitations.invitationStatus,
+            teamId: invitations.teamId,
+            teamName: teams.teamName
+        })
         .from(invitations)
+        .innerJoin(users, eq(invitations.inviteeId, users.userId))
+        .innerJoin(teams, eq(invitations.teamId, teams.teamId))
         .where(and(
             eq(invitations.invitationId, invitationId),
             eq(invitations.inviteeId, userId)
@@ -206,6 +231,19 @@ export const invitationServices = {
                 await tx
                 .insert(teamMembers)
                 .values(newMember)
+
+
+                /* ------------------------------------ notification ------------------------------------ */
+                        
+                const allTeamMembers = await teamMembersServices.getTeamMembersIds(userInvitation.teamId)
+                const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+                const message = `User [${userInvitation.userName}](${userId}) joined the team [${userInvitation.teamName}](${userInvitation.teamId})`
+                const notificationType: NotificationType = 'team_member_added'
+                        
+                notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                        
+                        
+                /* ------------------------------------ notification ------------------------------------ */
             }
         })
     }

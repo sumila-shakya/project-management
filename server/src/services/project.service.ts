@@ -1,11 +1,13 @@
 import { db } from "../config/mysql.config";
 import { projects, teamMembers, NewProject, tasks, users, teams } from "../models/mysql.model";
-import { eq, and, count, asc } from "drizzle-orm";
+import { eq, and, count, asc, ne } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
-import { Role, IAnalyticsLog } from "../@types/interface";
+import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { notificationEmitter } from "../events/notification.events";
+import { teamMembersServices } from "./team.service";
 
 export const projectGuard = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
@@ -59,8 +61,13 @@ export const projectServices = {
     async createProject(userId: number, teamId: number, data: projectType) {
         // check if the user is the member of the team
         const [isMember] = await db
-        .select()
+        .select({
+            teamName: teams.teamName,
+            userName: users.name
+        })
         .from(teamMembers)
+        .innerJoin(teams, eq(teamMembers.teamId, teams.teamId))
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
         .where(and(
             eq(teamMembers.teamId, teamId),
             eq(teamMembers.userId, userId)
@@ -90,6 +97,17 @@ export const projectServices = {
         .select()
         .from(projects)
         .where(eq(projects.projectId, result.insertId))
+
+        /* ------------------------------------ notification ------------------------------------ */
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${isMember.userName}](${userId}) created new a project in team [${isMember.teamName}](${teamId})`
+        const notificationType: NotificationType = 'project_created'
+
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+
+        /* ------------------------------------ notification ------------------------------------ */
 
         return insertedProject
     },
@@ -202,6 +220,18 @@ export const projectServices = {
         .set(updates)
         .where(eq(projects.projectId, projectId))
 
+        /* ------------------------------------ notification ------------------------------------ */
+
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingProject.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${membership.userName}](${userId}) updated project [${existingProject.projectName}](${projectId})`
+        const notificationType: NotificationType = 'project_updated'
+
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+
+
+        /* ------------------------------------ notification ------------------------------------ */
+
         return {
             ...existingProject, 
             ...updates,          
@@ -228,6 +258,18 @@ export const projectServices = {
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Project already archived")
         }
+
+        /* ------------------------------------ notification ------------------------------------ */
+
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingProject.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${membership.userName}](${userId}) archived project [${existingProject.projectName}](${projectId})`
+        const notificationType: NotificationType = 'project_archived'
+
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+
+
+        /* ------------------------------------ notification ------------------------------------ */
     },
 
     // RESTORE PROJECT SERVICE FUNCTION
@@ -249,6 +291,18 @@ export const projectServices = {
         if(result.affectedRows === 0) {
             throw new ApiError(400, "Project is already active")
         }
+
+        /* ------------------------------------ notification ------------------------------------ */
+
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingProject.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${membership.userName}](${userId}) restored project [${existingProject.projectName}](${projectId})`
+        const notificationType: NotificationType = 'project_restored'
+
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+
+
+        /* ------------------------------------ notification ------------------------------------ */
 
         return {
             ...existingProject,

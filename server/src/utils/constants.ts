@@ -7,6 +7,29 @@ export const INVITATION_STATUS = ['pending', 'accepted', 'rejected'] as const
 export const PROCESS_INVITATION_STATUS = ['accepted', 'rejected'] as const
 export const ACTIONS = ['created', 'updated', 'deleted', 'completed', 'commented', 'comment_deleted', 'assigned', 'asset_attached', 'asset_deleted'] as const
 export const ALLOWED_FILE_TYPE = ['images', 'documents', 'text', 'archives', 'video'] as const
+
+export const NOTIFICATION_TYPES = [
+    'project_created',
+    'project_updated', 
+    'project_archived',
+    'project_restored',
+
+    'task_created',
+    'task_completed',
+    'task_assigned', 
+    'task_updated', 
+    'task_commented', 
+
+    'invitation_received',
+
+    'team_updated', 
+    'team_member_added',
+    'team_member_removed',
+    'role_updated', 
+
+    'asset_attached'
+] as const
+
 export const COOKIES_OPTIONS = {
     httpOnly: true,
     maxAge: 7*24*60*60*1000,

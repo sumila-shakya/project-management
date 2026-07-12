@@ -1,5 +1,5 @@
 import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean } from "drizzle-orm/mysql-core";
-import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS, ALLOWED_FILE_TYPE } from "../utils/constants";
+import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS, ALLOWED_FILE_TYPE, NOTIFICATION_TYPES } from "../utils/constants";
 
 /* ------------------------------------------ SCHEMA DEFINITIONS ------------------------------------------ */
 
@@ -135,6 +135,17 @@ export const invitations = mysqlTable('invitations', {
     expiresAt: timestamp('expires_at', { mode: 'date' }).notNull(),
 })
 
+// NOTIFICATIONS SCHEMA
+export const notifications = mysqlTable('notifications', {
+    notificationId: serial('notification_id').primaryKey(),
+    recipientId: bigint('recipient_id', { mode: 'number', unsigned: true }).notNull().references(() => users.userId, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    notificationType: mysqlEnum('notification_type', NOTIFICATION_TYPES).notNull(),
+    message: text('message').notNull(),
+    isRead: boolean('is_read').notNull().default(false),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
+})
+
 /* ------------------------------------------ TYPE DEFINITIONS ------------------------------------------ */
 
 // USERS SCHEMA TYPE
@@ -180,3 +191,7 @@ export type NewEmailToken = typeof emailVerificationTokens.$inferInsert
 // INVITATION TYPE
 export type Invitation = typeof invitations.$inferSelect
 export type NewInvitation = typeof invitations.$inferInsert
+
+// NOTIFICATION TYPE
+export type Notification = typeof notifications.$inferSelect
+export type NewNotification = typeof notifications.$inferInsert

@@ -3,13 +3,15 @@ import { taskAssets, tasks, projects, teamMembers, NewTaskAssets, teams, users }
 import { eq, and, asc, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { taskGuard } from "./task.service";
-import { FileType, FileMetaData } from "../@types/interface";
+import { FileType, FileMetaData, NotificationType } from "../@types/interface";
 import { getFileType } from "../utils/file-helper";
 import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
+import { teamMembersServices } from "./team.service";
+import { notificationEmitter } from "../events/notification.events";
 
 export const taskAssetsServices = {
     // ATTACH ASSET SERVICE FUNCTION
@@ -85,6 +87,18 @@ export const taskAssetsServices = {
 
         // write into the log
         await AnalyticsLog.create(log)
+
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
+        const message = `User [${existingTask.userName}](${userId}) attached a new ${fileType} on task [${existingTask.title}](${taskId})`
+        const notificationType: NotificationType = 'asset_attached'
+                
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
 
         return {
             assetId: result.insertId,

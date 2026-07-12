@@ -5,10 +5,12 @@ import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../validator/comment.validator";
 import { cursorPaginationType } from "../validator/global.validator";
 import { eq, and, desc, asc, or, gt, lt } from "drizzle-orm";
-import { IAnalyticsLog, CommentCursor, CursorPageMetaData } from "../@types/interface";
+import { IAnalyticsLog, CommentCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
 import { taskGuard } from "./task.service";
 import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { teamMembersServices } from "./team.service";
+import { notificationEmitter } from "../events/notification.events";
 
 export const commentServices = {
     // ADD COMMENTS SERVICE FUNCTION
@@ -63,6 +65,18 @@ export const commentServices = {
 
             await AnalyticsLog.create(log)
         }
+
+        /* ------------------------------------ notification ------------------------------------ */
+                
+        const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+        const recipients = allTeamMembers.filter((memberId) => memberId !== authorId)
+        const message = `User [${existingTask.userName}](${authorId}) commented on the task [${existingTask.title}](${taskId})`
+        const notificationType: NotificationType = 'task_commented'
+                
+        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                
+                
+        /* ------------------------------------ notification ------------------------------------ */
 
         return {
             commentId: result.insertId,

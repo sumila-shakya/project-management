@@ -1,4 +1,4 @@
-import { ROLE, TASK_STATUS, ACTIONS,  ALLOWED_MIME_TYPES, ALLOWED_FILE_TYPE} from "../utils/constants"
+import { ROLE, TASK_STATUS, ACTIONS,  ALLOWED_MIME_TYPES, ALLOWED_FILE_TYPE, NOTIFICATION_TYPES } from "../utils/constants"
 
 export type Role = typeof ROLE[number]
 
@@ -9,6 +9,8 @@ export type Actions = typeof ACTIONS[number]
 export type MimeType = typeof ALLOWED_MIME_TYPES[number]
 
 export type FileType = typeof ALLOWED_FILE_TYPE[number]
+
+export type NotificationType = typeof NOTIFICATION_TYPES[number]
 
 export interface Payload {
     userId: number
