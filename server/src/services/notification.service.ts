@@ -5,6 +5,7 @@ import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { eq, or, lt, gt, and, asc, desc } from "drizzle-orm";
 import { encodeNotificationCursor, decodeNotificationCursor } from "../utils/cursor";
 import { NotificationCursor, CursorPageMetaData } from "../@types/interface";
+import { ApiError } from "../utils/apiError";
 
 
 export const notificationServices = {
@@ -68,5 +69,30 @@ export const notificationServices = {
             pageMetaData,
             currentPageData
         }
+    },
+
+    async readNotification(userId: number, notificationId: number) {
+        const [existingNotification] = await db
+        .select()
+        .from(notifications)
+        .where(and(
+            eq(notifications.notificationId, notificationId),
+            eq(notifications.recipientId, userId)
+        )) 
+
+        if(!existingNotification) {
+            throw new ApiError(403, "Access denied")
+        }
+
+        if(existingNotification.isRead) {
+            throw new ApiError(400, 'Notification already read')
+        }
+
+        await db
+        .update(notifications)
+        .set({
+            isRead: true
+        })
+        .where(eq(notifications.notificationId, notificationId))
     }
 }

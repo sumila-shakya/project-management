@@ -8,4 +8,6 @@ router.use(authMiddleware)
 
 router.get('/', notificationController.getNotifcations)
 
+router.patch('/:notificationId/read', notificationController.readNotification)
+
 export default router
