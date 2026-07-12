@@ -12,4 +12,6 @@ router.patch('/:notificationId/read', notificationController.readNotification)
 
 router.patch('/:notificationId/unread', notificationController.unreadNotification)
 
+router.patch('/read-all', notificationController.readAllNotifications)
+
 export default router

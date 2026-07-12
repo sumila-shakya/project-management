@@ -68,5 +68,24 @@ export const notificationController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async readAllNotifications(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            await notificationServices.readAllNotifications(userId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "all notifications marked as read successfully"))
+        } catch(error) {
+            next(error)
+        }
     }
 }

@@ -119,5 +119,14 @@ export const notificationServices = {
             isRead: false
         })
         .where(eq(notifications.notificationId, notificationId))
+    },
+
+    async readAllNotifications(userId: number) {
+        await db
+        .update(notifications)
+        .set({
+            isRead: true
+        })
+        .where(eq(notifications.recipientId, userId))
     }
 }
