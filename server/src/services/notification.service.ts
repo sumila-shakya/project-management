@@ -128,5 +128,18 @@ export const notificationServices = {
             isRead: true
         })
         .where(eq(notifications.recipientId, userId))
+    },
+
+    async deleteNotification(userId: number, notificationId: number) {
+        const [result] = await db
+        .delete(notifications)
+        .where(and(
+            eq(notifications.notificationId, notificationId),
+            eq(notifications.recipientId, userId)
+        ))
+
+        if(result.affectedRows === 0) {
+            throw new ApiError(403, "Access denied")
+        }
     }
 }

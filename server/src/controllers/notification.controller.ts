@@ -87,5 +87,26 @@ export const notificationController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async deleteNotification(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            const notificationId = parseId(req.params.notificationId as string)
+
+            await notificationServices.deleteNotification(userId, notificationId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, {}, "notification deleted successfully"))
+        } catch(error) {
+            next(error)
+        }
     }
 }
