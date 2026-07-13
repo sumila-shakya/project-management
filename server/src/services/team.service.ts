@@ -153,8 +153,9 @@ export const teamServices = {
         const message = `User [${member.userName}](${userId}) updated the team [${member.teamName}](${teamId})`
         const notificationType: NotificationType = 'team_updated'
                 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-                
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
                 
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -408,8 +409,10 @@ export const teamMembersServices = {
         const message = `User [${requestingUser.userName}](${requestingUserId}) removed you from the team [${adminCount.teamName}](${teamId})`
         const notificationType: NotificationType = 'team_member_removed'
                 
-        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
-        notificationEmitter.emit('notification_generated', notificationType, message, userToRemove)
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        }
+        notificationEmitter.emit('notification_generated', notificationType, message, [userToRemove])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -492,12 +495,14 @@ export const teamMembersServices = {
                 
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
         const recipients = allTeamMembers.filter((memberId) => memberId !== requestingUserId && memberId !== userToUpdateId)
-        const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) changed the role of the member [${userToUpdate.userName}](${userToUpdate}) in the team [${adminCount.teamName}](${teamId})`
+        const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) changed the role of the member [${userToUpdate.userName}](${userToUpdateId}) in the team [${adminCount.teamName}](${teamId})`
         const message = `User [${requestingUser.userName}](${requestingUserId}) changed your role in the team [${adminCount.teamName}](${teamId})`
         const notificationType: NotificationType = 'role_updated'
                 
-        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
-        notificationEmitter.emit('notification_generated', notificationType, message, userToUpdateId)
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        }
+        notificationEmitter.emit('notification_generated', notificationType, message, [userToUpdateId])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */

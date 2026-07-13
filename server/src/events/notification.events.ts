@@ -11,17 +11,19 @@ notificationEmitter.on('notification_generated', async(
     recipients: number[]) => {
 
     try{
-        for(const recipientId of recipients) {
-            const newNotification: NewNotification = {
-                notificationType: notificationType,
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification:NewNotification = {
+                recipientId: recipientId,
                 message: message,
-                recipientId: recipientId
+                notificationType: notificationType
             }
+            
+            return notification
+        })
 
-            await db
-            .insert(notifications)
-            .values(newNotification)
-        }
+        await db
+        .insert(notifications)
+        .values(newNotifications)
     }catch(error) {
         const message = error instanceof Error ? error.message: error
         console.error('Notification push error: ', message)

@@ -100,13 +100,13 @@ export const projectServices = {
 
         /* ------------------------------------ notification ------------------------------------ */
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
-
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${isMember.userName}](${userId}) created new a project in team [${isMember.teamName}](${teamId})`
         const notificationType: NotificationType = 'project_created'
 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
         /* ------------------------------------ notification ------------------------------------ */
 
         return insertedProject
@@ -227,8 +227,9 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) updated project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_updated'
 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
 
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -266,8 +267,9 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) archived project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_archived'
 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
 
         /* ------------------------------------ notification ------------------------------------ */
     },
@@ -299,8 +301,9 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) restored project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_restored'
 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
 
         /* ------------------------------------ notification ------------------------------------ */
 

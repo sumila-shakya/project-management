@@ -73,8 +73,9 @@ export const commentServices = {
         const message = `User [${existingTask.userName}](${authorId}) commented on the task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'task_commented'
                 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-                
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
                 
         /* ------------------------------------ notification ------------------------------------ */
 

@@ -164,8 +164,9 @@ export const taskServices = {
         const message = `User [${membership.userName}](${userId}) created a new task on project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'task_created'
         
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-        
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
         
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -404,8 +405,9 @@ export const taskServices = {
         const message = `User [${existingTask.userName}](${userId}) updated the task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'task_updated'
         
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-        
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
         
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -500,8 +502,9 @@ export const taskServices = {
             const message = `User [${existingTask.userName}](${userId}) completed task [${existingTask.title}](${taskId})`
             const notificationType: NotificationType = 'task_completed'
             
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-            
+            if(recipients.length > 0) {
+                notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            }
             /* ------------------------------------ notification ------------------------------------ */
         }
 
@@ -623,7 +626,9 @@ export const taskServices = {
         const message = `You are assigned the task [${existingTask.title}](${taskId}) by the user [${existingTask.userName}](${userId})`
         const notificationType: NotificationType = 'task_assigned'
 
-        notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+        }
         notificationEmitter.emit('notification_generated', notificationType, message, [data.assignedTo])
 
 

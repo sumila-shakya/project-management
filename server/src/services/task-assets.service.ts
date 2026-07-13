@@ -95,8 +95,9 @@ export const taskAssetsServices = {
         const message = `User [${existingTask.userName}](${userId}) attached a new ${fileType} on task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'asset_attached'
                 
-        notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-                
+        if(recipients.length > 0) {
+            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+        }
                 
         /* ------------------------------------ notification ------------------------------------ */
 

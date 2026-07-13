@@ -240,8 +240,9 @@ export const invitationServices = {
                 const message = `User [${userInvitation.userName}](${userId}) joined the team [${userInvitation.teamName}](${userInvitation.teamId})`
                 const notificationType: NotificationType = 'team_member_added'
                         
-                notificationEmitter.emit('notification_generated', notificationType, message, recipients)
-                        
+                if(recipients.length > 0) {
+                    notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                }
                         
                 /* ------------------------------------ notification ------------------------------------ */
             }
