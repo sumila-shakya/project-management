@@ -2,7 +2,10 @@ import { z } from 'zod'
 
 // REGISTRATION SCHEMA
 export const registrationSchema = z.object({
-    name: z.string().min(2, { message: "Name must be atleast two charaters long" }).trim(),
+    name: z.string()
+    .min(2, { message: "Name must be atleast two charaters long" })
+    .regex(/[A-Za-z]\w+/, { message: "Invalid email format" })
+    .trim(),
     email: z.string().email({ message: "Invalid email format" }),
     password: z.string().min(8, { message:"Password must be atleast 8 characters long" })
     .regex(/[A-Z]/, { message:"Password must contain at least one uppercase letter" })

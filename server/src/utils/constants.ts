@@ -28,7 +28,9 @@ export const NOTIFICATION_TYPES = [
     'team_member_removed',
     'role_updated', 
 
-    'asset_attached'
+    'asset_attached',
+
+    'mentioned'
 ] as const
 
 export const COOKIES_OPTIONS = {

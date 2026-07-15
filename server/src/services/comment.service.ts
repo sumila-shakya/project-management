@@ -4,7 +4,7 @@ import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../validator/comment.validator";
 import { cursorPaginationType } from "../validator/global.validator";
-import { eq, and, desc, asc, or, gt, lt } from "drizzle-orm";
+import { eq, and, desc, asc, or, gt, lt, inArray } from "drizzle-orm";
 import { IAnalyticsLog, CommentCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
 import { taskGuard } from "./task.service";
 import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
@@ -76,7 +76,14 @@ export const commentServices = {
         if(recipients.length > 0) {
             notificationEmitter.emit('notification_generated', notificationType, message, recipients)
         }
-                
+
+        const mentionedUserIds = await this.getMentionedUsers(data.content, existingTask.teamId)
+        if(mentionedUserIds) {
+            const message = `user [${authorId}](${existingTask.userName}) mentioned you in the comment on the task[${existingTask.taskId}](${existingTask.title})`
+            const notificationType: NotificationType = 'mentioned'
+            notificationEmitter.emit('notification_generated', notificationType, message, mentionedUserIds)
+        }
+        
         /* ------------------------------------ notification ------------------------------------ */
 
         return {
@@ -308,5 +315,51 @@ export const commentServices = {
         .where(eq(comments.commentId, commentId))
 
         await AnalyticsLog.create(log)
+    },
+
+    async getMentionedUsers(content: string, teamId: number) {
+        const regex = /@\[([A-Za-z]\w+)\]\(([0-9]+)\)/gm
+        const array = [...content.matchAll(regex)]
+
+        if(array.length <= 0) {
+            return
+        }
+
+        const mentionedUsers: Record<string, string> = {}
+        for(const user of array) {
+            mentionedUsers[user[2]] = user[1]
+        }
+        const mentionIds = array.map((user) => parseInt(user[2]))
+
+        const existingUsers = await db
+        .select({
+            userId: teamMembers.userId,
+            username: users.name
+        })
+        .from(teamMembers)
+        .innerJoin(users, eq(teamMembers.userId, users.userId))
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            inArray(teamMembers.userId, mentionIds)
+        ))
+
+        const dbrecord:Record<string,string> = {}
+        for(const user of existingUsers) {
+            dbrecord[String(user.userId)] = user.username
+        }
+
+        const nonExistentUsers = mentionIds.filter((id) => {
+            if(dbrecord[String(id)] && dbrecord[String(id)] === mentionedUsers[String(id)]) {
+                return false
+            }
+            else 
+                return true
+        })
+
+        if(nonExistentUsers.length > 0) {
+            throw new ApiError(404, "mentioned user not found")
+        }
+
+        return mentionIds  
     }
 }
