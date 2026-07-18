@@ -15,6 +15,7 @@ export const updateTeamMemberSchema = z.object({
     role: z.enum(ROLE, {message: "Invalid role"})
 })
 
+// ANALYTICS LOG FILTER SCHEMA
 export const filterAnalyticsLogSchema = z.object({
     taskId: z.coerce.number().positive().optional(),
     userId: z.coerce.number().positive().optional(),
@@ -25,7 +26,7 @@ export const filterAnalyticsLogSchema = z.object({
     limit: z.coerce.number().positive().max(10).optional(),
 })
 
-
+/* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type createTeamType = z.infer<typeof createTeamSchema>
 export type updateTeamType = z.infer<typeof updateTeamSchema>
 export type updateTeamMemberType = z.infer<typeof updateTeamMemberSchema>

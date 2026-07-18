@@ -5,6 +5,7 @@ import { db } from "../config/mysql.config";
 
 export const notificationEmitter = new EventEmitter()
 
+// NOTIFICATION EVENT LISTENER
 notificationEmitter.on('notification_generated', async(
     notificationType: NotificationType, 
     message: string, 

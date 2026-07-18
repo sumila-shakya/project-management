@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { TASK_PRIORITY, TASK_STATUS } from '../utils/constants'
 
+// TASK SCHEMA
 export const taskSchema =  z.object({
     title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim(),
     description: z.string().max(500, { message: "Description must be under 500 characters" }).optional(),
@@ -11,6 +12,7 @@ export const taskSchema =  z.object({
     dueDate: z.coerce.date().refine((date) => date > new Date(), {message: "Due date must be in future"})
 })
 
+// TASK FILTER SCHEMA
 export const filterTaskSchema = z.object({
     title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim().optional(),
     taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"}).optional(),
@@ -19,6 +21,7 @@ export const filterTaskSchema = z.object({
     limit: z.coerce.number().positive().max(10).optional(),
 })
 
+// UPDATE TASK SCHEMA
 export const updateTaskSchema = z.object({
     title: z.string().min(2, { message: "Title must be atleast two charaters long" }).trim().optional(),
     description: z.string().max(500, { message: "Description must be under 500 characters" }).optional(),
@@ -32,15 +35,17 @@ export const updateTaskSchema = z.object({
     return true
 })
 
+// PROCESS TASK SCHEMA
 export const processTaskSchema = z.object({
     taskStatus: z.enum(TASK_STATUS, {message: "Invalid Status"})
 })
 
+// ASSIGN TASK SCHEMA
 export const assignTaskSchema = z.object({
     assignedTo: z.coerce.number().positive()
 })
 
-
+/* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type taskType = z.infer<typeof taskSchema>
 export type filterTaskType = z.infer<typeof filterTaskSchema>
 export type updateTaskType = z.infer<typeof updateTaskSchema>

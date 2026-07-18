@@ -67,7 +67,8 @@ export const commentServices = {
         }
 
         /* ------------------------------------ notification ------------------------------------ */
-                
+        
+        // send notifications to all the team members
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
         const recipients = allTeamMembers.filter((memberId) => memberId !== authorId)
         const message = `User [${existingTask.userName}](${authorId}) commented on the task [${existingTask.title}](${taskId})`
@@ -77,7 +78,10 @@ export const commentServices = {
             notificationEmitter.emit('notification_generated', notificationType, message, recipients)
         }
 
+        // get the mentioned users
         const mentionedUserIds = await this.getMentionedUsers(data.content, existingTask.teamId)
+
+        // send notifications to mentioned users if any
         if(mentionedUserIds) {
             const message = `user [${authorId}](${existingTask.userName}) mentioned you in the comment on the task[${existingTask.taskId}](${existingTask.title})`
             const notificationType: NotificationType = 'mentioned'
@@ -317,10 +321,14 @@ export const commentServices = {
         await AnalyticsLog.create(log)
     },
 
+    // GET MENTIONED USERS SERVICE FUNCTION
     async getMentionedUsers(content: string, teamId: number) {
         const regex = /@\[([A-Za-z]\w+)\]\(([0-9]+)\)/gm
+
+        // get the mentioned users
         const array = [...content.matchAll(regex)]
 
+        // return if nomentioned users are found
         if(array.length <= 0) {
             return
         }
@@ -329,8 +337,11 @@ export const commentServices = {
         for(const user of array) {
             mentionedUsers[user[2]] = user[1]
         }
+
+        // get the mentioned users id
         const mentionIds = array.map((user) => parseInt(user[2]))
 
+        // get the mentioned users data from the database
         const existingUsers = await db
         .select({
             userId: teamMembers.userId,
@@ -348,6 +359,7 @@ export const commentServices = {
             dbrecord[String(user.userId)] = user.username
         }
 
+        // check for any non existing users
         const nonExistentUsers = mentionIds.filter((id) => {
             if(dbrecord[String(id)] && dbrecord[String(id)] === mentionedUsers[String(id)]) {
                 return false
@@ -356,10 +368,12 @@ export const commentServices = {
                 return true
         })
 
+        // throw errors if the mentioned user is not found in the database
         if(nonExistentUsers.length > 0) {
             throw new ApiError(404, "mentioned user not found")
         }
 
+        // return the mentioned users ids
         return mentionIds  
     }
 }

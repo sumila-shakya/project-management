@@ -33,20 +33,6 @@ export const NOTIFICATION_TYPES = [
     'mentioned'
 ] as const
 
-export const COOKIES_OPTIONS = {
-    httpOnly: true,
-    maxAge: 7*24*60*60*1000,
-    sameSite: "strict" as const
-} as const
-
-export const ALLOWED_FILE_SIZE = {
-    images: 5*1024*1024,
-    documents: 10*1024*1024,
-    text: 5*1024*1024,
-    archives: 20*1024*1024,
-    video: 100*1024*1024,
-} as const
-
 export const ALLOWED_MIME_TYPES = [
     // Images
     'image/jpeg',
@@ -77,3 +63,17 @@ export const ALLOWED_MIME_TYPES = [
     'video/mp4',
     'video/webm',
 ] as const
+
+export const COOKIES_OPTIONS = {
+    httpOnly: true,
+    maxAge: 7*24*60*60*1000,
+    sameSite: "strict" as const
+} as const
+
+export const ALLOWED_FILE_SIZE = {
+    images: 5*1024*1024,
+    documents: 10*1024*1024,
+    text: 5*1024*1024,
+    archives: 20*1024*1024,
+    video: 100*1024*1024,
+} as const

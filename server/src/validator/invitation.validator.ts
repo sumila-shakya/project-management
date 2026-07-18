@@ -21,6 +21,7 @@ export const filterInvitationSchema = z.object({
     limit: z.coerce.number().positive().max(10).optional(),
 })
 
+/* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type invitationType = z.infer<typeof invitationSchema>
 export type processInvitationType = z.infer<typeof processInvitationSchema>
 export type filterInvitationType = z.infer<typeof filterInvitationSchema>

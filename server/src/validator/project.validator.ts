@@ -49,7 +49,7 @@ export const filterProjectSchema = z.object({
     limit: z.coerce.number().positive().max(10).optional()
 })
 
-
+/* --------------------------------- VALIDATION TYPES --------------------------------- */
 export type projectType = z.infer<typeof projectSchema>
 export type updateProjectType = z.infer<typeof updateProjectSchema>
 export type filterProjectType = z.infer<typeof filterProjectSchema>
