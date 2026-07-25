@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/api/assets/1/download
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
 
 settings:
   encodeUrl: true

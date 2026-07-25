@@ -20,11 +20,11 @@ Content-Type: application/json
 ### logout check
 POST http://localhost:3000/api/auth/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4OTI0OCwiZXhwIjoxNzg0OTg5ODQ4fQ.NZJbv_Kp1AJosqecqXR3WGVd6i7RU3r1d4tTXzkUltQ
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzc1NywiZXhwIjoxNzgyODk0MzU3fQ.LIZD3CfWuEEmMU6ihNeGV5QRtkWLhE_Q-f_upLFA4sA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4OTI0OCwiZXhwIjoxNzg0OTg5ODQ4fQ.NZJbv_Kp1AJosqecqXR3WGVd6i7RU3r1d4tTXzkUltQ
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh
@@ -67,7 +67,7 @@ Content-Type: application/json
 }
 
 ### verify email
-POST http://localhost:3000/api/auth/verify-email?token=805db81ceccd0cacaa613c558503494e
+POST http://localhost:3000/api/auth/verify-email?token=c59135aa27d3c60a9040f474f90cdb14
 Content-Type: application/json
 
 {}

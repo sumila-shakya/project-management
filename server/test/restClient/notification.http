@@ -1,0 +1,28 @@
+### get notifications
+GET http://localhost:3000/api/notification
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4OTMxNiwiZXhwIjoxNzg0OTg5OTE2fQ.pWEPzaihMnByDO4s4jQVXY-Kyo7vpl3KnxUaUYlzXcE
+
+### read notification
+PATCH http://localhost:3000/api/notification/1/read
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
+Content-Type: application/json
+
+{}
+
+### unead notifications
+PATCH http://localhost:3000/api/notification/1/unread
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
+Content-Type: application/json
+
+{}
+
+### read all notifications
+PATCH http://localhost:3000/api/notification/read-all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
+Content-Type: application/json
+
+{}
+
+### delete notification
+DELETE  http://localhost:3000/api/notification/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU

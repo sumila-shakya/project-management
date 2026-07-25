@@ -1,17 +1,17 @@
 ### create projects
 POST http://localhost:3000/api/teams/1/projects
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzIxMSwiZXhwIjoxNzg0OTg3ODExfQ.fOqs3Y0Sn7I8E-4xK6j7UWqA2CsGVx8u4Fr53xe8wcg
 Content-Type: application/json
 
 {
     "projectName": "Task Management",
-    "endDate": "2026-07-25",
+    "endDate": "2026-10-25",
     "description": "this a task management project"
 }
 
 ### get all the team projects
 GET http://localhost:3000/api/teams/1/projects?projectStatus=active
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzIxMSwiZXhwIjoxNzg0OTg3ODExfQ.fOqs3Y0Sn7I8E-4xK6j7UWqA2CsGVx8u4Fr53xe8wcg
 
 ### get projects details
 GET http://localhost:3000/api/projects/1

@@ -1,6 +1,6 @@
 ### create team 
 POST http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5MzU2NywiZXhwIjoxNzgyODk0MTY3fQ.RSCBUh7ImoXLqvTuDAocLee47exwY2sxFMVHEKNSJmQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzA0OSwiZXhwIjoxNzg0OTg3NjQ5fQ.9xdyvOEZZjy-opedT88ZlKABuAynixaX-2h7xrLZPW8
 Content-Type: application/json
 
 {
@@ -10,11 +10,11 @@ Content-Type: application/json
 
 ### get all the users team
 GET http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5MzU2NywiZXhwIjoxNzgyODk0MTY3fQ.RSCBUh7ImoXLqvTuDAocLee47exwY2sxFMVHEKNSJmQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
 
 ### get team by id
 GET http://localhost:3000/api/teams/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzA0OSwiZXhwIjoxNzg0OTg3NjQ5fQ.9xdyvOEZZjy-opedT88ZlKABuAynixaX-2h7xrLZPW8
 
 ### update team
 PATCH http://localhost:3000/api/teams/1
@@ -45,5 +45,5 @@ DELETE http://localhost:3000/api/teams/1/members/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
 
 ### get analytics log
-GET http://localhost:3000/api/teams/1/activity?cursor=eyJ0aW1lc3RhbXAiOiIyMDI2LTA3LTAxVDA4OjI2OjQ1LjU2NFoiLCJfaWQiOiI2YTQ0Y2Y0NWY4ZmUyMDYzNmIwMGI0ODkifQ
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4MjkyNTgwNCwiZXhwIjoxNzgyOTI2NDA0fQ.aUHMRcwfUGGzkia0-aEs5ugDbbyUQFF78SAEK2V081w
+GET http://localhost:3000/api/teams/1/activity
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU

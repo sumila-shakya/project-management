@@ -21,7 +21,7 @@ export const notificationController = {
             const filterData: filterNotificationType = filterNotificationSchema.parse(req.query)
 
             // get user notification
-            const userNotifications = notificationServices.getNotifications(userId, filterData)
+            const userNotifications = await notificationServices.getNotifications(userId, filterData)
 
             // send 200 success msg
             res
@@ -78,7 +78,7 @@ export const notificationController = {
             // send 200 success msg
             res
             .status(200)
-            .json(new ApiResponse(200, {}, "notification read successfully"))
+            .json(new ApiResponse(200, {}, "notification unread successfully"))
         } catch(error) {
             next(error)
         }

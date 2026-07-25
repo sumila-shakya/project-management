@@ -89,11 +89,13 @@ export const commentServices = {
         }
 
         // get the mentioned users
-        const mentionedUserIds = await this.getMentionedUsers(data.content, existingTask.teamId)
+        const allMentionedUserIds = await this.getMentionedUsers(data.content, existingTask.teamId)
 
         // send notifications to mentioned users if any
-        if(mentionedUserIds) {
-            const message = `user [${authorId}](${existingTask.userName}) mentioned you in the comment on the task[${existingTask.taskId}](${existingTask.title})`
+        if(allMentionedUserIds) {
+            const mentionedUserIds = allMentionedUserIds.filter((id) => id !== authorId )
+
+            const message = `user [${existingTask.userName}](${authorId}) mentioned you in the comment on the task[${existingTask.title}](${existingTask.taskId})`
             const notificationType: NotificationType = 'mentioned'
             const customizedNotifications: NewNotification[] = mentionedUserIds.map((recipientId) => {
                 const notification: NewNotification = {
@@ -347,7 +349,7 @@ export const commentServices = {
         // get the mentioned users
         const array = [...content.matchAll(regex)]
 
-        // return if nomentioned users are found
+        // return if no mentioned users are found
         if(array.length <= 0) {
             return
         }

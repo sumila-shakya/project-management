@@ -1,6 +1,6 @@
 ### add comment to a task
 POST http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
 
 ### get comments on a task
 GET http://localhost:3000/api/tasks/1/comments
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
 
 ### edit comment to a task
 PATCH http://localhost:3000/api/comments/1
@@ -23,3 +23,12 @@ Content-Type: application/json
 ### delete comments on a task
 DELETE http://localhost:3000/api/comments/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+
+### mention users
+POST http://localhost:3000/api/tasks/1/comments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4OTI0OCwiZXhwIjoxNzg0OTg5ODQ4fQ.NZJbv_Kp1AJosqecqXR3WGVd6i7RU3r1d4tTXzkUltQ
+Content-Type: application/json
+
+{
+    "content": "hi i am mentioning @[mohan](2) and mnetioning myself @[sumila](1)"
+}
