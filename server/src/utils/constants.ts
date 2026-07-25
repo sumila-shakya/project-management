@@ -30,7 +30,10 @@ export const NOTIFICATION_TYPES = [
 
     'asset_attached',
 
-    'mentioned'
+    'mentioned',
+
+    'deadline_approaching',
+    'task_overdue'
 ] as const
 
 export const ALLOWED_MIME_TYPES = [
@@ -77,3 +80,15 @@ export const ALLOWED_FILE_SIZE = {
     archives: 20*1024*1024,
     video: 100*1024*1024,
 } as const
+
+export const DEADLINE_LEVEL_TIME = [
+    3*24*60*60*1000,
+    24*60*60*1000,
+    3*60*60*1000
+] as const
+
+export const DEADLINE_LEVEL_MESSAGE = [
+    "REMAINDER",
+    "WARNING",
+    "URGENT",
+] as const

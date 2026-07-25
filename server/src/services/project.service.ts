@@ -1,12 +1,12 @@
 import { db } from "../config/mysql.config";
-import { projects, teamMembers, NewProject, tasks, users, teams } from "../models/mysql.model";
+import { projects, teamMembers, NewProject, tasks, users, teams, NewNotification } from "../models/mysql.model";
 import { eq, and, count, asc, ne } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
-import { notificationEmitter } from "../events/notification.events";
+import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
 
 export const projectGuard = {
@@ -100,12 +100,23 @@ export const projectServices = {
 
         /* ------------------------------------ notification ------------------------------------ */
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${isMember.userName}](${userId}) created new a project in team [${isMember.teamName}](${teamId})`
         const notificationType: NotificationType = 'project_created'
 
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+
+            return notification
+        })
+
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -227,8 +238,18 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) updated project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_updated'
 
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+
+            return notification
+        })
+
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -267,8 +288,18 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) archived project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_archived'
 
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+
+            return notification
+        })
+
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -301,8 +332,18 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) restored project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_restored'
 
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+
+            return notification
+        })
+
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
 
         /* ------------------------------------ notification ------------------------------------ */

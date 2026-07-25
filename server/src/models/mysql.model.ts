@@ -1,5 +1,6 @@
-import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, timestamp, text, bigint, mysqlEnum, unique, AnyMySqlColumn, index, boolean, int, check } from "drizzle-orm/mysql-core";
 import { ROLE, PROJECT_STATUS, TASK_STATUS, TASK_PRIORITY, INVITATION_STATUS, ALLOWED_FILE_TYPE, NOTIFICATION_TYPES } from "../utils/constants";
+import { sql } from "drizzle-orm";
 
 /* ------------------------------------------ SCHEMA DEFINITIONS ------------------------------------------ */
 
@@ -64,7 +65,13 @@ export const tasks = mysqlTable('tasks', {
     dueDate: timestamp('due_date',{ mode:'date' }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
     updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().onUpdateNow(),
-    completedAt: timestamp('completed_at',{mode:'date'})
+    completedAt: timestamp('completed_at',{mode:'date'}),
+    deadlineLevel: int('deadline_level').notNull().default(0)
+}, (table) => {
+    return { 
+        deadlineLevelCheck: check('deadline_level_chk', sql`${table.deadlineLevel} BETWEEN 0 AND 4`),
+        deadlineIndex: index('deadline_index').on(table.dueDate, table.deadlineLevel)
+    }
 })
 
 // TASK ASSETS SCHEMA

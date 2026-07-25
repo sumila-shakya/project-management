@@ -1,16 +1,16 @@
 import { db } from "../config/mysql.config";
-import { tasks, taskAssets, projects, teamMembers, users, NewTask, teams } from "../models/mysql.model";
+import { tasks, taskAssets, projects, teamMembers, users, NewTask, teams, NewNotification } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
-import { eq, and, asc, like, count } from "drizzle-orm";
+import { eq, and, asc, like, count, lte, gt, ne, lt, inArray } from "drizzle-orm";
 import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../validator/task.validator";
 import { paginationType } from "../validator/global.validator";
 import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges, NotificationType } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
-import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, DEADLINE_LEVEL_TIME, DEADLINE_LEVEL_MESSAGE } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
-import { notificationEmitter } from "../events/notification.events";
+import { systemEmitter } from "../events/system.events";
 
 // VALIDATE USER ACCESS FUNCTION
 export const taskGuard = {
@@ -163,9 +163,19 @@ export const taskServices = {
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${membership.userName}](${userId}) created a new task on project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'task_created'
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+        
+            return notification
+        })
         
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
         
         /* ------------------------------------ notification ------------------------------------ */
@@ -404,9 +414,19 @@ export const taskServices = {
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${existingTask.userName}](${userId}) updated the task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'task_updated'
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+        
+            return notification
+        })
         
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
         
         /* ------------------------------------ notification ------------------------------------ */
@@ -501,9 +521,19 @@ export const taskServices = {
             const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
             const message = `User [${existingTask.userName}](${userId}) completed task [${existingTask.title}](${taskId})`
             const notificationType: NotificationType = 'task_completed'
+
+            const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+
+            return notification
+        })
             
             if(recipients.length > 0) {
-                notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                systemEmitter.emit('notification_generated', newNotifications)
             }
             /* ------------------------------------ notification ------------------------------------ */
         }
@@ -621,15 +651,31 @@ export const taskServices = {
         /* ------------------------------------ notification ------------------------------------ */
 
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(existingTask.teamId)
+
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId && memberId !== data.assignedTo )
         const generalMessage = `User [${existingTask.userName}](${userId}) assigned the task [${existingTask.title}](${taskId}) to user [${membership.userName}](${data.assignedTo})`
-        const message = `You are assigned the task [${existingTask.title}](${taskId}) by the user [${existingTask.userName}](${userId})`
         const notificationType: NotificationType = 'task_assigned'
+        
+        const customizedNotification: NewNotification = {
+            notificationType: notificationType,
+            recipientId: data.assignedTo,
+            message: `You are assigned the task [${existingTask.title}](${taskId}) by the user [${existingTask.userName}](${userId})`
+        }
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: generalMessage,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+        
+            return notification
+        })
 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
-        notificationEmitter.emit('notification_generated', notificationType, message, [data.assignedTo])
+        systemEmitter.emit('notification_generated', [customizedNotification])
 
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -726,6 +772,86 @@ export const taskServices = {
         if(result.affectedRows > 0) {
             await AnalyticsLog.create(log)
         }
+    },
+    
+    async notifyDeadlineApproaching(level: number) {
+        const maxDate: Date = new Date();
+        maxDate.setTime(maxDate.getTime() + DEADLINE_LEVEL_TIME[level-1])
+
+        const minDate: Date = new Date();
+        if(level > 0 && level < 3) {
+            minDate.setTime(minDate.getTime() + DEADLINE_LEVEL_TIME[level])
+        }
+
+        const filters = [ne(tasks.taskStatus, 'completed')]
+        filters.push(gt(tasks.dueDate, minDate))
+        filters.push(lte(tasks.dueDate, maxDate))
+        filters.push(lt(tasks.deadlineLevel, level))
+
+        await db.transaction(async (tx) => {
+            const tasksDue = await tx
+            .select()
+            .from(tasks)
+            .where(and(...filters))
+
+            if(tasksDue.length > 0) {
+                const taskIds: number[] = tasksDue.map((task) => task.taskId)
+
+                await tx
+                .update(tasks)
+                .set({
+                    deadlineLevel: level
+                })
+                .where(inArray(tasks.taskId, taskIds))
+
+                const newNotifications: NewNotification[] = tasksDue.map((task) => {
+                    const notification: NewNotification = {
+                        notificationType: 'deadline_approaching',
+                        recipientId: task.assignedTo ? task.assignedTo: task.createdBy,
+                        message: `${DEADLINE_LEVEL_MESSAGE[level-1]}: task[${task.title}](${task.taskId}) is due ${task.dueDate}`
+                    }
+                    return notification
+                })
+
+                systemEmitter.emit('notification_generated', newNotifications)
+            }
+        })
+    },
+
+    async notifyOverdueTask() {
+        await db.transaction(async (tx) => {
+            const taskOverdue = await tx
+            .select()
+            .from(tasks)
+            .where(and(
+                ne(tasks.taskStatus, 'completed'),
+                lt(tasks.dueDate, new Date()),
+                lt(tasks.deadlineLevel, 4)
+            ))
+
+            if(taskOverdue.length > 0) {
+                const taskIds: number[] = taskOverdue.map((task) => task.taskId)
+
+                await tx
+                .update(tasks)
+                .set({
+                    deadlineLevel: 4
+                })
+                .where(inArray(tasks.taskId, taskIds))
+
+                const newNotifications: NewNotification[] = taskOverdue.map((task) => {
+                    const notification: NewNotification = {
+                        notificationType: 'task_overdue',
+                        recipientId: task.assignedTo ? task.assignedTo: task.createdBy,
+                        message: `CRITICAL: task[${task.title}](${task.taskId}) is overdue`
+                    }
+                    return notification
+                })
+
+                systemEmitter.emit('notification_generated', newNotifications)
+            }
+        })
+        
     }
 }
 

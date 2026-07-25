@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { comments, projects, tasks, teamMembers, NewComment, teams, users, Comment } from "../models/mysql.model";
+import { comments, projects, tasks, teamMembers, NewComment, teams, users, Comment, NewNotification } from "../models/mysql.model";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../validator/comment.validator";
@@ -10,7 +10,7 @@ import { taskGuard } from "./task.service";
 import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
-import { notificationEmitter } from "../events/notification.events";
+import { systemEmitter } from "../events/system.events";
 
 export const commentServices = {
     // ADD COMMENTS SERVICE FUNCTION
@@ -73,9 +73,19 @@ export const commentServices = {
         const recipients = allTeamMembers.filter((memberId) => memberId !== authorId)
         const message = `User [${existingTask.userName}](${authorId}) commented on the task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'task_commented'
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+                
+            return notification
+        })
                 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
 
         // get the mentioned users
@@ -85,7 +95,16 @@ export const commentServices = {
         if(mentionedUserIds) {
             const message = `user [${authorId}](${existingTask.userName}) mentioned you in the comment on the task[${existingTask.taskId}](${existingTask.title})`
             const notificationType: NotificationType = 'mentioned'
-            notificationEmitter.emit('notification_generated', notificationType, message, mentionedUserIds)
+            const customizedNotifications: NewNotification[] = mentionedUserIds.map((recipientId) => {
+                const notification: NewNotification = {
+                    notificationType: notificationType,
+                    message: message,
+                    recipientId: recipientId
+                }
+
+                return notification
+            })
+            systemEmitter.emit('notification_generated', customizedNotifications)
         }
         
         /* ------------------------------------ notification ------------------------------------ */

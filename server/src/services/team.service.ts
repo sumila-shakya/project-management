@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { AnalyticsLog } from "../models/mongodb.model";
-import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMember } from "../models/mysql.model";
+import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMember, NewNotification } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../validator/team.validator";
 import { paginationType } from "../validator/global.validator";
@@ -8,7 +8,7 @@ import { and, asc, count, eq } from "drizzle-orm";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { encodeLogCursor, decodeLogCursor } from "../utils/cursor";
 import { LogCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
-import { notificationEmitter } from "../events/notification.events";
+import { systemEmitter } from "../events/system.events";
 import mongoose from "mongoose";
 
 export const teamServices = {
@@ -152,9 +152,19 @@ export const teamServices = {
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${member.userName}](${userId}) updated the team [${member.teamName}](${teamId})`
         const notificationType: NotificationType = 'team_updated'
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+                
+            return notification
+        })
                 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -404,15 +414,31 @@ export const teamMembersServices = {
         /* ------------------------------------ notification ------------------------------------ */
                 
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+
         const recipients = allTeamMembers.filter((memberId) => memberId !== requestingUserId && memberId !== userToRemoveId)
         const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) removed the member [${userToRemove.userName}](${userToRemoveId}) from the team [${adminCount.teamName}](${teamId})`
-        const message = `User [${requestingUser.userName}](${requestingUserId}) removed you from the team [${adminCount.teamName}](${teamId})`
         const notificationType: NotificationType = 'team_member_removed'
+
+        const customizedNotification: NewNotification = {
+            notificationType: notificationType,
+            message: `User [${requestingUser.userName}](${requestingUserId}) removed you from the team [${adminCount.teamName}](${teamId})`,
+            recipientId: userToRemoveId
+        }
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: generalMessage,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+                
+            return notification
+        })
                 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
-        notificationEmitter.emit('notification_generated', notificationType, message, [userToRemove])
+        systemEmitter.emit('notification_generated', [customizedNotification])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -494,15 +520,31 @@ export const teamMembersServices = {
         /* ------------------------------------ notification ------------------------------------ */
                 
         const allTeamMembers = await teamMembersServices.getTeamMembersIds(teamId)
+
         const recipients = allTeamMembers.filter((memberId) => memberId !== requestingUserId && memberId !== userToUpdateId)
         const generalMessage = `User [${requestingUser.userName}](${requestingUserId}) changed the role of the member [${userToUpdate.userName}](${userToUpdateId}) in the team [${adminCount.teamName}](${teamId})`
-        const message = `User [${requestingUser.userName}](${requestingUserId}) changed your role in the team [${adminCount.teamName}](${teamId})`
         const notificationType: NotificationType = 'role_updated'
+
+        const customizedNotification: NewNotification = {
+            notificationType: notificationType,
+            message: `User [${requestingUser.userName}](${requestingUserId}) changed your role in the team [${adminCount.teamName}](${teamId})`,
+            recipientId: userToUpdateId
+        }
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: generalMessage,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+                
+            return notification
+        })
                 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, generalMessage, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
-        notificationEmitter.emit('notification_generated', notificationType, message, [userToUpdateId])
+        systemEmitter.emit('notification_generated', [customizedNotification])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */

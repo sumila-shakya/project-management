@@ -1,12 +1,12 @@
 import { db } from "../config/mysql.config";
-import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember } from "../models/mysql.model";
+import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember, NewNotification } from "../models/mysql.model";
 import { invitationType, processInvitationType, filterInvitationType } from "../validator/invitation.validator";
 import { generateToken, hashToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { NotificationType } from "../@types/interface";
-import { notificationEmitter } from "../events/notification.events";
+import { notificationEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
 
 export const invitationServices = {
@@ -96,8 +96,13 @@ export const invitationServices = {
                 
         const message = `You are invited to join the team [${senderMembership.teamName}](${teamId})`
         const notificationType: NotificationType = 'invitation_received'
+        const newNotification: NewNotification = {
+            notificationType: notificationType,
+            message: message,
+            recipientId: data.inviteeId
+        }
                 
-        notificationEmitter.emit('notification_generated', notificationType, message, [data.inviteeId])
+        notificationEmitter.emit('notification_generated', [newNotification])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -239,9 +244,19 @@ export const invitationServices = {
                 const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
                 const message = `User [${userInvitation.userName}](${userId}) joined the team [${userInvitation.teamName}](${userInvitation.teamId})`
                 const notificationType: NotificationType = 'team_member_added'
+                
+                const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+                    const notification: NewNotification = {
+                        message: message,
+                        recipientId: recipientId,
+                        notificationType: notificationType
+                    }
+                
+                    return notification
+                })
                         
                 if(recipients.length > 0) {
-                    notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+                    notificationEmitter.emit('notification_generated', newNotifications)
                 }
                         
                 /* ------------------------------------ notification ------------------------------------ */

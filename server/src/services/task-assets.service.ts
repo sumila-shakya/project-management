@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { taskAssets, tasks, projects, teamMembers, NewTaskAssets, teams, users } from "../models/mysql.model";
+import { taskAssets, tasks, projects, teamMembers, NewTaskAssets, teams, users, NewNotification } from "../models/mysql.model";
 import { eq, and, asc, count } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { taskGuard } from "./task.service";
@@ -11,7 +11,7 @@ import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
 import { teamMembersServices } from "./team.service";
-import { notificationEmitter } from "../events/notification.events";
+import { systemEmitter } from "../events/system.events";
 
 export const taskAssetsServices = {
     // ATTACH ASSET SERVICE FUNCTION
@@ -94,9 +94,19 @@ export const taskAssetsServices = {
         const recipients = allTeamMembers.filter((memberId) => memberId !== userId)
         const message = `User [${existingTask.userName}](${userId}) attached a new ${fileType} on task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'asset_attached'
+
+        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+            const notification: NewNotification = {
+                message: message,
+                recipientId: recipientId,
+                notificationType: notificationType
+            }
+        
+            return notification
+        })
                 
         if(recipients.length > 0) {
-            notificationEmitter.emit('notification_generated', notificationType, message, recipients)
+            systemEmitter.emit('notification_generated', newNotifications)
         }
                 
         /* ------------------------------------ notification ------------------------------------ */
