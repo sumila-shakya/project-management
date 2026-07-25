@@ -63,7 +63,7 @@ export const commentServices = {
                 timestamp: new Date()
             }
 
-            await AnalyticsLog.create(log)
+            systemEmitter.emit('analytics_log_generated', [log])
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -337,7 +337,7 @@ export const commentServices = {
         .delete(comments)
         .where(eq(comments.commentId, commentId))
 
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
     },
 
     // GET MENTIONED USERS SERVICE FUNCTION

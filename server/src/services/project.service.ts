@@ -403,6 +403,6 @@ export const projectServices = {
         }
 
         // write into the log
-        await AnalyticsLog.insertMany(logs)
+        systemEmitter.emit('analytics_log_generated', logs)
     },
 }

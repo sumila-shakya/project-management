@@ -6,7 +6,7 @@ import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { NotificationType } from "../@types/interface";
-import { notificationEmitter } from "../events/system.events";
+import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
 
 export const invitationServices = {
@@ -102,7 +102,7 @@ export const invitationServices = {
             recipientId: data.inviteeId
         }
                 
-        notificationEmitter.emit('notification_generated', [newNotification])
+        systemEmitter.emit('notification_generated', [newNotification])
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -256,7 +256,7 @@ export const invitationServices = {
                 })
                         
                 if(recipients.length > 0) {
-                    notificationEmitter.emit('notification_generated', newNotifications)
+                    systemEmitter.emit('notification_generated', newNotifications)
                 }
                         
                 /* ------------------------------------ notification ------------------------------------ */

@@ -86,7 +86,7 @@ export const taskAssetsServices = {
         }
 
         // write into the log
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
 
         /* ------------------------------------ notification ------------------------------------ */
                 
@@ -307,6 +307,6 @@ export const taskAssetsServices = {
         await deleteFromCloudinary(secureUrl)
 
         // write into the log
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
     }
 }

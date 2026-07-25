@@ -148,7 +148,7 @@ export const taskServices = {
 
         // write into the analytics log
         if(result) {
-            await AnalyticsLog.create(log)
+            systemEmitter.emit('analytics_log_generated', [log])
         }
 
         // get the new inserted task
@@ -406,7 +406,7 @@ export const taskServices = {
         }
 
         // write the changes in analytics log
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
 
         /* ------------------------------------ notification ------------------------------------ */
         
@@ -562,7 +562,7 @@ export const taskServices = {
         }
 
         // write the changes to the analytics log
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
     },
 
     // ASSIGN TASK SERVICE FUNCTION
@@ -646,7 +646,7 @@ export const taskServices = {
         }
 
         // write into the analytics log
-        await AnalyticsLog.create(log)
+        systemEmitter.emit('analytics_log_generated', [log])
 
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -770,7 +770,7 @@ export const taskServices = {
 
         // write into the log
         if(result.affectedRows > 0) {
-            await AnalyticsLog.create(log)
+            systemEmitter.emit('analytics_log_generated', [log])
         }
     },
     
