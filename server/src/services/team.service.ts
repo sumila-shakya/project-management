@@ -4,8 +4,8 @@ import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMembe
 import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../validator/team.validator";
 import { paginationType } from "../validator/global.validator";
-import { and, asc, count, eq } from "drizzle-orm";
-import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { and, asc, count, eq, sql } from "drizzle-orm";
+import { DEFAULT_PAGE_LIMIT, TASK_PRIORITY, TASK_STATUS } from "../utils/constants";
 import { encodeLogCursor, decodeLogCursor } from "../utils/cursor";
 import { LogCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
 import { systemEmitter } from "../events/system.events";
@@ -285,6 +285,70 @@ export const teamServices = {
         return {
             pageMetaData,
             currentPageData
+        }
+    },
+
+    async getTeamOverview(userId: number, teamId: number) {
+        const [membership] = await db
+        .select({
+            teamId: teamMembers.teamId,
+            teamName: teams.teamName
+        })
+        .from(teamMembers)
+        .innerJoin(teams, eq(teams.teamId, teamMembers.teamId))
+        .where(and(
+            eq(teamMembers.teamId, teamId),
+            eq(teamMembers.userId, userId)
+        ))
+
+        if(!membership) {
+            throw new ApiError(403, "Access Denied")
+        }
+
+        const [teamSummary, taskDistribution] = await Promise.all([
+            db
+            .select({
+                totalTask: count(),
+                overdueTasks: sql<number>`SUM(CASE WHEN ${tasks.dueDate} < NOW() AND ${tasks.taskStatus} != ${TASK_STATUS[3]} THEN 1 ELSE 0 END)`.mapWith(Number),
+                unassignedTasks: sql<number>`SUM(CASE WHEN ${tasks.assignedTo} IS NULL THEN 1 ELSE 0 END)`.mapWith(Number),
+                completedTasks: sql<number>`SUM(CASE WHEN ${tasks.taskStatus} = ${TASK_STATUS[3]} THEN 1 ELSE 0 END)`.mapWith(Number)
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(projects.projectId, tasks.projectId))
+            .where(eq(projects.teamId, teamId)),
+
+            db
+            .select({
+                userId: teamMembers.userId,
+                userName: users.name,
+                role: teamMembers.role,
+                totalTaskAssigned: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} then 1 else 0 end)`.mapWith(Number),
+                distributionByStatus: {
+                    todoCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskStatus} = ${TASK_STATUS[0]} then 1 else 0 end)`.mapWith(Number),
+                    inProgressCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskStatus} = ${TASK_STATUS[1]} then 1 else 0 end)`.mapWith(Number),
+                    inReviewCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskStatus} = ${TASK_STATUS[2]} then 1 else 0 end)`.mapWith(Number),
+                    completedCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskStatus} = ${TASK_STATUS[3]} then 1 else 0 end)`.mapWith(Number),
+                },
+                distributionByPriority: {
+                    lowCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskPriority} = ${TASK_PRIORITY[0]} then 1 else 0 end)`.mapWith(Number),
+                    mediumCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskPriority} = ${TASK_PRIORITY[1]} then 1 else 0 end)`.mapWith(Number),
+                    highCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskPriority} = ${TASK_PRIORITY[2]} then 1 else 0 end)`.mapWith(Number),
+                    urgentCount: sql<number>`sum(case when ${tasks.assignedTo} = ${teamMembers.userId} and ${tasks.taskPriority} = ${TASK_PRIORITY[3]} then 1 else 0 end)`.mapWith(Number),
+                },
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(projects.projectId, tasks.projectId))
+            .innerJoin(teamMembers, eq(teamMembers.teamId, projects.teamId))
+            .innerJoin(users, eq(users.userId, teamMembers.userId))
+            .where(eq(teamMembers.teamId, teamId))
+            .groupBy(teamMembers.userId)
+        ])
+
+        return {
+            teamId: membership.teamId,
+            teamName: membership.teamName,
+            teamSummary,
+            taskDistribution
         }
     }
 }

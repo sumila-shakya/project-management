@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ### get all the users team
 GET http://localhost:3000/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIzNzk1MywiZXhwIjoxNzg1MjM4NTUzfQ.JJJ-yyz0ge5cfOTvbFM4960XOdDOVl8kq8-eXaLjtRs
 
 ### get team by id
 GET http://localhost:3000/api/teams/1
@@ -47,3 +47,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhd
 ### get analytics log
 GET http://localhost:3000/api/teams/1/activity
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
+
+### get team overview
+GET http://localhost:3000/api/teams/1/overview
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIzODU5OSwiZXhwIjoxNzg1MjM5MTk5fQ.QZRvA0mPdTfJx5v0tNmWh-CKJvvgFYJFNN2dlw5Li-0

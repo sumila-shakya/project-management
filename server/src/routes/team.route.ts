@@ -41,6 +41,8 @@ router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
 // UPDATE THE TEAM MEMBER ROLE ROUTE
 router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
 
+router.get('/:teamId/overview', teamController.getTeamOverview)
+
 
 /* ------------------------------------ TEAM PROJECTS ROUTES ------------------------------------ */
 // CREATE PROJECT ROUTE

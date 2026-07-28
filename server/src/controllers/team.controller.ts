@@ -173,6 +173,29 @@ export const teamController = {
         } catch(error) {
             next(error)
         }
+    },
+
+    async getTeamOverview(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the teamId from the request params
+            const teamId = parseId(req.params.teamId as string)
+
+            const data = await teamServices.getTeamOverview(userId, teamId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, data))
+        } catch(error) {
+            next(error)
+        }
     }
 }
 
@@ -261,7 +284,7 @@ export const teamMembersController = {
             // 200 success message
             res
             .status(200)
-            .json(new ApiResponse(300, updatedMember, "Member updated successfully"))
+            .json(new ApiResponse(200, updatedMember, "Member updated successfully"))
         } catch(error) {
             next(error)
         }
