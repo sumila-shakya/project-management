@@ -32,17 +32,17 @@ Content-Type: application/json
 }
 
 ### process task
-PATCH http://localhost:3000/api/tasks/1/status
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
+PATCH http://localhost:3000/api/tasks/3/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NTIyNTYzMSwiZXhwIjoxNzg1MjI2MjMxfQ.9Lwn16KWxrvOy8ACPCikna3wSJDtH-SnLwWxqFsPq24
 Content-Type: application/json
 
 {
-    "taskStatus": "in_progress"
+    "taskStatus": "completed"
 }
 
 ### assign task
-PATCH http://localhost:3000/api/tasks/1/assign
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NDk4NzMzMywiZXhwIjoxNzg0OTg3OTMzfQ.qz6Irs3nPQPceQwlAltzZlRfeb8A3zXopZWEaxFv1gI
+PATCH http://localhost:3000/api/tasks/3/assign
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNTQ3OCwiZXhwIjoxNzg1MjI2MDc4fQ.umF7oTMzKdj-5JOyVBSz7CRtm0oWhZ33WPVfIVGJvzo
 Content-Type: application/json
 
 {
@@ -56,3 +56,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhd
 ### delete the task
 DELETE http://localhost:3000/api/tasks/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc3OTAzNjMyNSwiZXhwIjoxNzc5MDM2OTI1fQ.IvE67n0YKZWoHA_FxGkY1ZOWHxYbKNpYGYD4_nH4e50
+
+### create new tasks
+POST http://localhost:3000/api/projects/1/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNTQ3OCwiZXhwIjoxNzg1MjI2MDc4fQ.umF7oTMzKdj-5JOyVBSz7CRtm0oWhZ33WPVfIVGJvzo
+Content-Type: application/json
+
+{
+    "title": "test1",
+    "description": "this is a test task1",
+    "taskPriority": "low",
+    "dueDate": "2026-10-25"
+}
+
+### create new tasks
+POST http://localhost:3000/api/projects/1/tasks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNTQ3OCwiZXhwIjoxNzg1MjI2MDc4fQ.umF7oTMzKdj-5JOyVBSz7CRtm0oWhZ33WPVfIVGJvzo
+Content-Type: application/json
+
+{
+    "title": "test2",
+    "description": "this is a test task2",
+    "taskPriority": "high",
+    "dueDate": "2026-10-25"
+}

@@ -1,11 +1,11 @@
 import { db } from "../config/mysql.config";
 import { projects, teamMembers, NewProject, tasks, users, teams, NewNotification } from "../models/mysql.model";
-import { eq, and, count, asc, ne } from "drizzle-orm";
+import { eq, and, count, asc, ne, sum, sql } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
 import { AnalyticsLog } from "../models/mongodb.model";
-import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, TASK_STATUS } from "../utils/constants";
 import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
 
@@ -405,4 +405,71 @@ export const projectServices = {
         // write into the log
         systemEmitter.emit('analytics_log_generated', logs)
     },
+
+    async getProjectProgress(userId: number, projectId: number) {
+        const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
+
+        const [ distributionByStatus, distributionByPriority, [projectSummary] ] = await Promise.all([
+            db
+            .select({
+                taskStatus: tasks.taskStatus,
+                totalTasks: count(tasks.taskId)
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(projects.projectId, tasks.projectId))
+            .where(eq(projects.projectId, projectId))
+            .groupBy(tasks.taskStatus),
+
+            db
+            .select({
+                taskPriority: tasks.taskPriority,
+                totalTasks: count(tasks.taskId)
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(projects.projectId, tasks.projectId))
+            .where(eq(projects.projectId, projectId))
+            .groupBy(tasks.taskPriority),
+
+            db
+            .select({
+                totalTask: count(),
+                overdueTasks: sql<number>`SUM(
+                    CASE 
+                    WHEN ${projects.projectId} = ${projectId} 
+                    AND ${tasks.dueDate} < NOW() 
+                    AND ${tasks.taskStatus} != ${TASK_STATUS[3]} 
+                    THEN 1 ELSE 0 
+                    END
+                )`.mapWith(Number),
+                unassignedTasks: sql<number>`SUM(
+                    CASE 
+                    WHEN ${projects.projectId} = ${projectId} 
+                    AND ${tasks.assignedTo} IS NULL
+                    THEN 1 ELSE 0 
+                    END
+                )`.mapWith(Number),
+                completionPercentage: sql<number>`ROUND(
+                    (SUM(CASE WHEN ${projects.projectId} = ${projectId} AND ${tasks.taskStatus} = ${TASK_STATUS[3]} THEN 1 ELSE 0 END) 
+                    / count(*) * 100), 2)
+                `.mapWith(Number)
+            })
+            .from(tasks)
+            .innerJoin(projects, eq(projects.projectId, tasks.projectId))
+            .where(eq(projects.projectId, projectId))
+        ])
+
+        return {
+            projectId: existingProject.projectId,
+            projectName: existingProject.projectName,
+            description: existingProject.description,
+            projectStatus: existingProject.projectStatus,
+            startDate: existingProject.startDate,
+            endDate: existingProject.endDate,
+            projectSummary: projectSummary,
+            distribution: {
+                distributionByStatus,
+                distributionByPriority
+            }
+        }
+    }
 }

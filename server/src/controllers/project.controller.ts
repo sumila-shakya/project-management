@@ -200,5 +200,29 @@ export const projectController = {
         } catch(error) {
             next(error)
         }
+    },
+
+
+    async getProjectProgress(req: Request, res: Response, next: NextFunction) {
+        try {
+            // get the user id from the request
+            const userId = req.user?.userId
+
+            //if not the user id throw error
+            if(!userId) {
+                throw new ApiError(401, "Access Denied")
+            }
+
+            // get the projectId from the request params
+            const projectId = parseId(req.params.projectId as string)
+
+            const result = await projectServices.getProjectProgress(userId, projectId)
+
+            res
+            .status(200)
+            .json(new ApiResponse(200, result))
+        } catch(error) {
+            next(error)
+        }
     }
 }

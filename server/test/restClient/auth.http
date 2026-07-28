@@ -20,11 +20,11 @@ Content-Type: application/json
 ### logout check
 POST http://localhost:3000/api/auth/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4OTI0OCwiZXhwIjoxNzg0OTg5ODQ4fQ.NZJbv_Kp1AJosqecqXR3WGVd6i7RU3r1d4tTXzkUltQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NTIyNTYzMSwiZXhwIjoxNzg1MjI2MjMxfQ.9Lwn16KWxrvOy8ACPCikna3wSJDtH-SnLwWxqFsPq24
 
 ### get account check
 GET http://localhost:3000/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4OTI0OCwiZXhwIjoxNzg0OTg5ODQ4fQ.NZJbv_Kp1AJosqecqXR3WGVd6i7RU3r1d4tTXzkUltQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NTIyNTYzMSwiZXhwIjoxNzg1MjI2MjMxfQ.9Lwn16KWxrvOy8ACPCikna3wSJDtH-SnLwWxqFsPq24
 
 ### refresh token
 POST  http://localhost:3000/api/auth/refresh

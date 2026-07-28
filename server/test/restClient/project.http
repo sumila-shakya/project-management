@@ -43,3 +43,7 @@ Content-Type: application/json
 ### delete project 
 DELETE  http://localhost:3000/api/projects/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
+
+### get project progress
+GET http://localhost:3000/api/projects/1/progress
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNjMyNCwiZXhwIjoxNzg1MjI2OTI0fQ.4vdSATKj_Yy-KU_OCo78kBz9Qxib4Ak-YDYOR77aIkk
