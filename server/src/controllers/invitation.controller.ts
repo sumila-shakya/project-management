@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { invitationSchema, processInvitationSchema, filterInvitationSchema, invitationType, processInvitationType, filterInvitationType} from "../validator/invitation.validator";
-import { paginationSchema, paginationType } from "../validator/global.validator";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { invitationServices } from "../services/invitation.service";

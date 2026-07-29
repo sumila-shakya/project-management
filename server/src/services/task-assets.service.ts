@@ -9,7 +9,6 @@ import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
-import { AnalyticsLog } from "../models/mongodb.model";
 import { teamMembersServices } from "./team.service";
 import { systemEmitter } from "../events/system.events";
 

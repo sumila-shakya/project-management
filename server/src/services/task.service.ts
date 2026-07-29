@@ -1,5 +1,5 @@
 import { db } from "../config/mysql.config";
-import { tasks, taskAssets, projects, teamMembers, users, NewTask, teams, NewNotification } from "../models/mysql.model";
+import { tasks, projects, teamMembers, users, NewTask, teams, NewNotification } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { eq, and, asc, like, count, lte, gt, ne, lt, inArray } from "drizzle-orm";
 import { taskType, filterTaskType, updateTaskType, processTaskType, assignTaskType } from "../validator/task.validator";
@@ -7,7 +7,6 @@ import { paginationType } from "../validator/global.validator";
 import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges, NotificationType } from "../@types/interface";
-import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT, DEADLINE_LEVEL_TIME, DEADLINE_LEVEL_MESSAGE } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
 import { systemEmitter } from "../events/system.events";
@@ -774,21 +773,26 @@ export const taskServices = {
         }
     },
     
+    // NOTIFY DEADLINE APPROACHING SERVICE FUNCTION
     async notifyDeadlineApproaching(level: number) {
+        // get the maximum limit for the deadline
         const maxDate: Date = new Date();
         maxDate.setTime(maxDate.getTime() + DEADLINE_LEVEL_TIME[level-1])
 
+        // get the minimum limit for the deadline
         const minDate: Date = new Date();
         if(level > 0 && level < 3) {
             minDate.setTime(minDate.getTime() + DEADLINE_LEVEL_TIME[level])
         }
 
+        // get the query filters
         const filters = [ne(tasks.taskStatus, 'completed')]
         filters.push(gt(tasks.dueDate, minDate))
         filters.push(lte(tasks.dueDate, maxDate))
         filters.push(lt(tasks.deadlineLevel, level))
 
         await db.transaction(async (tx) => {
+            // get the tasks matching the filters
             const tasksDue = await tx
             .select()
             .from(tasks)
@@ -797,6 +801,7 @@ export const taskServices = {
             if(tasksDue.length > 0) {
                 const taskIds: number[] = tasksDue.map((task) => task.taskId)
 
+                // update the task deadline level to avoid spamming the user
                 await tx
                 .update(tasks)
                 .set({
@@ -813,13 +818,16 @@ export const taskServices = {
                     return notification
                 })
 
+                // send notification to the users
                 systemEmitter.emit('notification_generated', newNotifications)
             }
         })
     },
 
+    // NOTIFY OVERDUE TASK SERVICE FUNCTION
     async notifyOverdueTask() {
         await db.transaction(async (tx) => {
+            // get the overdue tasks
             const taskOverdue = await tx
             .select()
             .from(tasks)
@@ -832,6 +840,7 @@ export const taskServices = {
             if(taskOverdue.length > 0) {
                 const taskIds: number[] = taskOverdue.map((task) => task.taskId)
 
+                // update the task deadline level to avoid spamming the user
                 await tx
                 .update(tasks)
                 .set({
@@ -848,6 +857,7 @@ export const taskServices = {
                     return notification
                 })
 
+                // send notification to the users
                 systemEmitter.emit('notification_generated', newNotifications)
             }
         })

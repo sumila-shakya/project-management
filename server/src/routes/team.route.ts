@@ -41,8 +41,6 @@ router.delete('/:teamId/members/:memberId', teamMembersController.removeMember)
 // UPDATE THE TEAM MEMBER ROLE ROUTE
 router.patch('/:teamId/members/:memberId/role', teamMembersController.updateMember)
 
-router.get('/:teamId/overview', teamController.getTeamOverview)
-
 
 /* ------------------------------------ TEAM PROJECTS ROUTES ------------------------------------ */
 // CREATE PROJECT ROUTE
@@ -51,8 +49,15 @@ router.post('/:teamId/projects', projectController.createProject)
 // GET ALL PROJECTS ROUTE
 router.get('/:teamId/projects', projectController.getProjects)
 
+
 /* ------------------------------------ ANALYTICS LOG ROUTES ------------------------------------ */
 // GET THE ANALYLICS LOG ROUTE
 router.get('/:teamId/activity', teamController.getAnalyticsLog)
+
+
+/* ------------------------------------ TEAM OVERVIEW ROUTE ------------------------------------ */
+// GET TEAM OVERVIEW ROUTE
+router.get('/:teamId/overview', teamController.getTeamOverview)
+
 
 export default router

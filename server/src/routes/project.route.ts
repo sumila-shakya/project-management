@@ -24,6 +24,7 @@ router.patch('/:projectId/restore', projectController.restoreProject)
 // DELETE PROJECT ROUTE
 router.delete('/:projectId', projectController.deleteProject)
 
+// GET PROJECT PROGRESS ROUTE
 router.get('/:projectId/progress', projectController.getProjectProgress)
 
 /* ------------------------------------ TASK ROUTES ------------------------------------ */

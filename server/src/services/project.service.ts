@@ -1,10 +1,9 @@
 import { db } from "../config/mysql.config";
 import { projects, teamMembers, NewProject, tasks, users, teams, NewNotification } from "../models/mysql.model";
-import { eq, and, count, asc, ne, sum, sql } from "drizzle-orm";
+import { eq, and, count, asc, sql } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
-import { AnalyticsLog } from "../models/mongodb.model";
 import { DEFAULT_PAGE_LIMIT, TASK_STATUS } from "../utils/constants";
 import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
@@ -406,6 +405,7 @@ export const projectServices = {
         systemEmitter.emit('analytics_log_generated', logs)
     },
 
+    // GET PROJECT PROGRESS SERVICE FUNCTION
     async getProjectProgress(userId: number, projectId: number) {
         const {existingProject, membership} = await projectGuard.validateAccess(userId, projectId)
 

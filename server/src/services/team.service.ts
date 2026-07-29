@@ -1,6 +1,6 @@
 import { db } from "../config/mysql.config";
 import { AnalyticsLog } from "../models/mongodb.model";
-import { users, teams, teamMembers, tasks, projects, Team, NewTeam, NewTeamMember, NewNotification } from "../models/mysql.model";
+import { users, teams, teamMembers, tasks, projects, NewTeam, NewTeamMember, NewNotification } from "../models/mysql.model";
 import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../validator/team.validator";
 import { paginationType } from "../validator/global.validator";
@@ -288,7 +288,9 @@ export const teamServices = {
         }
     },
 
+    // GET TEAM OVERVIEW SERVICE FUNCTION
     async getTeamOverview(userId: number, teamId: number) {
+        // check if the user is the member of the team
         const [membership] = await db
         .select({
             teamId: teamMembers.teamId,
@@ -301,6 +303,7 @@ export const teamServices = {
             eq(teamMembers.userId, userId)
         ))
 
+        // throw error is user is not the memmber of the team
         if(!membership) {
             throw new ApiError(403, "Access Denied")
         }
@@ -620,6 +623,7 @@ export const teamMembersServices = {
         }
     },
 
+    // GET TEAM MEMBERS ID SERVICE FUNCTION
     async getTeamMembersIds(teamId: number) {
         const members = await db
         .select()

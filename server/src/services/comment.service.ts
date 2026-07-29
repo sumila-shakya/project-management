@@ -1,6 +1,5 @@
 import { db } from "../config/mysql.config";
 import { comments, projects, tasks, teamMembers, NewComment, teams, users, Comment, NewNotification } from "../models/mysql.model";
-import { AnalyticsLog } from "../models/mongodb.model";
 import { ApiError } from "../utils/apiError";
 import { commentContentType } from "../validator/comment.validator";
 import { cursorPaginationType } from "../validator/global.validator";

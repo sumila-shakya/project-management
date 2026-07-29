@@ -8,6 +8,7 @@ import { paginationSchema, paginationType } from "../validator/global.validator"
 import { parseId } from "../utils/validate-id";
 
 export const taskController = {
+    // CREATE TASK CONTROLLER FUNCTION
     async createTask(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -36,6 +37,7 @@ export const taskController = {
         }
     },
 
+    // GET USER TASKS CONTROLLER FUNCTION
     async getMyTasks(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -61,6 +63,7 @@ export const taskController = {
         }
     },
 
+    // GET TASKS IN PROJECT CONTROLLER FUNCTION
     async getTasksInProject(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -89,6 +92,7 @@ export const taskController = {
         }
     },
 
+    // GET TASK DETAILS CONTROLLER FUNCTION
     async getTaskDetails(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -114,6 +118,7 @@ export const taskController = {
         }
     },
 
+    // UPDATE TASK CONTROLLER FUNCTION
     async updateTask(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -147,6 +152,7 @@ export const taskController = {
         }
     },
 
+    // PROGRESS TASK CONTROLLER FUNCTION
     async processTask(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -175,6 +181,7 @@ export const taskController = {
         }
     },
 
+    // ASSIGN TASK CONTROLLER FUNCTION
     async assignTask(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -203,6 +210,7 @@ export const taskController = {
         }
     },
 
+    // GET SUB TASKS CONTROLLER FUNCTION
     async getSubTasks(req: Request, res: Response, next: NextFunction) {
         try {
              // get the user id from the request
@@ -231,6 +239,7 @@ export const taskController = {
         }
     },
 
+    // DELETE TASK CONTROLLER FUNCTION
     async deleteTask(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request

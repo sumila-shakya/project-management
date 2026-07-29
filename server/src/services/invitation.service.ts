@@ -1,7 +1,7 @@
 import { db } from "../config/mysql.config";
 import { users, teams, teamMembers, invitations, NewInvitation, NewTeamMember, NewNotification } from "../models/mysql.model";
 import { invitationType, processInvitationType, filterInvitationType } from "../validator/invitation.validator";
-import { generateToken, hashToken } from "../utils/token";
+import { generateToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { DEFAULT_PAGE_LIMIT } from "../utils/constants";

@@ -3,6 +3,7 @@ import { exit } from 'node:process'
 import { app } from './app'
 import { db } from './config/mysql.config'
 import { connectMongoDb } from './config/mongodb.config'
+import { notifyDeadlines } from './cron/notification.cron'
 
 const PORT = process.env.PORT || 3000
 
@@ -17,6 +18,9 @@ const startServer = async() => {
         //testing mysql connection
         await db.execute('SELECT 1')
         console.log("MySQL connected !!")
+
+        //intializing the cron job
+        notifyDeadlines()
 
         //server listening at port 3000
         app.listen(PORT, ()=>{

@@ -202,7 +202,7 @@ export const projectController = {
         }
     },
 
-
+    // GET PROJECT PROGRESS CONTROLLER FUNCTION
     async getProjectProgress(req: Request, res: Response, next: NextFunction) {
         try {
             // get the user id from the request
@@ -216,8 +216,10 @@ export const projectController = {
             // get the projectId from the request params
             const projectId = parseId(req.params.projectId as string)
 
+            // get the project progress stats
             const result = await projectServices.getProjectProgress(userId, projectId)
 
+            // send 200 success msg
             res
             .status(200)
             .json(new ApiResponse(200, result))

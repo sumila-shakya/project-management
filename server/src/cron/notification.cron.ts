@@ -1,6 +1,7 @@
 import cron from 'node-cron'
 import { taskServices } from '../services/task.service'
 
+// CRON JOB TO NOTIFY THE APPROACHING DEADLINE
 export const notifyDeadlines = () => {
     cron.schedule('0 * * * *', async() => {
         try {

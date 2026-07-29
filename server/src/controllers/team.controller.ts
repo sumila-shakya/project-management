@@ -188,8 +188,10 @@ export const teamController = {
             // get the teamId from the request params
             const teamId = parseId(req.params.teamId as string)
 
+            // get the team oveview and task distribution data
             const data = await teamServices.getTeamOverview(userId, teamId)
 
+            // send 200 success msg
             res
             .status(200)
             .json(new ApiResponse(200, data))

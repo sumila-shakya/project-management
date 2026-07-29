@@ -18,6 +18,7 @@ systemEmitter.on('notification_generated', async(newNotifications: NewNotificati
     }
 })
 
+// ANALYTICS LOG EVENT LISTENER
 systemEmitter.on('analytics_log_generated', async(logs: IAnalyticsLog[]) => {
     try {
         await AnalyticsLog.insertMany(logs)
