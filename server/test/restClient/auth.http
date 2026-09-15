@@ -1,5 +1,5 @@
 ### Register new user
-POST http://localhost:3000/api/auth/register
+POST http://localhost:3003/api/auth/register
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ### Login check
-POST  http://localhost:3000/api/auth/login
+POST  http://localhost:3003/api/auth/login
 Content-Type: application/json
 
 {
@@ -18,22 +18,22 @@ Content-Type: application/json
 }
 
 ### logout check
-POST http://localhost:3000/api/auth/logout
+POST http://localhost:3003/api/auth/logout
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NTIyNTYzMSwiZXhwIjoxNzg1MjI2MjMxfQ.9Lwn16KWxrvOy8ACPCikna3wSJDtH-SnLwWxqFsPq24
 
 ### get account check
-GET http://localhost:3000/api/auth/me
+GET http://localhost:3003/api/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4NTIyNTYzMSwiZXhwIjoxNzg1MjI2MjMxfQ.9Lwn16KWxrvOy8ACPCikna3wSJDtH-SnLwWxqFsPq24
 
 ### refresh token
-POST  http://localhost:3000/api/auth/refresh
+POST  http://localhost:3003/api/auth/refresh
 Content-Type: application/json
 
 {}
 
 ### change password
-PATCH http://localhost:3000/api/auth/change-password
+PATCH http://localhost:3003/api/auth/change-password
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3Njc3NjE3NCwiZXhwIjoxNzc2Nzc2Nzc0fQ.-vaZrehTK8YLo52nEogbheJ_1dLq58Zk8Wbr3Brj2rQ
 Content-Type: application/json
 
@@ -42,7 +42,7 @@ Content-Type: application/json
 }
 
 ### update account
-PATCH http://localhost:3000/api/auth/me
+PATCH http://localhost:3003/api/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NzAzMDk0MCwiZXhwIjoxNzc3MDMxNTQwfQ.Bua2fNd_ez6IgKRgKHuR5CS02mmgUxb5NccgDHtEit0
 Content-Type: application/json
 
@@ -51,7 +51,7 @@ Content-Type: application/json
 }
 
 ### forget password
-POST http://localhost:3000/api/auth/forget-password
+POST http://localhost:3003/api/auth/forget-password
 Content-Type: application/json
 
 {
@@ -59,7 +59,7 @@ Content-Type: application/json
 }
 
 ### reset password
-POST http://localhost:3000/api/auth/reset-password?token=814cc3cf7fcaf4624834af80b864f0aa
+POST http://localhost:3003/api/auth/reset-password?token=814cc3cf7fcaf4624834af80b864f0aa
 Content-Type: application/json
 
 {
@@ -67,13 +67,13 @@ Content-Type: application/json
 }
 
 ### verify email
-POST http://localhost:3000/api/auth/verify-email?token=c59135aa27d3c60a9040f474f90cdb14
+POST http://localhost:3003/api/auth/verify-email?token=c59135aa27d3c60a9040f474f90cdb14
 Content-Type: application/json
 
 {}
 
 ### Register new user
-POST http://localhost:3000/api/auth/register
+POST http://localhost:3003/api/auth/register
 Content-Type: application/json
 
 {
@@ -84,7 +84,7 @@ Content-Type: application/json
 }
 
 ### Login check
-POST  http://localhost:3000/api/auth/login
+POST  http://localhost:3003/api/auth/login
 Content-Type: application/json
 
 {

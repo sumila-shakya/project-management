@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/tasks/1/assets?fileCategory=images
+  url: http://localhost:3003/api/tasks/1/assets?fileCategory=images
   params:
     - name: fileCategory
       value: images

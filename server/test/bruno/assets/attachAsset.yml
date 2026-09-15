@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/tasks/1/assets
+  url: http://localhost:3003/api/tasks/1/assets
   body:
     type: multipart-form
     data:
