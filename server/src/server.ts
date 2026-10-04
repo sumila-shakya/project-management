@@ -4,6 +4,7 @@ import { app } from './app'
 import { db } from './config/mysql.config'
 import { connectMongoDb } from './config/mongodb.config'
 import { notifyDeadlines } from './cron/notification.cron'
+import './queue/worker'
 
 const PORT = process.env.PORT || 3000
 

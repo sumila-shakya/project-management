@@ -59,7 +59,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhd
 
 ### create new tasks
 POST http://localhost:3003/api/projects/1/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNTQ3OCwiZXhwIjoxNzg1MjI2MDc4fQ.umF7oTMzKdj-5JOyVBSz7CRtm0oWhZ33WPVfIVGJvzo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTEyNzg4NywiZXhwIjoxNzkxMTI4NDg3fQ.gEXQheSjDxnyZxOAgRU2shrZGbyqlWs43od-_ogLp9Q
 Content-Type: application/json
 
 {
@@ -71,7 +71,7 @@ Content-Type: application/json
 
 ### create new tasks
 POST http://localhost:3003/api/projects/1/tasks
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NTIyNTQ3OCwiZXhwIjoxNzg1MjI2MDc4fQ.umF7oTMzKdj-5JOyVBSz7CRtm0oWhZ33WPVfIVGJvzo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTEyNzg4NywiZXhwIjoxNzkxMTI4NDg3fQ.gEXQheSjDxnyZxOAgRU2shrZGbyqlWs43od-_ogLp9Q
 Content-Type: application/json
 
 {

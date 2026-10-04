@@ -4,9 +4,10 @@ import { eq, and, count, asc, sql } from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
-import { DEFAULT_PAGE_LIMIT, TASK_STATUS } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, TASK_STATUS, QUEUE_OPTIONS } from "../utils/constants";
 import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
+import { analyticslogQueue } from "../queue/queue";
 
 export const projectGuard = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
@@ -363,7 +364,7 @@ export const projectServices = {
         .from(tasks)
         .where(eq(tasks.projectId, existingProject.projectId))
 
-        const logs: IAnalyticsLog[] = allTasks.map(data => {
+        const jobs = allTasks.map(data => {
             const log: IAnalyticsLog = {
                 actor: {
                     userId: String(userId),
@@ -385,7 +386,11 @@ export const projectServices = {
                 },
                 timestamp: new Date()
             }
-            return log
+            return {
+                name: 'task-log',
+                data: log,
+                opts: QUEUE_OPTIONS
+            }
         })
 
         // delete the archived project
@@ -401,8 +406,8 @@ export const projectServices = {
             throw new ApiError(400, "Please archive the project first")
         }
 
-        // write into the log
-        systemEmitter.emit('analytics_log_generated', logs)
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.addBulk(jobs)
     },
 
     // GET PROJECT PROGRESS SERVICE FUNCTION

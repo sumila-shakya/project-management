@@ -2,6 +2,7 @@ import express from 'express'
 import { ApiResponse } from './utils/apiResponse'
 import { errorHandler } from './middlewares/error.middleware'
 import { db } from './config/mysql.config'
+import { RedisClient } from './config/redis.config'
 import authRouter from './routes/auth.route'
 import teamRouter from './routes/team.route'
 import invitationRouter from './routes/invitation.route'
@@ -49,6 +50,7 @@ app.get('/api/health', async (req, res, next) => {
             server: "UP",
             mysql: "Connected",
             mongodb: mongodbStatus,
+            redis: RedisClient.status === 'ready' ? "Connected": "Disconnected",
             timestamp: new Date().toISOString()
         }
 

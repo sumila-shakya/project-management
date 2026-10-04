@@ -7,9 +7,10 @@ import { paginationType } from "../validator/global.validator";
 import { projectGuard } from "./project.service";
 import { statusTransition } from "../utils/status-transition";
 import { Role, IAnalyticsLog, IChanges, NotificationType } from "../@types/interface";
-import { DEFAULT_PAGE_LIMIT, DEADLINE_LEVEL_TIME, DEADLINE_LEVEL_MESSAGE } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, DEADLINE_LEVEL_TIME, DEADLINE_LEVEL_MESSAGE, QUEUE_OPTIONS } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
 import { systemEmitter } from "../events/system.events";
+import { analyticslogQueue } from "../queue/queue";
 
 // VALIDATE USER ACCESS FUNCTION
 export const taskGuard = {
@@ -147,7 +148,8 @@ export const taskServices = {
 
         // write into the analytics log
         if(result) {
-            systemEmitter.emit('analytics_log_generated', [log])
+            // send the logData to the queue for writing in background
+            await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
         }
 
         // get the new inserted task
@@ -404,8 +406,8 @@ export const taskServices = {
             timestamp: new Date()
         }
 
-        // write the changes in analytics log
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
 
         /* ------------------------------------ notification ------------------------------------ */
         
@@ -560,8 +562,8 @@ export const taskServices = {
             timestamp: new Date()
         }
 
-        // write the changes to the analytics log
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
     },
 
     // ASSIGN TASK SERVICE FUNCTION
@@ -644,8 +646,8 @@ export const taskServices = {
             timestamp: new Date()
         }
 
-        // write into the analytics log
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
 
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -769,7 +771,8 @@ export const taskServices = {
 
         // write into the log
         if(result.affectedRows > 0) {
-            systemEmitter.emit('analytics_log_generated', [log])
+            // send the logData to the queue for writing in background
+            await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
         }
     },
     

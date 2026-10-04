@@ -73,6 +73,12 @@ export const COOKIES_OPTIONS = {
     sameSite: "strict" as const
 } as const
 
+export const QUEUE_OPTIONS = {
+    attempts: 5,
+    backoff: { type:'exponential', delay: 1000},
+    removeOnComplete: true
+} as const
+
 export const ALLOWED_FILE_SIZE = {
     images: 5*1024*1024,
     documents: 10*1024*1024,

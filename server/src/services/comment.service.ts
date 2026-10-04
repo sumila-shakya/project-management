@@ -7,8 +7,9 @@ import { eq, and, desc, asc, or, gt, lt, inArray } from "drizzle-orm";
 import { IAnalyticsLog, CommentCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
 import { taskGuard } from "./task.service";
 import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
-import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, QUEUE_OPTIONS } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
+import { analyticslogQueue } from "../queue/queue";
 import { systemEmitter } from "../events/system.events";
 
 export const commentServices = {
@@ -62,7 +63,8 @@ export const commentServices = {
                 timestamp: new Date()
             }
 
-            systemEmitter.emit('analytics_log_generated', [log])
+            // send the logData to the queue for writing in background
+            await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -338,7 +340,8 @@ export const commentServices = {
         .delete(comments)
         .where(eq(comments.commentId, commentId))
 
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
     },
 
     // GET MENTIONED USERS SERVICE FUNCTION

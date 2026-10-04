@@ -5,12 +5,13 @@ import { ApiError } from "../utils/apiError";
 import { taskGuard } from "./task.service";
 import { FileType, FileMetaData, NotificationType } from "../@types/interface";
 import { getFileType } from "../utils/file-helper";
-import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { ALLOWED_FILE_SIZE, DEFAULT_PAGE_LIMIT, QUEUE_OPTIONS } from "../utils/constants";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { teamMembersServices } from "./team.service";
 import { systemEmitter } from "../events/system.events";
+import { analyticslogQueue } from "../queue/queue";
 
 export const taskAssetsServices = {
     // ATTACH ASSET SERVICE FUNCTION
@@ -84,8 +85,8 @@ export const taskAssetsServices = {
             timestamp: new Date()
         }
 
-        // write into the log
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
 
         /* ------------------------------------ notification ------------------------------------ */
                 
@@ -305,7 +306,7 @@ export const taskAssetsServices = {
         // delete from the cloudinary
         await deleteFromCloudinary(secureUrl)
 
-        // write into the log
-        systemEmitter.emit('analytics_log_generated', [log])
+        // send the logData to the queue for writing in background
+        await analyticslogQueue.add('task-log', log, QUEUE_OPTIONS)
     }
 }
