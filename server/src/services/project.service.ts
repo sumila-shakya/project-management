@@ -5,9 +5,8 @@ import { ApiError } from "../utils/apiError";
 import { projectType, updateProjectType, filterProjectType } from "../validator/project.validator";
 import { Role, IAnalyticsLog, NotificationType } from "../@types/interface";
 import { DEFAULT_PAGE_LIMIT, TASK_STATUS, QUEUE_OPTIONS } from "../utils/constants";
-import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
-import { analyticslogQueue } from "../queue/queue";
+import { analyticslogQueue, notificationQueue } from "../queue/queue";
 
 export const projectGuard = {
     // PROJECT SERVICE FUNCTION TO CHECK IF PROJECT EXISTS AND MEMBER HAS ACCESS TO IT
@@ -105,18 +104,22 @@ export const projectServices = {
         const message = `User [${isMember.userName}](${userId}) created new a project in team [${isMember.teamName}](${teamId})`
         const notificationType: NotificationType = 'project_created'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
         /* ------------------------------------ notification ------------------------------------ */
 
@@ -238,18 +241,22 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) updated project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_updated'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -288,18 +295,22 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) archived project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_archived'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
 
         /* ------------------------------------ notification ------------------------------------ */
@@ -332,18 +343,22 @@ export const projectServices = {
         const message = `User [${membership.userName}](${userId}) restored project [${existingProject.projectName}](${projectId})`
         const notificationType: NotificationType = 'project_restored'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
 
         /* ------------------------------------ notification ------------------------------------ */

@@ -5,10 +5,10 @@ import { ApiError } from "../utils/apiError";
 import { createTeamType, updateTeamType, updateTeamMemberType, filterAnalyticsLogType } from "../validator/team.validator";
 import { paginationType } from "../validator/global.validator";
 import { and, asc, count, eq, sql } from "drizzle-orm";
-import { DEFAULT_PAGE_LIMIT, TASK_PRIORITY, TASK_STATUS } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, TASK_PRIORITY, TASK_STATUS, QUEUE_OPTIONS } from "../utils/constants";
 import { encodeLogCursor, decodeLogCursor } from "../utils/cursor";
 import { LogCursor, CursorPageMetaData, NotificationType } from "../@types/interface";
-import { systemEmitter } from "../events/system.events";
+import { notificationQueue } from "../queue/queue";
 import mongoose from "mongoose";
 
 export const teamServices = {
@@ -153,18 +153,22 @@ export const teamServices = {
         const message = `User [${member.userName}](${userId}) updated the team [${member.teamName}](${teamId})`
         const notificationType: NotificationType = 'team_updated'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
                 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
                 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -492,20 +496,25 @@ export const teamMembersServices = {
             recipientId: userToRemoveId
         }
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: generalMessage,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
                 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
                 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
-        systemEmitter.emit('notification_generated', [customizedNotification])
+        
+        await notificationQueue.add('team-notification', customizedNotification, QUEUE_OPTIONS)
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -598,20 +607,25 @@ export const teamMembersServices = {
             recipientId: userToUpdateId
         }
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: generalMessage,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
                 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
                 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
-        systemEmitter.emit('notification_generated', [customizedNotification])
+        
+        await notificationQueue.add('team-notification', customizedNotification, QUEUE_OPTIONS)
                 
                 
         /* ------------------------------------ notification ------------------------------------ */

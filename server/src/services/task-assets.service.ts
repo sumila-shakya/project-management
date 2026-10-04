@@ -10,8 +10,7 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 import { filterAssetsType } from "../validator/assets.validator";
 import { IAnalyticsLog } from "../@types/interface";
 import { teamMembersServices } from "./team.service";
-import { systemEmitter } from "../events/system.events";
-import { analyticslogQueue } from "../queue/queue";
+import { analyticslogQueue, notificationQueue } from "../queue/queue";
 
 export const taskAssetsServices = {
     // ATTACH ASSET SERVICE FUNCTION
@@ -95,18 +94,22 @@ export const taskAssetsServices = {
         const message = `User [${existingTask.userName}](${userId}) attached a new ${fileType} on task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'asset_attached'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
         
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
                 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
         }
                 
         /* ------------------------------------ notification ------------------------------------ */

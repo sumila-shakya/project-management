@@ -9,8 +9,7 @@ import { taskGuard } from "./task.service";
 import { encodeCommentCursor, decodeCommentCursor } from "../utils/cursor";
 import { DEFAULT_PAGE_LIMIT, QUEUE_OPTIONS } from "../utils/constants";
 import { teamMembersServices } from "./team.service";
-import { analyticslogQueue } from "../queue/queue";
-import { systemEmitter } from "../events/system.events";
+import { analyticslogQueue, notificationQueue } from "../queue/queue";
 
 export const commentServices = {
     // ADD COMMENTS SERVICE FUNCTION
@@ -75,18 +74,23 @@ export const commentServices = {
         const message = `User [${existingTask.userName}](${authorId}) commented on the task [${existingTask.title}](${taskId})`
         const notificationType: NotificationType = 'task_commented'
 
-        const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+        const notificationJobs = recipients.map((recipientId) => {
             const notification: NewNotification = {
                 message: message,
                 recipientId: recipientId,
                 notificationType: notificationType
             }
                 
-            return notification
+            return {
+                name: 'team-notification',
+                data: notification,
+                opts: QUEUE_OPTIONS
+            }
         })
                 
         if(recipients.length > 0) {
-            systemEmitter.emit('notification_generated', newNotifications)
+            await notificationQueue.addBulk(notificationJobs)
+            //systemEmitter.emit('notification_generated', newNotifications)
         }
 
         // get the mentioned users
@@ -98,16 +102,21 @@ export const commentServices = {
 
             const message = `user [${existingTask.userName}](${authorId}) mentioned you in the comment on the task[${existingTask.title}](${existingTask.taskId})`
             const notificationType: NotificationType = 'mentioned'
-            const customizedNotifications: NewNotification[] = mentionedUserIds.map((recipientId) => {
+            const customizedNotificationJobs = mentionedUserIds.map((recipientId) => {
                 const notification: NewNotification = {
                     notificationType: notificationType,
                     message: message,
                     recipientId: recipientId
                 }
 
-                return notification
+                return {
+                    name: 'team-notification',
+                    data: notification,
+                    opts: QUEUE_OPTIONS
+                }
             })
-            systemEmitter.emit('notification_generated', customizedNotifications)
+
+            await notificationQueue.addBulk(customizedNotificationJobs)
         }
         
         /* ------------------------------------ notification ------------------------------------ */

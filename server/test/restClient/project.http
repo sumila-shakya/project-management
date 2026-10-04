@@ -1,6 +1,6 @@
 ### create projects
 POST http://localhost:3003/api/teams/1/projects
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzIxMSwiZXhwIjoxNzg0OTg3ODExfQ.fOqs3Y0Sn7I8E-4xK6j7UWqA2CsGVx8u4Fr53xe8wcg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTEzMTU3NSwiZXhwIjoxNzkxMTMyMTc1fQ.sIEVDeInkN24JxEA2a1Z_l5TJlLUk4SCTync-bY4VU0
 Content-Type: application/json
 
 {
@@ -11,15 +11,15 @@ Content-Type: application/json
 
 ### get all the team projects
 GET http://localhost:3003/api/teams/1/projects?projectStatus=active
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzIxMSwiZXhwIjoxNzg0OTg3ODExfQ.fOqs3Y0Sn7I8E-4xK6j7UWqA2CsGVx8u4Fr53xe8wcg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTEzMTU3NSwiZXhwIjoxNzkxMTMyMTc1fQ.sIEVDeInkN24JxEA2a1Z_l5TJlLUk4SCTync-bY4VU0
 
 ### get projects details
 GET http://localhost:3003/api/projects/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc4Mjg5Mzg0MiwiZXhwIjoxNzgyODk0NDQyfQ.TD9pfDtAFVn2HZ12CVdpJmq3Zbvey-omtI1fl2clwqQ
 
 ### update project 
-PATCH http://localhost:3003/api/projects/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4Mjg5NDQ2NywiZXhwIjoxNzgyODk1MDY3fQ.fmAltDnlbMLIuCYxwQjHcKlV4NmiZffzZSXEr8ZD84k
+PATCH http://localhost:3003/api/projects/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTEzMTU3NSwiZXhwIjoxNzkxMTMyMTc1fQ.sIEVDeInkN24JxEA2a1Z_l5TJlLUk4SCTync-bY4VU0
 Content-Type: application/json
 
 {

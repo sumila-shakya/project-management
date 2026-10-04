@@ -4,10 +4,10 @@ import { invitationType, processInvitationType, filterInvitationType } from "../
 import { generateToken } from "../utils/token";
 import { and, asc, eq, count} from "drizzle-orm";
 import { ApiError } from "../utils/apiError";
-import { DEFAULT_PAGE_LIMIT } from "../utils/constants";
+import { DEFAULT_PAGE_LIMIT, QUEUE_OPTIONS } from "../utils/constants";
 import { NotificationType } from "../@types/interface";
-import { systemEmitter } from "../events/system.events";
 import { teamMembersServices } from "./team.service";
+import { notificationQueue } from "../queue/queue";
 
 export const invitationServices = {
     // SEND INVITATIONS SERVICE FUNCTION
@@ -101,8 +101,8 @@ export const invitationServices = {
             message: message,
             recipientId: data.inviteeId
         }
-                
-        systemEmitter.emit('notification_generated', [newNotification])
+           
+        await notificationQueue.add('team-notification', newNotification, QUEUE_OPTIONS)
                 
                 
         /* ------------------------------------ notification ------------------------------------ */
@@ -245,18 +245,22 @@ export const invitationServices = {
                 const message = `User [${userInvitation.userName}](${userId}) joined the team [${userInvitation.teamName}](${userInvitation.teamId})`
                 const notificationType: NotificationType = 'team_member_added'
                 
-                const newNotifications: NewNotification[] = recipients.map((recipientId) => {
+                const notificationJobs = recipients.map((recipientId) => {
                     const notification: NewNotification = {
                         message: message,
                         recipientId: recipientId,
                         notificationType: notificationType
                     }
                 
-                    return notification
+                    return {
+                        name: 'team-notification',
+                        data: notification,
+                        opts: QUEUE_OPTIONS
+                    }
                 })
                         
                 if(recipients.length > 0) {
-                    systemEmitter.emit('notification_generated', newNotifications)
+                    await notificationQueue.addBulk(notificationJobs)
                 }
                         
                 /* ------------------------------------ notification ------------------------------------ */
