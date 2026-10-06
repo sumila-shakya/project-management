@@ -1,11 +1,15 @@
 import multer from "multer";
-import { ALLOWED_MIME_TYPES } from "../utils/constants";
+import { ALLOWED_MIME_TYPES, UPLOAD_DIR } from "../utils/constants";
 import { ApiError } from "../utils/apiError";
+import fs from 'fs'
 
 // configure the storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        if (!fs.existsSync(UPLOAD_DIR)) {
+            fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+        }
+        cb(null, UPLOAD_DIR);
     },
     filename: (req, file, cb) => {
         cb(null, file.originalname);
