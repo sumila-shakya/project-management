@@ -1,6 +1,6 @@
 ### create team 
 POST http://localhost:3003/api/teams
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4NzA0OSwiZXhwIjoxNzg0OTg3NjQ5fQ.9xdyvOEZZjy-opedT88ZlKABuAynixaX-2h7xrLZPW8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTQ0OTAwNCwiZXhwIjoxNzkxNDQ5NjA0fQ.KxWNt-X19kt3GYRWGwQf1VXcfABV6P9PpKrz_DJFiLc
 Content-Type: application/json
 
 {

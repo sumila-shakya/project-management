@@ -15,10 +15,11 @@ http:
           - C:\Users\sumil\Downloads\sampleResume.pdf
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc4NDk4Nzg0NiwiZXhwIjoxNzg0OTg4NDQ2fQ.n3b_r3F1TLxwIrGSZENjlGKVkCgKAuqypsv6Nci5viU
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc5MTQ0OTMyNywiZXhwIjoxNzkxNDQ5OTI3fQ.ZSUsn9DM9h-A6f6wrgT8KwQp8KksnZrJDdGBOnPn5YM
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

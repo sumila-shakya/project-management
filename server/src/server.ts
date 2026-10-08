@@ -7,7 +7,7 @@ import { notifyDeadlines } from './cron/notification.cron'
 import './queue/analytics-log-worker'
 import './queue/notification-worker'
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3003
 
 const startServer = async() => {
     try {
@@ -24,9 +24,9 @@ const startServer = async() => {
         //intializing the cron job
         notifyDeadlines()
 
-        //server listening at port 3000
+        //server listening at port 3003
         app.listen(PORT, ()=>{
-            console.log(`Server listening at port ${PORT || 3000}`)
+            console.log(`Server listening at port ${PORT || 3003}`)
         })
 
     } catch(error) {
