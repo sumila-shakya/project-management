@@ -1,58 +1,5 @@
 # Task Management System — Backend API
 
-A production-grade collaborative task management REST API built with Node.js, TypeScript, and Express. Designed with real-world backend engineering practices including polyglot persistence, event-driven notifications, role-based access control, and comprehensive audit logging.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js |
-| Language | TypeScript (strict mode) |
-| Framework | Express.js v5 |
-| Relational DB | MySQL + Drizzle ORM |
-| Document DB | MongoDB + Mongoose |
-| Validation | Zod |
-| Authentication | JWT (access + refresh tokens) |
-| File Storage | Cloudinary + Multer |
-| Email | Nodemailer + Mailtrap (dev) |
-| Scheduling | node-cron |
-| Password Hashing | bcrypt |
-
----
-
-## Architecture
-
-This project follows a layered **MVC architecture** with strict separation of concerns:
-
-```
-Request → Router → Controller → Service → Repository (Drizzle/Mongoose) → Database
-```
-
-- **Controllers** — Handle HTTP only. Read `req`, send `res`. Zero business logic.
-- **Services** — Own all business logic and orchestration.
-- **Validators** — Zod schemas guard every route boundary before the controller runs.
-- **Utils** — Shared helpers (cursor parser and generator, token generation, ID parsing).
-
-### Polyglot Persistence
-
-Two databases serve different purposes:
-
-| MySQL | MongoDB |
-|---|---|
-| Structured relational data | Flexible document data |
-| Users, teams, projects, tasks | Activity logs, analytics snapshots |
-| ACID transactions | Append-only event logs |
-| Foreign key integrity | Cursor-paginated history feeds |
-
----
-
-## Project Structure
-
-```
-# Task Management System — Backend API
-
 A production-grade collaborative task management REST API built with Node.js, TypeScript, and Express. Designed with real-world backend engineering practices including polyglot persistence, message queue-based background processing, event-driven notifications, role-based access control, and comprehensive audit logging.
 
 ---
@@ -102,8 +49,8 @@ Three data stores serve different purposes:
 
 | MySQL | MongoDB | Redis |
 |---|---|---|
-| Structured relational data | Flexible document data | Job queues + ephemeral state |
-| Users, teams, projects, tasks, tasks assets,  comments, invitations, notifications | Activity logs | BullMQ job metadata |
+| Structured relational data | Flexible document data | Job queues |
+| Users, teams, projects, tasks | Activity logs | BullMQ job metadata |
 | ACID transactions | Append-only event logs | Fast in-memory broker |
 | Foreign key integrity | Cursor-paginated history feeds | Zero persistence requirement |
 
@@ -157,19 +104,16 @@ Separating queues means a MongoDB outage does not block notification delivery, a
 
 ### Job Retry Strategy
 
-Both queues are configured with exponential backoff:
+Both queues are configured with exponential backoff. Failed jobs after max retries move to the **dead letter queue** for inspection — no silent failures.
 
-```
-Max attempts: 5
-```
-
-Failed jobs after max retries move to the **dead letter queue** for inspection — no silent failures.
+---
 
 ## Project Structure
 
 ```
 project-management/
 ├── .gitignore                            # Root level — applies to entire monorepo
+├── compose.yaml 
 ├── README.md                             # Root level — project documentation
 └── server/                               # Entire backend lives here
     ├── drizzle/                          # Drizzle generated migration files
@@ -181,6 +125,7 @@ project-management/
     │   │
     │   ├── config/
     │   │   ├── env.config.ts             # Environment variable validation and export
+    │   │   ├── redis.config.ts           # Redis connection    
     │   │   ├── mongodb.config.ts         # Mongoose connection setup
     │   │   └── mysql.config.ts           # Drizzle + mysql2 connection setup
     │   │
@@ -293,8 +238,10 @@ project-management/
     │
     ├── test/                             # Test directory
     ├── uploads/                          # Temporary local upload directory
+    ├── .dockerignore
     ├── .env                              # Environment variables (gitignored)
     ├── .env.example                      # Environment variable template
+    ├── Dockerfile
     ├── drizzle.config.js                 # Drizzle Kit configuration
     ├── package.json
     ├── package-lock.json
@@ -313,7 +260,6 @@ project-management/
 - Forgot password and reset password via email token (15min expiry)
 - Change password invalidates all active sessions across devices
 - Account update (name, bio) with partial Zod validation
-- Avatar upload via Cloudinary
 
 > **Note:** During development, SMTP port `2525` was blocked by ISP. Mailtrap worked correctly on port `587`. If emails are not sending, try changing `MAIL_PORT` in `.env`.
 
@@ -378,7 +324,7 @@ GET /api/teams/:teamId/activity
 ### Search & Filters
 
 - Tasks filterable by status, priority
-- Projects filterable by status with role-based visibility enforcement
+- Projects filterable by status
 - Notifications filterable by read status
 - Dynamic query builder pattern — filters applied conditionally without multiple code paths
 
@@ -497,41 +443,38 @@ PATCH  /api/invitations/:invitationId/process
 ## Environment Variables
 
 ```env
-PORT=3000
-NODE_ENV=development
+PORT = "3003"
 
-# MySQL
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=password
-DB_NAME=project_management_db
+# mysql credentials
+DB_HOST = "localhost"
+DB_USER = "root"
+DB_PASSWORD = "password"
+DB_NAME = "project_management_db"
 
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/project_management_db
+# mongodb uri
+MONGODB_URI = "mongodb://localhost:27017/project_management_db"
 
 # Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
+REDIS_URL="redis://localhost:6379"
 
-# JWT
-ACCESS_TOKEN_SECRET=access_token_secret
-REFRESH_TOKEN_SECRET=refresh_token_secret
+# JWT Tokens
+ACCESS_TOKEN_SECRET = "access token secret"
+REFRESH_TOKEN_SECRET = "refresh token secret"
 
-# Email (Mailtrap for development)
-# Note: use port 587 — port 2525 may be blocked by ISP
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=587
-MAIL_USER=your_mailtrap_user
-MAIL_PASS=your_mailtrap_pass
-MAIL_FROM=noreply@taskmanager.com
+# Ethereal credentials
+MAIL_HOST = "sandbox.smtp.mailtrap.io"
+MAIL_PORT = 587
+MAIL_USER = "your_mailtrap_user"
+MAIL_PASS = "your_mailtrap_pass"
+MAIL_FROM = "noreply@taskmanager.com"
 
-# Client
-CLIENT_URL=http://localhost:5000
+# client url
+CLIENT_URL = "http://localhost:5000"
 
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# cloudinary credentials
+CLOUDINARY_CLOUD_NAME= "your_cloud_name"
+CLOUDINARY_API_KEY= "your_api_key"
+CLOUDINARY_API_SECRET= "your_api_secret"
 ```
 
 ---
@@ -549,7 +492,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 
 ```bash
 # Clone the repository
-git clone https://github.com/sumila-shakya/project-management-server.git
+git clone https://github.com/sumila-shakya/project-management.git
 cd project-management/server
 
 # Install dependencies
@@ -605,310 +548,6 @@ A MongoDB outage should not prevent notification delivery, and a MySQL slowdown 
 
 - Notification delivery is polling-based — upgrade path is Socket.io with Redis adapter for horizontal scaling
 - Single server deployment — Redis-backed BullMQ workers already support horizontal scaling; adding more worker instances requires no code changes
-- No rate limiting on auth routes — add `express-rate-limit` before production deployment
-- No request logging — add Morgan or Pino for production observability
-- No test coverage — unit tests for state machine, cursor utilities, and token hashing are the highest priority additions
-
----
-
-## 👤 Author
-
-**Sumila Shakya**
-- Student ID: 80010269
-- Course: BSc CSIT (6th Semester)
-- Institution: Amrit Science College
-- GitHub: [@sumila-shakya](https://github.com/sumila-shakya)
-
----
-
-## 📄 License
-
-This project is built for educational and portfolio purposes.
-```
-
----
-
-## Features
-
-### Authentication & User Management
-
-- Registration with automatic email verification (24hr token expiry)
-- JWT-based login with access token (15min) and refresh token (7 days)
-- Stateful refresh token rotation — stored and validated in MySQL
-- Forgot password and reset password via email token (15min expiry)
-- Change password invalidates all active sessions across devices
-- Account update (name, bio) with partial Zod validation
-- Avatar upload via Cloudinary
-
-> **Note:** During development, SMTP port `2525` was blocked by ISP. Mailtrap worked correctly on port `587`. If emails are not sending, try changing `MAIL_PORT` in `.env`.
-
-### Team Management
-
-- Create teams — creator is automatically assigned admin role (atomic transaction)
-- In-app invitation system — invitations stored in DB, delivered via notifications
-- Accept or decline invitations via single `PATCH /invitations/:id` route
-- Role-based member management — admin, team_leader, member
-- Update member roles with last-admin protection (cannot demote or remove sole admin)
-- Remove members with cascade notification
-
-### Project Management
-
-- Projects scoped to teams with role-based access
-- Two-step deletion: archive first, hard delete second (prevents accidental loss)
-- Restore archived projects
-- Project progress tracking via conditional SQL aggregation
-
-### Task Management
-
-- Full CRUD with role + assignee-based access control
-- Task status managed as a **finite state machine** — invalid transitions are blocked
-- Separate routes for status change and task assignment (explicit intent)
-- Subtask support via self-referencing `parentTaskId` foreign key
-- File attachments via Cloudinary with MIME type validation
-- Allowed types: images, PDFs, Office documents, plain text, archives, videos
-- Per-category file size limits (images 5MB, documents 10MB, video 100MB)
-
-### Activity Logging (MongoDB)
-
-Every meaningful task event is written to MongoDB as an immutable log entry:
-
-```
-created, updated, deleted, completed, commented, comment_deleted, assigned, asset_attached, asset_deleted
-```
-
-Each log entry embeds display metadata at write time (actor name, task title, project name) so the audit feed renders correctly even after the source records are deleted.
-
-The activity feed endpoints — cursor-paginated (newest first):
-
-```
-GET /api/teams/:teamId/activity
-```
-
-### Notifications
-
-- Polling-based in-app notification system
-- Centralized `NotificationService`
-- Events that trigger notifications: task assignment, invitation, role change, member removal, deadline alerts, comment mentions, status changes
-- Cursor-paginated notification list
-- Lightweight unread count endpoint for efficient polling
-- Mark single or all notifications as read
-- Email notifications for password reset and email verification
-
-### Background Jobs (node-cron)
-
-- **Deadline alerts** — runs daily, checks task due dates, sends multilevel notifications (3 days, 1 day, 3 hrs, overdue)
-
-### Search & Filters
-
-- Tasks filterable by status, priority
-- Projects filterable by status with role-based visibility enforcement
-- Notifications filterable by read status
-- Dynamic query builder pattern — filters applied conditionally without multiple code paths
-
-### Pagination
-
-Two pagination strategies used based on use case:
-
-| Strategy | Used For | Why |
-|---|---|---|
-| Offset (page/limit) | Tasks, projects, team members | Users navigate by page number |
-| Cursor (base64url encoded) | Activity logs, notifications, comments | Infinite scroll, stable under inserts |
-
-Cursor encodes `{ id, timestamp }` as `base64url` — URL-safe, opaque to the client.
-
----
-
-## Security Practices
-
-- Passwords hashed with bcrypt (cost factor 10)
-- Reset and verification tokens hashed with SHA-256 before DB storage (raw token travels only in email)
-- `httpOnly` + `sameSite: strict` cookies for refresh tokens
-- JWT payload validated with Zod after signature verification (shape, not just signature)
-- Generic error messages on auth failures (no user enumeration)
-- Information leakage prevention — unauthorized resource access always returns 403 regardless of whether resource exists
-- Token rotation on every refresh — stolen tokens become invalid after single use
-- All active sessions invalidated on password change and reset
-
----
-
-## Database Design Highlights
-
-- All multi-write operations wrapped in **Drizzle transactions** (team creation, invitation processing, password reset, email verification)
-- Self-referencing `parentTaskId` on tasks table for subtask hierarchy
-- Composite unique constraint on `(teamId, userId)` in team_members
-- `onDelete: 'set null'` for `assignedTo` — deleting a user unassigns their tasks, not deletes them
-- MongoDB indexes on `(teamId, timestamp)`, `(projectId, timestamp)`, `(taskId, timestamp)` for activity log query performance
-
----
-
-## API Overview
-
-```
-Auth
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/logout
-POST   /api/auth/verify-email
-POST   /api/auth/resend-verification
-POST   /api/auth/refresh
-POST   /api/auth/forget-password
-POST   /api/auth/reset-password
-PATCH  /api/auth/change-password
-PATCH  /api/auth/me
-GET    /api/auth/me
-
-Teams
-GET    /api/teams
-POST   /api/teams
-GET    /api/teams/:teamId
-PATCH  /api/teams/:teamId
-DELETE /api/teams/:teamId
-GET    /api/teams/:teamId/members
-POST   /api/teams/:teamId/invite
-DELETE /api/teams/:teamId/members/:memberId
-PATCH  /api/teams/:teamId/members/:memberId/role
-GET    /api/teams/:teamId/overview
-GET    /api/teams/:teamId/activity
-
-Projects
-GET    /api/teams/:teamId/projects
-POST   /api/teams/:teamId/projects
-GET    /api/projects/:projectId
-PATCH  /api/projects/:projectId
-DELETE /api/projects/:projectId
-PATCH  /api/projects/:projectId/archive
-PATCH  /api/projects/:projectId/restore
-GET    /api/projects/:id/progress
-
-Tasks
-GET    /api/projects/:projectId/tasks
-POST   /api/projects/:projectId/tasks
-GET    /api/tasks/:taskId
-GET    /api/tasks/my-tasks
-PATCH  /api/tasks/:taskId
-DELETE /api/tasks/:taskId
-PATCH  /api/tasks/:taskId/status
-PATCH  /api/tasks/:taskId/assign
-GET    /api/tasks/:taskId/subtasks
-
-Task-Assets
-POST   /api/tasks/:taskId/assets
-GET    /api/tasks/:taskId/assets
-GET    /api/assets/:assetId/download
-DELETE /api/assets/:assetId
-
-Comments
-POST   /api/tasks/:taskId/comments
-GET    /api/tasks/:taskId/comments
-PATCH  /api/comments/:commentId
-DELETE /api/comments/:commentId
-
-Notifications
-GET    /api/notifications
-PATCH  /api/notifications/:notificationId/read
-PATCH  /api/notifications/:notificationId/unread
-PATCH  /api/notifications/read-all
-DELETE /api/notifications/:notificationId
-
-Invitations
-GET    /api/invitations
-PATCH  /api/invitations/:invitationId/process
-```
-
----
-
-## Environment Variables
-
-```env
-PORT = 3000
-
-# mysql credentials
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "password"
-DB_NAME = "project_management_db"
-
-# mongodb uri
-MONGODB_URI = "mongodb://localhost:27017/project_management_db"
-
-# JWT Tokens
-ACCESS_TOKEN_SECRET = "access token secret"
-REFRESH_TOKEN_SECRET = "refresh token secret"
-
-# Ethereal credentials
-MAIL_HOST = "sandbox.smtp.mailtrap.io"
-MAIL_PORT = 587
-MAIL_USER = "your_mailtrap_user"
-MAIL_PASS = "your_mailtrap_pass"
-MAIL_FROM = "noreply@taskmanager.com"
-
-# client url
-CLIENT_URL = "http://localhost:5000"
-
-# cloudinary credentials
-CLOUDINARY_CLOUD_NAME= "your_cloud_name"
-CLOUDINARY_API_KEY= "your_api_key"
-CLOUDINARY_API_SECRET= "your_api_secret"
-```
-
----
-
-## Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/project-management-server.git
-cd project-management-server
-
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env
-# Fill in your values in .env
-
-# Push database schema to MySQL
-npm run db:push
-
-# Start development server
-npm run dev
-```
-
----
-
-## Scripts
-
-```bash
-npm run dev          # Start with tsx + nodemon (hot reload)
-npm run build        # Compile TypeScript to dist/
-npm run start        # Run compiled output
-npm run db:generate  # Generate Drizzle migration files
-npm run db:push      # Push schema changes to database
-```
-
----
-
-## Design Decisions & Tradeoffs
-
-**Why two databases?**
-MySQL handles structured relational data with strict consistency requirements (users, teams, tasks). MongoDB handles append-only, flexible-schema event data (activity logs) where document shape varies per action type and read performance matters more than normalization.
-
-**Why stateful refresh tokens?**
-Storing refresh tokens in the DB enables true token revocation — logout actually invalidates the token server-side. Pure JWT refresh tokens cannot be revoked before expiry.
-
-**Why cursor pagination for activity logs?**
-Activity logs are append-only and consumed as infinite scroll feeds. Offset pagination breaks when new logs are inserted mid-scroll (page drift). Cursor pagination is stable regardless of concurrent inserts.
-
----
-
-## Known Limitations & Future Improvements
-
-- Notification delivery is polling-based — upgrade path is Socket.io with Redis adapter for horizontal scaling
-- Activity log writes are fire-and-forget — a message queue (Bull/BullMQ) would guarantee delivery under high load
-- Single server deployment — `connectedUsers` Map works for one instance; Redis Pub/Sub needed for multi-instance
-- No rate limiting on auth routes — add `express-rate-limit` before production deployment
-- No request logging — add Morgan or Pino for production observability
-
 
 ---
 
