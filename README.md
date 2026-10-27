@@ -1,4 +1,4 @@
-# Task Management System — Backend API
+# Project Management System — Backend API
 
 A production-grade collaborative task management REST API built with Node.js, TypeScript, and Express. Designed with real-world backend engineering practices including polyglot persistence, message queue-based background processing, event-driven notifications, role-based access control, and comprehensive audit logging.
 
